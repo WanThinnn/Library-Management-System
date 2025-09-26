@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Gửi lại email xác thực - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 2rem auto;">
+    <h2 style="text-align: center; margin-bottom: 2rem; color: #2c3e50;">Gửi lại email xác thực</h2>
+    
+    <p style="text-align: center; margin-bottom: 2rem; color: #666;">
+        Nhập email của bạn để nhận lại link xác thực tài khoản.
+    </p>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" required>
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%; margin-bottom: 1rem;">Gửi email xác thực</button>
+    </form>
+
+    <div style="text-align: center;">
+        <p><a href="{% url 'login' %}">Quay lại đăng nhập</a></p>
+    </div>
+</div>
+{% endblock %}

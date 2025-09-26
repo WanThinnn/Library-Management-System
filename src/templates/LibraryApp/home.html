@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2 style="text-align: center; color: #2c3e50;">Chào mừng đến với Hệ thống Quản lý Thư viện</h2>
+    
+    {% if user.is_authenticated %}
+        <div style="text-align: center; margin: 2rem 0;">
+            <h3>Xin chào, {{ user.first_name|default:user.username }}!</h3>
+            <p>Email: {{ user.email }}</p>
+            
+            {% with user_profile=user.userprofile|default_if_none:None %}
+            {% if user_profile and user_profile.is_verified %}
+                <div class="alert alert-success">
+                    <strong>✓ Tài khoản đã được xác thực</strong>
+                </div>
+            {% else %}
+                <div class="alert alert-error">
+                    <strong>⚠ Tài khoản chưa được xác thực</strong>
+                    <br>
+                    <a href="{% url 'resend_verification' %}">Gửi lại email xác thực</a>
+                </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+        
+        <div style="text-align: center;">
+            <h4>Tính năng quản lý thư viện (đang phát triển):</h4>
+            <ul style="list-style: none; padding: 0;">
+                <li>📚 Quản lý sách</li>
+                <li>👥 Quản lý thành viên</li>
+                <li>🔄 Mượn/trả sách</li>
+                <li>📊 Báo cáo thống kê</li>
+            </ul>
+        </div>
+    {% else %}
+        <div style="text-align: center; margin: 2rem 0;">
+            <p style="font-size: 1.2rem; margin-bottom: 2rem;">
+                Vui lòng đăng nhập để sử dụng hệ thống quản lý thư viện.
+            </p>
+            
+            <div>
+                <a href="{% url 'login' %}" class="btn" style="margin: 0 10px;">Đăng nhập</a>
+                <a href="{% url 'register' %}" class="btn btn-secondary" style="margin: 0 10px;">Đăng ký</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% if user.is_authenticated %}
+<div class="card">
+    <h3>Thông tin tài khoản</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 10px; font-weight: bold;">Họ tên:</td>
+            <td style="padding: 10px;">{{ user.first_name }} {{ user.last_name }}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 10px; font-weight: bold;">Username:</td>
+            <td style="padding: 10px;">{{ user.username }}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 10px; font-weight: bold;">Email:</td>
+            <td style="padding: 10px;">{{ user.email }}</td>
+        </tr>
+        {% with user_profile=user.userprofile|default_if_none:None %}
+        {% if user_profile and user_profile.phone_number %}
+        <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 10px; font-weight: bold;">Số điện thoại:</td>
+            <td style="padding: 10px;">{{ user_profile.phone_number }}</td>
+        </tr>
+        {% endif %}
+        <tr style="border-bottom: 1px solid #ddd;">
+            <td style="padding: 10px; font-weight: bold;">Ngày tham gia:</td>
+            <td style="padding: 10px;">{% if user_profile %}{{ user_profile.created_at|date:"d/m/Y H:i" }}{% else %}{{ user.date_joined|date:"d/m/Y H:i" }}{% endif %}</td>
+        </tr>
+        {% endwith %}
+    </table>
+</div>
+{% endif %}
+{% endblock %}
