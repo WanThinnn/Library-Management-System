@@ -1,56 +1,14 @@
 from django.contrib import admin
-from django.contrib.auth.models import User
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
-    UserProfile, EmailVerification,
     Parameter, ReaderType, Reader,
     Author, Category, BookTitle, AuthorDetail, Book, BookItem,
     BookImportReceipt, BookImportDetail,
     BorrowReturnReceipt, Receipt,
-    ReportDetailByCategory, BorrowReportDetailByCategory, LateReturnReport
+    ReportDetailByCategory, BorrowReportDetailByCategory, LateReturnReport,
+    UserGroup, Function, Permission, LibraryUser
 )
 
-# ==================== USER AUTHENTICATION ADMIN ====================
-
-# Inline cho UserProfile
-class UserProfileInline(admin.StackedInline):
-    model = UserProfile
-    can_delete = False
-    verbose_name_plural = 'User Profile'
-    fields = ('phone_number', 'address', 'date_of_birth', 'is_verified', 'created_at', 'updated_at')
-    readonly_fields = ('created_at', 'updated_at')
-
-# Extend UserAdmin để bao gồm UserProfile
-class UserAdmin(BaseUserAdmin):
-    inlines = (UserProfileInline,)
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'get_is_verified')
-    
-    def get_is_verified(self, obj):
-        try:
-            return obj.userprofile.is_verified
-        except UserProfile.DoesNotExist:
-            return False
-    get_is_verified.short_description = 'Verified'
-    get_is_verified.boolean = True
-
-# Re-register UserAdmin
-admin.site.unregister(User)
-admin.site.register(User, UserAdmin)
-
-@admin.register(EmailVerification)
-class EmailVerificationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'token', 'is_used', 'created_at', 'is_expired_display')
-    list_filter = ('is_used', 'created_at')
-    readonly_fields = ('created_at',)
-    search_fields = ('user__email', 'user__username')
-    
-    def is_expired_display(self, obj):
-        return obj.is_expired()
-    is_expired_display.short_description = 'Expired'
-    is_expired_display.boolean = True
-
-
-# ==================== LIBRARY MANAGEMENT ADMIN ====================
+# ==================== SYSTEM PARAMETERS ADMIN ====================
 
 @admin.register(Parameter)
 class ParameterAdmin(admin.ModelAdmin):
@@ -588,4 +546,135 @@ class LateReturnReportAdmin(admin.ModelAdmin):
             return f'{obj.late_return_days} ngày'
     late_return_days_display.short_description = 'Số ngày trễ'
     late_return_days_display.admin_order_field = 'late_return_days'
+
+
+# ==================== USER & PERMISSION ADMIN ====================
+
+class PermissionInline(admin.TabularInline):
+    model = Permission
+    extra = 1
+    fields = ('function', 'can_view', 'can_add', 'can_edit', 'can_delete')
+
+
+@admin.register(UserGroup)
+class UserGroupAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user_group_name', 'user_count', 'permission_count')
+    search_fields = ('user_group_name', 'description')
+    inlines = [PermissionInline]
+    
+    fieldsets = (
+        ('Thông tin nhóm', {
+            'fields': ('user_group_name', 'description')
+        }),
+        ('Thông tin hệ thống', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    readonly_fields = ('created_at', 'updated_at')
+    
+    def user_count(self, obj):
+        return obj.users.count()
+    user_count.short_description = 'Số thủ thư'
+    
+    def permission_count(self, obj):
+        return obj.permissions.count()
+    permission_count.short_description = 'Số quyền'
+
+
+@admin.register(Function)
+class FunctionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'function_name', 'screen_name', 'url_pattern', 'assigned_groups')
+    search_fields = ('function_name', 'screen_name', 'description')
+    
+    fieldsets = (
+        ('Thông tin chức năng', {
+            'fields': ('function_name', 'screen_name', 'url_pattern', 'description')
+        }),
+        ('Thông tin hệ thống', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    readonly_fields = ('created_at', 'updated_at')
+    
+    def assigned_groups(self, obj):
+        groups = UserGroup.objects.filter(permissions__function=obj).distinct()
+        return ', '.join([g.user_group_name for g in groups]) if groups else 'Chưa gán'
+    assigned_groups.short_description = 'Nhóm được gán'
+
+
+@admin.register(Permission)
+class PermissionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user_group', 'function', 'permissions_display')
+    list_filter = ('user_group', 'can_view', 'can_add', 'can_edit', 'can_delete')
+    search_fields = ('user_group__user_group_name', 'function__function_name')
+    
+    fieldsets = (
+        ('Phân quyền', {
+            'fields': ('user_group', 'function')
+        }),
+        ('Các quyền', {
+            'fields': ('can_view', 'can_add', 'can_edit', 'can_delete')
+        }),
+        ('Thông tin hệ thống', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    readonly_fields = ('created_at', 'updated_at')
+    
+    def permissions_display(self, obj):
+        perms = []
+        if obj.can_view: perms.append('✓ Xem')
+        if obj.can_add: perms.append('✓ Thêm')
+        if obj.can_edit: perms.append('✓ Sửa')
+        if obj.can_delete: perms.append('✓ Xóa')
+        return ' | '.join(perms) if perms else '❌ Không có quyền'
+    permissions_display.short_description = 'Quyền'
+
+
+@admin.register(LibraryUser)
+class LibraryUserAdmin(admin.ModelAdmin):
+    list_display = ('id', 'username', 'full_name', 'position', 'user_group', 'age_display', 'is_active')
+    list_filter = ('user_group', 'is_active', 'position')
+    search_fields = ('full_name', 'user__username', 'email', 'phone_number')
+    readonly_fields = ('username', 'age', 'created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Tài khoản Django', {
+            'fields': ('user', 'username')
+        }),
+        ('Thông tin cá nhân', {
+            'fields': ('full_name', 'date_of_birth', 'age', 'phone_number', 'email', 'address')
+        }),
+        ('Chức vụ & Quyền', {
+            'fields': ('position', 'user_group')
+        }),
+        ('Trạng thái', {
+            'fields': ('is_active',)
+        }),
+        ('Thông tin hệ thống', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def age_display(self, obj):
+        return f"{obj.age} tuổi"
+    age_display.short_description = 'Tuổi'
+    age_display.admin_order_field = 'date_of_birth'
+    
+    actions = ['activate_users', 'deactivate_users']
+    
+    def activate_users(self, request, queryset):
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f'Đã kích hoạt {updated} thủ thư.')
+    activate_users.short_description = 'Kích hoạt thủ thư đã chọn'
+    
+    def deactivate_users(self, request, queryset):
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f'Đã vô hiệu hóa {updated} thủ thư.')
+    deactivate_users.short_description = 'Vô hiệu hóa thủ thư đã chọn'
+
 

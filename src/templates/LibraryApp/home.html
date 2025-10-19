@@ -2,80 +2,85 @@
 
 {% block content %}
 <div class="card">
-    <h2 class="text-center" style="color: #2c3e50;">Chào mừng đến với Hệ thống Quản lý Thư viện</h2>
+    <h2 class="text-center" style="color: #2c3e50;">🏛️ Hệ thống Quản lý Thư viện</h2>
+    <p class="text-center" style="color: #7f8c8d; font-size: 1.1rem; margin-top: 1rem;">
+        Dành cho Thủ Thư và Quản trị viên
+    </p>
     
-    {% if user.is_authenticated %}
-        <div class="text-center" style="margin: 2rem 0;">
-            <h3>Xin chào, {{ user.first_name|default:user.username }}!</h3>
-            <p>Email: {{ user.email }}</p>
-            
-            {% with user_profile=user.userprofile|default_if_none:None %}
-            {% if user_profile and user_profile.is_verified %}
-                <div class="alert alert-success">
-                    <strong>✓ Tài khoản đã được xác thực</strong>
-                </div>
-            {% else %}
-                <div class="alert alert-error">
-                    <strong>⚠ Tài khoản chưa được xác thực</strong>
-                    <br>
-                    <a href="{% url 'resend_verification' %}">Gửi lại email xác thực</a>
-                </div>
-            {% endif %}
-            {% endwith %}
-        </div>
+    <div class="text-center" style="margin: 3rem 0;">
+        <h3 style="color: #34495e; margin-bottom: 2rem;">Các chức năng hệ thống</h3>
         
-        <div class="text-center">
-            <h4>Tính năng quản lý thư viện (đang phát triển):</h4>
-            <ul style="list-style: none; padding: 0;">
-                <li>📚 Quản lý sách</li>
-                <li>👥 Quản lý thành viên</li>
-                <li>🔄 Mượn/trả sách</li>
-                <li>📊 Báo cáo thống kê</li>
-            </ul>
-        </div>
-    {% else %}
-        <div class="text-center" style="margin: 2rem 0;">
-            <p style="font-size: 1.2rem; margin-bottom: 2rem;">
-                Vui lòng đăng nhập để sử dụng hệ thống quản lý thư viện.
-            </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; text-align: left;">
+            <div style="padding: 1.5rem; border-left: 4px solid #3498db; background: #ecf0f1;">
+                <h4 style="color: #2980b9; margin-bottom: 1rem;">📚 Quản lý Sách</h4>
+                <ul style="color: #555; line-height: 1.8;">
+                    <li>Nhập sách mới</li>
+                    <li>Quản lý danh mục sách</li>
+                    <li>Quản lý tác giả</li>
+                    <li>Theo dõi tồn kho</li>
+                </ul>
+            </div>
             
-            <div>
-                <a href="{% url 'login' %}" class="btn" style="margin: 0 10px;">Đăng nhập</a>
-                <a href="{% url 'register' %}" class="btn btn-secondary" style="margin: 0 10px;">Đăng ký</a>
+            <div style="padding: 1.5rem; border-left: 4px solid #e74c3c; background: #ecf0f1;">
+                <h4 style="color: #c0392b; margin-bottom: 1rem;">👥 Quản lý Độc giả</h4>
+                <ul style="color: #555; line-height: 1.8;">
+                    <li>Đăng ký độc giả mới</li>
+                    <li>Quản lý loại độc giả</li>
+                    <li>Theo dõi thẻ thư viện</li>
+                    <li>Quản lý công nợ</li>
+                </ul>
+            </div>
+            
+            <div style="padding: 1.5rem; border-left: 4px solid #2ecc71; background: #ecf0f1;">
+                <h4 style="color: #27ae60; margin-bottom: 1rem;">🔄 Mượn/Trả Sách</h4>
+                <ul style="color: #555; line-height: 1.8;">
+                    <li>Lập phiếu mượn sách</li>
+                    <li>Xử lý trả sách</li>
+                    <li>Tính tiền phạt tự động</li>
+                    <li>Theo dõi sách quá hạn</li>
+                </ul>
+            </div>
+            
+            <div style="padding: 1.5rem; border-left: 4px solid #f39c12; background: #ecf0f1;">
+                <h4 style="color: #e67e22; margin-bottom: 1rem;">📊 Báo cáo & Thống kê</h4>
+                <ul style="color: #555; line-height: 1.8;">
+                    <li>Báo cáo mượn sách theo thể loại</li>
+                    <li>Báo cáo trả trễ</li>
+                    <li>Thống kê tồn kho</li>
+                    <li>Báo cáo thu chi</li>
+                </ul>
+            </div>
+            
+            <div style="padding: 1.5rem; border-left: 4px solid #9b59b6; background: #ecf0f1;">
+                <h4 style="color: #8e44ad; margin-bottom: 1rem;">⚙️ Quản lý Hệ thống</h4>
+                <ul style="color: #555; line-height: 1.8;">
+                    <li>Cấu hình tham số</li>
+                    <li>Quản lý người dùng</li>
+                    <li>Phân quyền chức năng</li>
+                    <li>Nhóm người dùng</li>
+                </ul>
+            </div>
+            
+            <div style="padding: 1.5rem; border-left: 4px solid #1abc9c; background: #ecf0f1;">
+                <h4 style="color: #16a085; margin-bottom: 1rem;">💰 Quản lý Thu Chi</h4>
+                <ul style="color: #555; line-height: 1.8;">
+                    <li>Lập phiếu thu tiền</li>
+                    <li>Theo dõi thanh toán</li>
+                    <li>Quản lý công nợ</li>
+                    <li>Lịch sử giao dịch</li>
+                </ul>
             </div>
         </div>
-    {% endif %}
+    </div>
+    
+    <div class="text-center" style="margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white;">
+        <h3 style="margin-bottom: 1rem;">🔐 Truy cập Hệ thống</h3>
+        <p style="margin-bottom: 1.5rem; font-size: 1.1rem;">
+            Sử dụng tài khoản Thủ Thư để đăng nhập vào Admin Panel
+        </p>
+        <a href="/admin/" class="btn" style="background: white; color: #667eea; padding: 12px 30px; font-size: 1.1rem; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+            ➜ Đăng nhập Admin Panel
+        </a>
+    </div>
 </div>
-
-{% if user.is_authenticated %}
-<div class="card">
-    <h3>Thông tin tài khoản</h3>
-    <table class="info-table">
-        <tr>
-            <td>Họ tên:</td>
-            <td>{{ user.first_name }} {{ user.last_name }}</td>
-        </tr>
-        <tr>
-            <td>Username:</td>
-            <td>{{ user.username }}</td>
-        </tr>
-        <tr>
-            <td>Email:</td>
-            <td>{{ user.email }}</td>
-        </tr>
-        {% with user_profile=user.userprofile|default_if_none:None %}
-        {% if user_profile and user_profile.phone_number %}
-        <tr>
-            <td>Số điện thoại:</td>
-            <td>{{ user_profile.phone_number }}</td>
-        </tr>
-        {% endif %}
-        <tr>
-            <td>Ngày tham gia:</td>
-            <td>{% if user_profile %}{{ user_profile.created_at|date:"d/m/Y H:i" }}{% else %}{{ user.date_joined|date:"d/m/Y H:i" }}{% endif %}</td>
-        </tr>
-        {% endwith %}
-    </table>
-</div>
-{% endif %}
 {% endblock %}

@@ -2,37 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
-# Create your models here.
+from django.core.exceptions import ValidationError
 
-# ==================== AUTHENTICATION MODELS ====================
-
-# Extend User với Profile model thay vì custom User
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
-    date_of_birth = models.DateField(blank=True, null=True)
-    is_verified = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"Profile của {self.user.email}"
-
-class EmailVerification(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    token = models.CharField(max_length=100, unique=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    is_used = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Verification for {self.user.email}"
-
-    def is_expired(self):
-        return (timezone.now() - self.created_at).total_seconds() > 3600  # 1 hour
-
-
-# ==================== LIBRARY MANAGEMENT MODELS ====================
+# ==================== SYSTEM PARAMETERS ====================
 
 class Parameter(models.Model):
     """
@@ -1005,3 +977,233 @@ class LateReturnReport(models.Model):
     
     def __str__(self):
         return f"Báo cáo {self.date.strftime('%d/%m/%Y')} - {self.book_item} - Trễ {self.late_return_days} ngày"
+
+
+# ==================== USER & PERMISSION MANAGEMENT ====================
+
+class UserGroup(models.Model):
+    """
+    Nhóm người dùng (User Group)
+    Phân quyền theo nhóm cho thủ thư
+    """
+    user_group_name = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name='Tên nhóm người dùng'
+    )
+    description = models.TextField(
+        blank=True,
+        verbose_name='Mô tả'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ngày tạo')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Ngày cập nhật')
+    
+    class Meta:
+        db_table = 'user_group'
+        verbose_name = 'Nhóm người dùng'
+        verbose_name_plural = 'Nhóm người dùng'
+        ordering = ['user_group_name']
+    
+    def __str__(self):
+        return self.user_group_name
+
+
+class Function(models.Model):
+    """
+    Chức năng (Function)
+    Các chức năng/màn hình trong hệ thống
+    """
+    function_name = models.CharField(
+        max_length=100,
+        verbose_name='Tên chức năng'
+    )
+    screen_name = models.CharField(
+        max_length=100,
+        verbose_name='Tên màn hình'
+    )
+    description = models.TextField(
+        blank=True,
+        verbose_name='Mô tả'
+    )
+    url_pattern = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name='URL pattern',
+        help_text='VD: /readers/, /books/, /borrow/'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ngày tạo')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Ngày cập nhật')
+    
+    class Meta:
+        db_table = 'function'
+        verbose_name = 'Chức năng'
+        verbose_name_plural = 'Chức năng'
+        ordering = ['function_name']
+    
+    def __str__(self):
+        return f"{self.function_name} ({self.screen_name})"
+
+
+class Permission(models.Model):
+    """
+    Quyền (Permission)
+    Gán quyền sử dụng chức năng cho nhóm người dùng
+    """
+    user_group = models.ForeignKey(
+        UserGroup,
+        on_delete=models.CASCADE,
+        related_name='permissions',
+        verbose_name='Nhóm người dùng'
+    )
+    function = models.ForeignKey(
+        Function,
+        on_delete=models.CASCADE,
+        related_name='permissions',
+        verbose_name='Chức năng'
+    )
+    can_view = models.BooleanField(
+        default=True,
+        verbose_name='Xem'
+    )
+    can_add = models.BooleanField(
+        default=False,
+        verbose_name='Thêm'
+    )
+    can_edit = models.BooleanField(
+        default=False,
+        verbose_name='Sửa'
+    )
+    can_delete = models.BooleanField(
+        default=False,
+        verbose_name='Xóa'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ngày tạo')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Ngày cập nhật')
+    
+    class Meta:
+        db_table = 'permission'
+        verbose_name = 'Quyền'
+        verbose_name_plural = 'Quyền'
+        unique_together = [['user_group', 'function']]
+        indexes = [
+            models.Index(fields=['user_group']),
+            models.Index(fields=['function']),
+        ]
+    
+    def __str__(self):
+        permissions = []
+        if self.can_view: permissions.append('Xem')
+        if self.can_add: permissions.append('Thêm')
+        if self.can_edit: permissions.append('Sửa')
+        if self.can_delete: permissions.append('Xóa')
+        return f"{self.user_group.user_group_name} - {self.function.function_name} [{', '.join(permissions)}]"
+
+
+class LibraryUser(models.Model):
+    """
+    Người dùng hệ thống (Thủ thư)
+    Chỉ dành cho nhân viên thư viện, không phải độc giả
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='library_user',
+        verbose_name='Tài khoản Django'
+    )
+    full_name = models.CharField(
+        max_length=100,
+        verbose_name='Họ và tên'
+    )
+    date_of_birth = models.DateField(
+        verbose_name='Ngày sinh'
+    )
+    position = models.CharField(
+        max_length=100,
+        verbose_name='Chức vụ',
+        help_text='VD: Thủ thư trưởng, Thủ thư, Nhân viên...'
+    )
+    user_group = models.ForeignKey(
+        UserGroup,
+        on_delete=models.PROTECT,
+        related_name='users',
+        verbose_name='Nhóm người dùng'
+    )
+    phone_number = models.CharField(
+        max_length=15,
+        blank=True,
+        verbose_name='Số điện thoại'
+    )
+    email = models.EmailField(
+        blank=True,
+        verbose_name='Email'
+    )
+    address = models.TextField(
+        blank=True,
+        verbose_name='Địa chỉ'
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name='Đang hoạt động'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ngày tạo')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Ngày cập nhật')
+    
+    class Meta:
+        db_table = 'library_user'
+        verbose_name = 'Thủ thư'
+        verbose_name_plural = 'Thủ thư'
+        ordering = ['full_name']
+        indexes = [
+            models.Index(fields=['user_group']),
+            models.Index(fields=['is_active']),
+        ]
+    
+    def __str__(self):
+        return f"{self.full_name} ({self.position})"
+    
+    @property
+    def username(self):
+        """Tên đăng nhập"""
+        return self.user.username
+    
+    @property
+    def age(self):
+        """Tính tuổi"""
+        today = timezone.now().date()
+        age = today.year - self.date_of_birth.year
+        if today.month < self.date_of_birth.month or \
+           (today.month == self.date_of_birth.month and today.day < self.date_of_birth.day):
+            age -= 1
+        return age
+    
+    def has_permission(self, function_name, permission_type='view'):
+        """
+        Kiểm tra quyền truy cập chức năng
+        permission_type: 'view', 'add', 'edit', 'delete'
+        """
+        try:
+            permission = Permission.objects.get(
+                user_group=self.user_group,
+                function__function_name=function_name
+            )
+            
+            if permission_type == 'view':
+                return permission.can_view
+            elif permission_type == 'add':
+                return permission.can_add
+            elif permission_type == 'edit':
+                return permission.can_edit
+            elif permission_type == 'delete':
+                return permission.can_delete
+            
+            return False
+        except Permission.DoesNotExist:
+            return False
+    
+    def get_allowed_functions(self):
+        """Lấy danh sách chức năng được phép sử dụng"""
+        return Function.objects.filter(
+            permissions__user_group=self.user_group,
+            permissions__can_view=True
+        ).distinct()
+
