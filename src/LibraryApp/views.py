@@ -1,4 +1,889 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
+from django.utils import timezone
+from django.db import transaction
+from .models import Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt
+from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm
+
 
 def home_view(request):
+    """Trang chủ hệ thống"""
     return render(request, 'LibraryApp/home.html')
+
+
+# ==================== AUTHENTICATION ====================
+
+def login_view(request):
+    """
+    Đăng nhập hệ thống
+    Dành cho: SuperUser, Staff (Quản lý, Thủ thư)
+    """
+    # Nếu đã đăng nhập, chuyển về trang chủ
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = LibraryLoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            
+            # Thông báo chào mừng
+            if user.is_superuser:
+                messages.success(request, f'Chào mừng Quản trị viên {user.username}! Bạn có toàn quyền truy cập.')
+            elif user.is_staff:
+                messages.success(request, f'Chào mừng {user.username}!')
+            else:
+                messages.warning(request, 'Tài khoản này không có quyền truy cập hệ thống.')
+                logout(request)
+                return redirect('login')
+            
+            # Redirect về trang được yêu cầu hoặc trang chủ
+            next_url = request.GET.get('next', 'home')
+            return redirect(next_url)
+        else:
+            messages.error(request, 'Tên đăng nhập hoặc mật khẩu không đúng.')
+    else:
+        form = LibraryLoginForm()
+    
+    context = {
+        'form': form,
+        'page_title': 'Đăng nhập'
+    }
+    
+    return render(request, 'LibraryApp/login.html', context)
+
+
+def logout_view(request):
+    """Đăng xuất khỏi hệ thống"""
+    if request.user.is_authenticated:
+        username = request.user.username
+        logout(request)
+        messages.success(request, f'Đã đăng xuất tài khoản {username}.')
+    return redirect('login')
+
+
+# ==================== YC1: LẬP THẺ ĐỘC GIẢ ====================
+
+@login_required(login_url='login')
+def reader_create_view(request):
+    """
+    View lập thẻ độc giả mới - YC1
+    
+    Business Rules (QĐ1):
+    - Tuổi từ min_age đến max_age (mặc định 18-55)
+    - Phải chọn loại độc giả hợp lệ
+    - Thẻ có giá trị theo card_validity_period (mặc định 6 tháng)
+    """
+    
+    # Kiểm tra hệ thống đã được cấu hình chưa
+    params = Parameter.objects.first()
+    if not params:
+        messages.error(request, 'Hệ thống chưa được cấu hình. Vui lòng liên hệ quản trị viên.')
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = ReaderForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    # Lưu độc giả (auto-calculate expiration_date trong model.save())
+                    reader = form.save()
+                    
+                    messages.success(
+                        request,
+                        f'Lập thẻ độc giả thành công! '
+                        f'Mã độc giả: {reader.id} - {reader.reader_name}. '
+                        f'Thẻ có hiệu lực đến: {reader.expiration_date.strftime("%d/%m/%Y")}'
+                    )
+                    return redirect('reader_detail', reader_id=reader.id)
+            except Exception as e:
+                messages.error(request, f'Có lỗi xảy ra: {str(e)}')
+        else:
+            messages.error(request, 'Vui lòng kiểm tra lại thông tin.')
+    else:
+        form = ReaderForm()
+    
+    context = {
+        'form': form,
+        'params': params,
+        'reader_types': ReaderType.objects.all(),
+        'page_title': 'Lập thẻ độc giả mới'
+    }
+    
+    return render(request, 'LibraryApp/reader_create.html', context)
+
+
+@login_required(login_url='login')
+def reader_detail_view(request, reader_id):
+    """
+    Xem chi tiết thẻ độc giả - Hiển thị thông tin sau khi lập thẻ
+    """
+    reader = get_object_or_404(Reader, id=reader_id)
+    
+    context = {
+        'reader': reader,
+        'page_title': f'Thẻ độc giả - {reader.reader_name}'
+    }
+    
+    return render(request, 'LibraryApp/reader_detail.html', context)
+
+
+@login_required(login_url='login')
+def reader_list_view(request):
+    """
+    Danh sách độc giả - Để tra cứu và quản lý
+    """
+    readers = Reader.objects.select_related('reader_type').all().order_by('-card_creation_date')
+    
+    # Filter theo loại độc giả nếu có
+    reader_type_id = request.GET.get('reader_type')
+    if reader_type_id:
+        readers = readers.filter(reader_type_id=reader_type_id)
+    
+    # Search theo tên hoặc email
+    search_query = request.GET.get('search')
+    if search_query:
+        readers = readers.filter(
+            reader_name__icontains=search_query
+        ) | readers.filter(
+            email__icontains=search_query
+        )
+    
+    context = {
+        'readers': readers,
+        'reader_types': ReaderType.objects.all(),
+        'page_title': 'Danh sách độc giả'
+    }
+    
+    return render(request, 'LibraryApp/reader_list.html', context)
+
+
+# ==================== YC2: TIẾP NHẬN SÁCH MỚI ====================
+
+@login_required(login_url='login')
+def book_import_view(request):
+    """
+    View tiếp nhận sách mới - YC2
+    
+    Business Rules (QĐ2):
+    - Chỉ nhận sách xuất bản trong vòng 8 năm (book_return_period)
+    - Thể loại phải hợp lệ
+    - Tác giả phải hợp lệ
+    - Tạo phiếu nhập và chi tiết phiếu nhập
+    """
+    
+    # Kiểm tra hệ thống đã được cấu hình chưa
+    params = Parameter.objects.first()
+    if not params:
+        messages.error(request, 'Hệ thống chưa được cấu hình. Vui lòng liên hệ quản trị viên.')
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = BookImportForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    # Lấy dữ liệu từ form
+                    book_title_name = form.cleaned_data['book_title']
+                    category = form.cleaned_data['category']
+                    authors = form.cleaned_data['authors']
+                    publish_year = form.cleaned_data['publish_year']
+                    publisher = form.cleaned_data['publisher']
+                    isbn = form.cleaned_data.get('isbn', '')
+                    edition = form.cleaned_data.get('edition', '')
+                    language = form.cleaned_data['language']
+                    quantity = form.cleaned_data['quantity']
+                    unit_price = form.cleaned_data['unit_price']
+                    description = form.cleaned_data.get('description', '')
+                    notes = form.cleaned_data.get('notes', '')
+                    import_date = form.cleaned_data['import_date']
+                    
+                    # Kiểm tra hoặc tạo BookTitle
+                    book_title, created = BookTitle.objects.get_or_create(
+                        book_title=book_title_name,
+                        category=category,
+                        defaults={'description': description}
+                    )
+                    
+                    # Thêm tác giả cho BookTitle (chỉ nếu vừa tạo)
+                    if created:
+                        for author in authors:
+                            AuthorDetail.objects.create(
+                                author=author,
+                                book_title=book_title
+                            )
+                    
+                    # Tạo hoặc cập nhật Book
+                    book, book_created = Book.objects.get_or_create(
+                        book_title=book_title,
+                        publish_year=publish_year,
+                        publisher=publisher,
+                        isbn=isbn if isbn else None,
+                        defaults={
+                            'quantity': 0,
+                            'remaining_quantity': 0,
+                            'unit_price': unit_price,
+                            'edition': edition,
+                            'language': language
+                        }
+                    )
+                    
+                    # Tạo phiếu nhập
+                    receipt = BookImportReceipt.objects.create(
+                        import_date=import_date,
+                        created_by=request.user.username,
+                        notes=notes
+                    )
+                    
+                    # Tạo chi tiết phiếu nhập
+                    import_detail = BookImportDetail.objects.create(
+                        receipt=receipt,
+                        book=book,
+                        quantity=quantity,
+                        unit_price=unit_price
+                    )
+                    
+                    # Thông báo thành công
+                    messages.success(
+                        request,
+                        f'Tiếp nhận sách thành công! '
+                        f'Tựa sách: {book_title.book_title} '
+                        f'({quantity} cuốn, {unit_price:,}đ/cuốn). '
+                        f'Phiếu nhập #{receipt.id}.'
+                    )
+                    return redirect('book_import_detail', import_id=receipt.id)
+            except Exception as e:
+                messages.error(request, f'Có lỗi xảy ra: {str(e)}')
+        else:
+            # Hiển thị lỗi validation cho user
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = BookImportForm()
+    
+    # Lấy tham số để hiển thị thông tin QĐ2
+    from datetime import date
+    min_year = date.today().year - params.book_return_period
+    
+    context = {
+        'form': form,
+        'params': params,
+        'min_year': min_year,
+        'page_title': 'Tiếp nhận sách mới'
+    }
+    
+    return render(request, 'LibraryApp/book_import.html', context)
+
+
+@login_required(login_url='login')
+def book_import_detail_view(request, import_id):
+    """
+    Xem chi tiết phiếu nhập sách
+    """
+    receipt = get_object_or_404(BookImportReceipt, id=import_id)
+    import_details = receipt.import_details.all()
+    
+    context = {
+        'receipt': receipt,
+        'import_details': import_details,
+        'page_title': f'Phiếu nhập sách #{receipt.id}'
+    }
+    
+    return render(request, 'LibraryApp/book_import_detail.html', context)
+
+
+@login_required(login_url='login')
+def book_import_list_view(request):
+    """
+    Danh sách phiếu nhập sách
+    """
+    receipts = BookImportReceipt.objects.all().order_by('-import_date')
+    
+    # Filter theo tháng/năm nếu có
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    
+    if month and year:
+        receipts = receipts.filter(
+            import_date__month=month,
+            import_date__year=year
+        )
+    elif year:
+        receipts = receipts.filter(import_date__year=year)
+    
+    context = {
+        'receipts': receipts,
+        'page_title': 'Danh sách phiếu nhập sách'
+    }
+    
+    return render(request, 'LibraryApp/book_import_list.html', context)
+
+
+# ==================== BOOK SEARCH (YC3) ====================
+
+def book_search_view(request):
+    """
+    Tra cứu sách - YC3
+    Chức năng công khai - ai cũng có thể tra cứu
+    """
+    from django.db.models import Q
+    
+    form = BookSearchForm(request.GET)
+    books = Book.objects.all().select_related('book_title', 'book_title__category').prefetch_related('book_title__authors')
+    
+    if form.is_valid():
+        # Tìm kiếm theo tên sách hoặc mã sách
+        search_text = form.cleaned_data.get('search_text')
+        if search_text:
+            books = books.filter(
+                Q(book_title__book_title__icontains=search_text) |
+                Q(id__icontains=search_text)
+            )
+        
+        # Lọc theo thể loại
+        category = form.cleaned_data.get('category')
+        if category:
+            books = books.filter(book_title__category=category)
+        
+        # Lọc theo tác giả
+        author = form.cleaned_data.get('author')
+        if author:
+            books = books.filter(book_title__authors=author)
+        
+        # Lọc theo tình trạng
+        status = form.cleaned_data.get('status')
+        if status == 'available':
+            books = books.filter(remaining_quantity__gt=0)
+        elif status == 'unavailable':
+            books = books.filter(remaining_quantity=0)
+    
+    # Sắp xếp theo tên sách
+    books = books.order_by('book_title__book_title')
+    
+    # Phân trang (20 cuốn/trang)
+    from django.core.paginator import Paginator
+    paginator = Paginator(books, 20)
+    page_num = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_num)
+    
+    context = {
+        'form': form,
+        'page_obj': page_obj,
+        'books': page_obj.object_list,
+        'total_results': paginator.count,
+        'page_title': 'Tra cứu sách'
+    }
+    
+    return render(request, 'LibraryApp/book_search.html', context)
+
+
+# ==================== BORROW BOOK (YC4) ====================
+
+@login_required(login_url='login')
+def borrow_book_view(request):
+    """
+    Cho mượn sách - YC4
+    Validate theo QĐ4: thẻ còn hạn, không quá hạn, sách chưa mượn, không quá 5 quyển
+    Hỗ trợ mượn nhiều sách cùng lúc
+    """
+    params = Parameter.objects.first()
+    
+    if request.method == 'POST':
+        form = BorrowBookForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    reader_id = form.cleaned_data['reader_id']
+                    book_ids = form.cleaned_data['book_ids']  # List of IDs
+                    borrow_date = form.cleaned_data['borrow_date']
+                    books = form.cleaned_data['books']  # Dict of Book objects
+                    
+                    # Lấy độc giả
+                    reader = Reader.objects.get(id=reader_id)
+                    
+                    # Tính ngày phải trả (tối đa 4 ngày)
+                    from datetime import datetime, timedelta
+                    borrow_datetime = datetime.combine(borrow_date, datetime.min.time())
+                    due_date = borrow_datetime + timedelta(days=params.max_borrow_days)
+                    
+                    # Tạo phiếu mượn cho từng sách
+                    receipts = []
+                    for book_id in book_ids:
+                        book = books[book_id]
+                        
+                        # Lấy cuốn sách còn sẵn
+                        book_item = BookItem.objects.filter(book=book, is_borrowed=False).first()
+                        if not book_item:
+                            messages.error(request, f'Không tìm thấy cuốn "{book.book_title.book_title}" còn sẵn.')
+                            return redirect('borrow_book')
+                        
+                        # Tạo phiếu mượn
+                        borrow_receipt = BorrowReturnReceipt.objects.create(
+                            reader=reader,
+                            book_item=book_item,
+                            borrow_date=borrow_datetime,
+                            due_date=due_date,
+                            notes=''
+                        )
+                        receipts.append(borrow_receipt)
+                        
+                        # Cập nhật trạng thái cuốn sách
+                        book_item.is_borrowed = True
+                        book_item.save(update_fields=['is_borrowed'])
+                        
+                        # Cập nhật số lượng còn lại của sách
+                        book.remaining_quantity -= 1
+                        book.save(update_fields=['remaining_quantity'])
+                    
+                    # Thông báo thành công
+                    if len(receipts) == 1:
+                        messages.success(
+                            request,
+                            f'✓ Cho mượn thành công! Phiếu #{receipts[0].id} - Phải trả trước {due_date.strftime("%d/%m/%Y")}'
+                        )
+                        return redirect('borrow_book_detail', receipt_id=receipts[0].id)
+                    else:
+                        receipt_ids = ', '.join([f'#{r.id}' for r in receipts])
+                        messages.success(
+                            request,
+                            f'✓ Cho mượn {len(receipts)} quyển thành công! Phiếu: {receipt_ids} - Phải trả trước {due_date.strftime("%d/%m/%Y")}'
+                        )
+                        return redirect('borrow_book_list')
+                    
+            except Reader.DoesNotExist:
+                messages.error(request, 'Độc giả không tồn tại.')
+                return redirect('borrow_book')
+            except Exception as e:
+                messages.error(request, f'Lỗi: {str(e)}')
+                return redirect('borrow_book')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{error}')
+    else:
+        form = BorrowBookForm()
+    
+    context = {
+        'form': form,
+        'params': params,
+        'page_title': 'Cho mượn sách'
+    }
+    
+    return render(request, 'LibraryApp/borrow_book.html', context)
+
+
+@login_required(login_url='login')
+def borrow_book_detail_view(request, receipt_id):
+    """
+    Xem chi tiết phiếu mượn sách
+    """
+    receipt = get_object_or_404(BorrowReturnReceipt, id=receipt_id)
+    
+    context = {
+        'receipt': receipt,
+        'page_title': f'Phiếu mượn #{receipt.id}'
+    }
+    
+    return render(request, 'LibraryApp/borrow_book_detail.html', context)
+
+
+@login_required(login_url='login')
+def borrow_book_list_view(request):
+    """
+    Danh sách phiếu mượn sách
+    """
+    from django.db.models import Q
+    
+    # Mặc định: chỉ hiện phiếu mượn chưa trả
+    receipts = BorrowReturnReceipt.objects.filter(return_date__isnull=True).order_by('-borrow_date')
+    
+    # Filter theo trạng thái
+    status = request.GET.get('status', 'unreturned')
+    if status == 'all':
+        receipts = BorrowReturnReceipt.objects.all().order_by('-borrow_date')
+    elif status == 'overdue':
+        from django.utils import timezone
+        receipts = receipts.filter(due_date__lt=timezone.now())
+    
+    # Filter theo độc giả
+    reader_id = request.GET.get('reader_id')
+    if reader_id:
+        receipts = receipts.filter(reader_id=reader_id)
+    
+    context = {
+        'receipts': receipts,
+        'current_status': status,
+        'page_title': 'Danh sách phiếu mượn sách'
+    }
+    
+    return render(request, 'LibraryApp/borrow_book_list.html', context)
+
+
+# ==================== API ENDPOINTS FOR BORROW BOOK ====================
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.db.models import Q
+
+@require_http_methods(["GET"])
+def api_readers_list(request):
+    """
+    API lấy danh sách độc giả với tìm kiếm
+    Query params: search (tìm kiếm theo tên hoặc email)
+    """
+    search = request.GET.get('search', '').strip()
+    
+    # Chỉ hiện độc giả hoạt động
+    readers = Reader.objects.filter(is_active=True).order_by('reader_name')
+    
+    if search:
+        readers = readers.filter(
+            Q(reader_name__icontains=search) | 
+            Q(email__icontains=search)
+        )
+    
+    data = [
+        {
+            'id': reader.id,
+            'name': reader.reader_name,
+            'email': reader.email,
+            'display': f"{reader.reader_name} - {reader.email}"
+        }
+        for reader in readers[:50]  # Giới hạn 50 kết quả
+    ]
+    
+    return JsonResponse({'success': True, 'data': data})
+
+
+@require_http_methods(["GET"])
+def api_books_list(request):
+    """
+    API lấy danh sách sách còn sẵn với tìm kiếm
+    Query params: search (tìm kiếm theo tên sách hoặc tác giả)
+    """
+    search = request.GET.get('search', '').strip()
+    
+    # Chỉ hiện sách còn sẵn
+    books = Book.objects.filter(remaining_quantity__gt=0).select_related(
+        'book_title', 'book_title__category'
+    ).order_by('book_title__book_title')
+    
+    if search:
+        books = books.filter(
+            Q(book_title__book_title__icontains=search) |
+            Q(book_title__authors__author_name__icontains=search)
+        ).distinct()
+    
+    data = [
+        {
+            'id': book.id,
+            'title': book.book_title.book_title,
+            'year': book.publish_year,
+            'category': book.book_title.category.category_name if book.book_title.category else 'N/A',
+            'remaining': book.remaining_quantity,
+            'display': f"{book.book_title.book_title} ({book.publish_year}) - Còn {book.remaining_quantity} quyển"
+        }
+        for book in books[:50]  # Giới hạn 50 kết quả
+    ]
+    
+    return JsonResponse({'success': True, 'data': data})
+
+
+@require_http_methods(["GET"])
+def api_borrowing_readers(request):
+    """
+    API lấy danh sách độc giả đang mượn sách (chưa trả)
+    """
+    # Lấy tất cả phiếu mượn chưa trả, group by reader
+    from django.db.models import Count, Max
+    
+    borrowing_records = BorrowReturnReceipt.objects.filter(
+        return_date__isnull=True
+    ).values('reader_id').annotate(
+        count=Count('id'),
+        latest_due=Max('due_date')
+    ).order_by('-latest_due')
+    
+    data = []
+    for record in borrowing_records[:100]:  # Giới hạn 100 kết quả
+        reader = Reader.objects.get(id=record['reader_id'])
+        
+        # Lấy danh sách sách đang mượn
+        borrows = BorrowReturnReceipt.objects.filter(
+            reader_id=reader.id,
+            return_date__isnull=True
+        ).select_related('book_item__book__book_title')
+        
+        # Kiểm tra có quá hạn không
+        from django.utils import timezone
+        today = timezone.now().date()
+        is_overdue = any(b.due_date.date() < today for b in borrows)
+        
+        data.append({
+            'reader_id': reader.id,
+            'reader_name': reader.reader_name,
+            'reader_email': reader.email,
+            'borrowed_count': record['count'],
+            'latest_due_date': record['latest_due'].strftime('%d/%m/%Y'),
+            'is_overdue': is_overdue,
+            'books': [
+                {
+                    'title': b.book_item.book.book_title.book_title,
+                    'borrow_date': b.borrow_date.strftime('%d/%m/%Y'),
+                    'due_date': b.due_date.strftime('%d/%m/%Y'),
+                    'is_overdue': b.due_date.date() < today
+                }
+                for b in borrows
+            ]
+        })
+    
+    return JsonResponse({'success': True, 'data': data})
+"""
+Views cho YC5: Nhận trả sách
+"""
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
+from django.utils import timezone
+from django.db import models
+from .models import BorrowReturnReceipt, Parameter, Reader
+from .forms import ReturnBookForm
+
+
+@login_required
+def return_book_view(request):
+    """
+    Trang nhận trả sách - YC5
+    Chọn độc giả → chọn sách → nhập ngày trả
+    """
+    params = Parameter.objects.first()
+    fine_rate = params.fine_rate if params else 1000
+    
+    context = {
+        'page_title': 'Nhận trả sách',
+        'params': params,
+        'fine_rate': fine_rate,
+    }
+    
+    if request.method == 'POST':
+        form = ReturnBookForm(request.POST)
+        if form.is_valid():
+            receipts = form.save()
+            if receipts:
+                count = len(receipts)
+                messages.success(request, f'✓ Đã ghi nhận trả sách - {count} quyển')
+                return redirect('return_book_list')
+            else:
+                messages.error(request, 'Lỗi khi lưu thông tin trả sách')
+    else:
+        form = ReturnBookForm()
+    
+    # Convert params to JSON for JavaScript
+    import json
+    params_json = json.dumps({
+        'fine_rate': params.fine_rate if params else 1000
+    })
+    
+    # Get all readers for dropdown
+    readers = Reader.objects.all().values('id', 'reader_name', 'email').order_by('reader_name')
+    
+    context['form'] = form
+    context['params_json'] = params_json
+    context['readers'] = list(readers)
+    context['readers_json'] = json.dumps(list(readers))
+    return render(request, 'LibraryApp/return_book.html', context)
+
+
+@login_required
+def return_book_detail_view(request, receipt_id):
+    """
+    Xem chi tiết phiếu trả sách - YC5
+    Hiển thị: thông tin độc giả, sách trả, tiền phạt
+    """
+    receipt = get_object_or_404(BorrowReturnReceipt, id=receipt_id)
+    params = Parameter.objects.first()
+    fine_rate = params.fine_rate if params else 1000
+    
+    # Tính tiền phạt
+    days_overdue = receipt.days_overdue if receipt.is_overdue else 0
+    fine_amount = days_overdue * fine_rate
+    
+    context = {
+        'page_title': f'Chi tiết phiếu trả sách #{receipt_id}',
+        'receipt': receipt,
+        'days_overdue': days_overdue,
+        'fine_amount': fine_amount,
+        'fine_rate': fine_rate,
+    }
+    
+    return render(request, 'LibraryApp/return_book_detail.html', context)
+
+
+@login_required
+def return_book_list_view(request):
+    """
+    Danh sách phiếu trả sách - YC5
+    Hỗ trợ lọc và tìm kiếm
+    """
+    # Lấy bộ lọc từ GET
+    filter_type = request.GET.get('filter', 'all')
+    search = request.GET.get('search', '')
+    
+    # Base query: chỉ lấy phiếu đã trả (return_date != null)
+    receipts = BorrowReturnReceipt.objects.filter(
+        return_date__isnull=False
+    ).select_related('reader', 'book_item__book__book_title')
+    
+    # Lọc theo loại
+    if filter_type == 'overdue':
+        from django.db.models import Q
+        receipts = receipts.filter(
+            due_date__date__lt=models.F('return_date__date')
+        )
+    elif filter_type == 'ontime':
+        from django.db.models import Q, F as DjangoF
+        receipts = receipts.exclude(
+            due_date__date__lt=DjangoF('return_date__date')
+        )
+    
+    # Tìm kiếm theo tên độc giả hoặc tên sách
+    if search:
+        from django.db.models import Q
+        receipts = receipts.filter(
+            Q(reader__reader_name__icontains=search) |
+            Q(book_item__book__book_title__book_title__icontains=search) |
+            Q(reader__email__icontains=search)
+        )
+    
+    # Sắp xếp
+    receipts = receipts.order_by('-return_date')
+    
+    # Phân trang
+    from django.core.paginator import Paginator
+    paginator = Paginator(receipts, 20)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    # Tính tiền phạt cho mỗi receipt
+    for receipt in page_obj.object_list:
+        if hasattr(receipt, 'is_overdue') and receipt.is_overdue:
+            receipt.fine_amount = receipt.days_overdue * 1000  # QĐ5: 1000đ/ngày
+        else:
+            receipt.fine_amount = 0
+    
+    context = {
+        'page_title': 'Danh sách phiếu trả sách',
+        'page_obj': page_obj,
+        'receipts': page_obj.object_list,
+        'filter_type': filter_type,
+        'search': search,
+        'total_results': paginator.count,
+    }
+    
+    return render(request, 'LibraryApp/return_book_list.html', context)
+
+
+@login_required
+@require_http_methods(["GET"])
+def api_unreturned_receipts(request):
+    """
+    API: Lấy danh sách phiếu mượn chưa trả
+    Dùng cho dropdown chọn phiếu trả sách
+    """
+    search = request.GET.get('search', '')
+    print(f'[API] Fetching unreturned receipts, search={search}')
+    
+    # Lấy phiếu chưa trả
+    receipts = BorrowReturnReceipt.objects.filter(
+        return_date__isnull=True
+    ).select_related('reader', 'book_item__book__book_title')
+    
+    print(f'[API] Found {len(receipts)} unreturned receipts')
+    
+    # Tìm kiếm
+    if search:
+        from django.db.models import Q
+        receipts = receipts.filter(
+            Q(reader__reader_name__icontains=search) |
+            Q(book_item__book__book_title__book_title__icontains=search) |
+            Q(reader__email__icontains=search) |
+            Q(id__icontains=search)
+        )
+    
+    # Giới hạn kết quả
+    receipts = receipts[:50]
+    
+    data = []
+    for receipt in receipts:
+        try:
+            days_borrowed = (timezone.now().date() - receipt.borrow_date.date()).days
+            book_title = receipt.book_item.book.book_title.book_title
+            reader_name = receipt.reader.reader_name
+            
+            data.append({
+                'id': receipt.id,
+                'reader_name': reader_name,
+                'reader_email': receipt.reader.email,
+                'book_title': book_title,
+                'borrow_date': receipt.borrow_date.strftime('%d/%m/%Y'),
+                'due_date': receipt.due_date.strftime('%d/%m/%Y'),
+                'days_borrowed': days_borrowed,
+                'is_overdue': receipt.due_date.date() < timezone.now().date(),
+                'display': f"#{receipt.id} - {reader_name} ({book_title})"
+            })
+        except Exception as e:
+            print(f'Error processing receipt {receipt.id}: {e}')
+            continue
+    
+    return JsonResponse({'success': True, 'data': data})
+
+
+@login_required
+@require_http_methods(["GET"])
+def api_reader_borrowed_books(request, reader_id):
+    """
+    API: Lấy danh sách sách độc giả đó mượn nhưng chưa trả
+    """
+    try:
+        reader = Reader.objects.get(id=reader_id)
+    except Reader.DoesNotExist:
+        return JsonResponse({'success': False, 'data': [], 'error': 'Reader not found'}, status=404)
+    
+    # Lấy danh sách phiếu mượn chưa trả của độc giả
+    receipts = BorrowReturnReceipt.objects.filter(
+        reader=reader,
+        return_date__isnull=True
+    ).select_related('book_item__book__book_title')
+    
+    data = []
+    for receipt in receipts:
+        try:
+            days_borrowed = (timezone.now().date() - receipt.borrow_date.date()).days
+            book_title = receipt.book_item.book.book_title.book_title
+            days_overdue = max(0, days_borrowed - 4)
+            
+            data.append({
+                'receipt_id': receipt.id,
+                'book_item_id': receipt.book_item.id,
+                'book_title': book_title,
+                'barcode': receipt.book_item.barcode,
+                'borrow_date': receipt.borrow_date.strftime('%d/%m/%Y'),
+                'due_date': receipt.due_date.strftime('%d/%m/%Y'),
+                'days_borrowed': days_borrowed,
+                'days_overdue': days_overdue,
+                'is_overdue': days_overdue > 0,
+            })
+        except Exception as e:
+            print(f'Error processing receipt {receipt.id}: {e}')
+            continue
+    
+    return JsonResponse({'success': True, 'data': data})
+

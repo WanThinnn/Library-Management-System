@@ -175,11 +175,13 @@ class Reader(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.reader_name} ({self.email})"
+        return f"{self.reader_name} - {self.email}"
     
     @property
     def age(self):
         """Tính tuổi của độc giả"""
+        if not self.date_of_birth:
+            return None
         from datetime import date
         today = date.today()
         return today.year - self.date_of_birth.year - (
@@ -199,8 +201,41 @@ class Reader(models.Model):
         delta = self.expiration_date - timezone.now()
         return delta.days
     
+    def clean(self):
+        """
+        Validate business rules cho độc giả theo QĐ1
+        """
+        from django.core.exceptions import ValidationError
+        
+        # Kiểm tra ngày sinh trước
+        # if not self.date_of_birth:
+        #     raise ValidationError({"date_of_birth": "Ngày sinh không được để trống"})
+        
+        # Lấy tham số hệ thống
+        try:
+            params = Parameter.objects.first()
+            if not params:
+                raise ValidationError("Chưa cấu hình tham số hệ thống!")
+            
+            # Kiểm tra tuổi
+            reader_age = self.age
+            if reader_age is None:
+                raise ValidationError({"date_of_birth": "Ngày sinh không hợp lệ"})
+                
+            if reader_age < params.min_age:
+                raise ValidationError(
+                    f"Độc giả phải từ {params.min_age} tuổi trở lên. Tuổi hiện tại: {reader_age}"
+                )
+            
+            if reader_age > params.max_age:
+                raise ValidationError(
+                    f"Độc giả không được quá {params.max_age} tuổi. Tuổi hiện tại: {reader_age}"
+                )
+        except Parameter.DoesNotExist:
+            raise ValidationError("Chưa cấu hình tham số hệ thống!")
+    
     def save(self, *args, **kwargs):
-        # Tự động tính ngày hết hạn nếu chưa có
+        # Tự động tính ngày hết hạn nếu chưa có (trước khi validate)
         if not self.expiration_date:
             from dateutil.relativedelta import relativedelta
             try:
@@ -209,6 +244,9 @@ class Reader(models.Model):
             except:
                 months = 6
             self.expiration_date = self.card_creation_date + relativedelta(months=months)
+        
+        # Validate trước khi lưu
+        self.full_clean()
         
         super().save(*args, **kwargs)
 
@@ -411,7 +449,7 @@ class Book(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.book_title.book_title} ({self.publish_year})"
+        return f"{self.book_title.book_title} ({self.publish_year}) - Còn {self.remaining_quantity} quyển"
     
     @property
     def borrowed_quantity(self):
@@ -581,11 +619,9 @@ class BookImportDetail(models.Model):
         verbose_name='Sách'
     )
     quantity = models.IntegerField(
-        validators=[MinValueValidator(1)],
         verbose_name='Số lượng'
     )
     unit_price = models.IntegerField(
-        validators=[MinValueValidator(0)],
         verbose_name='Đơn giá'
     )
     amount = models.IntegerField(
