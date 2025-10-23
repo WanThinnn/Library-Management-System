@@ -7,7 +7,7 @@
         Dành cho Thủ Thư và Quản trị viên
     </p>
     
-    <div class="text-center" style="margin: 3rem 0;">
+    {% comment %} <div class="text-center" style="margin: 3rem 0;">
         <h3 style="color: #34495e; margin-bottom: 2rem;">Các chức năng hệ thống</h3>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; text-align: left;">
@@ -72,15 +72,46 @@
             </div>
         </div>
     </div>
-    
+     {% endcomment %}
     <div class="text-center" style="margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white;">
-        <h3 style="margin-bottom: 1rem;">🔐 Truy cập Hệ thống</h3>
-        <p style="margin-bottom: 1.5rem; font-size: 1.1rem;">
-            Sử dụng tài khoản Thủ Thư để đăng nhập vào Admin Panel
-        </p>
-        <a href="/admin/" class="btn" style="background: white; color: #667eea; padding: 12px 30px; font-size: 1.1rem; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
-            ➜ Đăng nhập Admin Panel
-        </a>
+        {% if user.is_authenticated %}
+            <h3 style="margin-bottom: 1rem;">� Chào mừng, {{ user.username }}!</h3>
+            <p style="margin-bottom: 1.5rem; font-size: 1.1rem;">
+                {% if user.is_superuser %}
+                    Bạn đang đăng nhập với quyền <strong>Quản trị viên</strong> (Toàn quyền)
+                {% elif user.is_staff %}
+                    Bạn đang đăng nhập với quyền <strong>Nhân viên</strong>
+                {% endif %}
+            </p>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <a href="{% url 'reader_create' %}" class="btn" style="background: white; color: #667eea; padding: 12px 30px; font-size: 1.1rem; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                    📝 Lập thẻ độc giả
+                </a>
+                <a href="{% url 'reader_list' %}" class="btn" style="background: white; color: #667eea; padding: 12px 30px; font-size: 1.1rem; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                    📚 Danh sách độc giả
+                </a>
+                <a href="{% url 'book_import' %}" class="btn" style="background: white; color: #667eea; padding: 12px 30px; font-size: 1.1rem; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                    📥 Tiếp nhận Sách
+                </a>
+                <a href="/admin/" class="btn" style="background: white; color: #667eea; padding: 12px 30px; font-size: 1.1rem; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                    ⚙️ Admin Panel
+                </a>
+            </div>
+
+        {% else %}
+            <h3 style="margin-bottom: 1rem;">🔐 Truy cập Hệ thống</h3>
+            <p style="margin-bottom: 1.5rem; font-size: 1.1rem;">
+                Vui lòng đăng nhập để sử dụng các chức năng quản lý
+            </p>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <a href="{% url 'login' %}" class="btn" style="background: white; color: #667eea; padding: 12px 30px; font-size: 1.1rem; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                    🔑 Đăng nhập
+                </a>
+                <a href="/admin/" class="btn" style="background: white; color: #667eea; padding: 12px 30px; font-size: 1.1rem; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                    ⚙️ Admin Panel
+                </a>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Header -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="card-title mb-2">
+                <i class="fas fa-receipt"></i> {{ page_title }}
+            </h2>
+            <p class="text-muted mb-0">
+                <strong>Phiếu nhập #{{ receipt.id }}</strong> - Ngày nhập: 
+                <strong>{{ receipt.import_date|date:"d/m/Y" }}</strong>
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Receipt Information -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Thông tin phiếu nhập
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Mã phiếu:</strong> #{{ receipt.id }}</p>
+                            <p><strong>Ngày nhập:</strong> {{ receipt.import_date|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Người lập:</strong> {{ receipt.created_by }}</p>
+                            <p><strong>Tổng tiền:</strong> 
+                                <span class="badge bg-success">{{ receipt.total_amount|floatformat:0 }}đ</span>
+                            </p>
+                        </div>
+                    </div>
+                    {% if receipt.notes %}
+                        <p><strong>Ghi chú:</strong></p>
+                        <p class="text-muted">{{ receipt.notes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Import Details -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Chi tiết sách nhập
+                    </h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tựa sách</th>
+                                <th>Thể loại</th>
+                                <th>Năm XB</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detail in import_details %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ detail.book.book_title.book_title }}</strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ detail.book.book_title.category.category_name }}
+                                        </small>
+                                    </td>
+                                    <td>{{ detail.book.book_title.category.category_name }}</td>
+                                    <td>{{ detail.book.publish_year }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ detail.quantity }}</span>
+                                    </td>
+                                    <td>{{ detail.unit_price|floatformat:0 }}đ</td>
+                                    <td>
+                                        <strong>{{ detail.amount|floatformat:0 }}đ</strong>
+                                    </td>
+                                </tr>
+                                <tr class="table-light">
+                                    <td colspan="6">
+                                        <small>
+                                            <strong>Tác giả:</strong>
+                                            {% for author in detail.book.book_title.authors.all %}
+                                                {{ author.author_name }}{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                            {% if detail.book.isbn %}
+                                                <br><strong>ISBN:</strong> {{ detail.book.isbn }}
+                                            {% endif %}
+                                            {% if detail.book.edition %}
+                                                <br><strong>Phiên bản:</strong> {{ detail.book.edition }}
+                                            {% endif %}
+                                        </small>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            <tr class="table-active">
+                                <td colspan="4"></td>
+                                <td><strong>Tổng cộng:</strong></td>
+                                <td><strong>{{ receipt.total_amount|floatformat:0 }}đ</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie"></i> Thống kê
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <p class="text-muted mb-1">Tổng số tựa sách:</p>
+                        <h3 class="text-primary">
+                            {{ import_details|length }}
+                            <i class="fas fa-book"></i>
+                        </h3>
+                    </div>
+                    <div class="mb-3">
+                        <p class="text-muted mb-1">Tổng số lượng:</p>
+                        <h3 class="text-info">
+                            {{ receipt.total_books_imported }}
+                            <i class="fas fa-boxes"></i>
+                        </h3>
+                    </div>
+                    <div class="mb-3">
+                        <p class="text-muted mb-1">Tổng trị giá:</p>
+                        <h3 class="text-success">
+                            {{ receipt.total_amount|floatformat:0 }}đ
+                        </h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs"></i> Thao tác
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'book_import' %}" class="btn btn-primary btn-sm w-100 mb-2">
+                        <i class="fas fa-plus"></i> Nhập sách mới
+                    </a>
+                    <a href="{% url 'book_import_list' %}" class="btn btn-secondary btn-sm w-100 mb-2">
+                        <i class="fas fa-list"></i> Danh sách phiếu
+                    </a>
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm w-100">
+                        <i class="fas fa-home"></i> Về trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

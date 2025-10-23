@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>🎫 {{ page_title }}</h2>
+    
+    <!-- Thông tin thẻ độc giả -->
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin: 0 0 15px 0; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 10px;">
+            📇 THÔNG TIN THẺ ĐỘC GIẢ
+        </h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <strong>Mã độc giả:</strong><br>
+                <span style="font-size: 1.2em;">{{ reader.id }}</span>
+            </div>
+            <div>
+                <strong>Loại độc giả:</strong><br>
+                <span style="font-size: 1.2em;">{{ reader.reader_type.reader_type_name }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Thông tin cá nhân -->
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="color: #2c3e50; margin-top: 0;">👤 Thông tin cá nhân</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 12px; font-weight: bold; width: 200px;">Họ và tên:</td>
+                <td style="padding: 12px;">{{ reader.reader_name }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 12px; font-weight: bold;">Ngày sinh:</td>
+                <td style="padding: 12px;">{{ reader.date_of_birth|date:"d/m/Y" }} 
+                    <span style="color: #666;">({{ reader.age }} tuổi)</span>
+                </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 12px; font-weight: bold;">Email:</td>
+                <td style="padding: 12px;">{{ reader.email }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; font-weight: bold;">Địa chỉ:</td>
+                <td style="padding: 12px;">{{ reader.address|default:"Chưa cập nhật" }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <!-- Thông tin thẻ -->
+    <div style="background: #e8f4f8; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="color: #2980b9; margin-top: 0;">📅 Thông tin thẻ thư viện</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #b3d9e6;">
+                <td style="padding: 12px; font-weight: bold; width: 200px;">Ngày lập thẻ:</td>
+                <td style="padding: 12px;">{{ reader.card_creation_date|date:"d/m/Y" }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #b3d9e6;">
+                <td style="padding: 12px; font-weight: bold;">Ngày hết hạn:</td>
+                <td style="padding: 12px;">
+                    {{ reader.expiration_date|date:"d/m/Y" }}
+                    {% if reader.is_card_expired %}
+                        <span style="color: #c62828; font-weight: bold;">⚠️ ĐÃ HẾT HẠN</span>
+                    {% else %}
+                        <span style="color: #27ae60; font-weight: bold;">✅ CÒN HẠN</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #b3d9e6;">
+                <td style="padding: 12px; font-weight: bold;">Trạng thái:</td>
+                <td style="padding: 12px;">
+                    {% if reader.is_active %}
+                        <span style="background: #27ae60; color: white; padding: 5px 15px; border-radius: 20px;">
+                            ✅ Đang hoạt động
+                        </span>
+                    {% else %}
+                        <span style="background: #e74c3c; color: white; padding: 5px 15px; border-radius: 20px;">
+                            ❌ Đã khóa
+                        </span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; font-weight: bold;">Tổng nợ:</td>
+                <td style="padding: 12px;">
+                    <span style="font-size: 1.2em; font-weight: bold; color: {% if reader.total_debt > 0 %}#c62828{% else %}#27ae60{% endif %};">
+                        {{ reader.total_debt|floatformat:0|default:"0" }}đ
+                    </span>
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <!-- Thông tin mượn sách -->
+    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="color: #856404; margin-top: 0;">
+            <i class="fas fa-book"></i> Sách đang mượn
+        </h3>
+        <div id="readerBorrowingList" style="min-height: 200px;">
+            <div style="text-align: center; color: #999;">
+                <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách...
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action buttons -->
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <a href="{% url 'reader_create' %}" class="btn" style="flex: 1; text-align: center;">
+            ➕ Lập thẻ độc giả khác
+        </a>
+        <a href="{% url 'reader_list' %}" class="btn btn-secondary" style="flex: 1; text-align: center;">
+            📋 Danh sách độc giả
+        </a>
+        <a href="{% url 'home' %}" class="btn btn-secondary" style="flex: 1; text-align: center;">
+            🏠 Trang chủ
+        </a>
+    </div>
+</div>
+
+<style>
+    .reader-borrow-item {
+        padding: 12px;
+        border-left: 4px solid #ffc107;
+        background-color: #fffbf0;
+        margin-bottom: 10px;
+        border-radius: 4px;
+    }
+    
+    .reader-borrow-item.overdue {
+        border-left-color: #dc3545;
+        background-color: #ffe5e5;
+    }
+    
+    .reader-borrow-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    
+    .reader-borrow-table th {
+        background-color: #f8f9fa;
+        padding: 10px;
+        text-align: left;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+    }
+    
+    .reader-borrow-table td {
+        padding: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .reader-borrow-table tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .reader-borrow-table tr.overdue {
+        background-color: #ffe5e5;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+    
+    .badge-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .badge-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .badge-warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+</style>
+
+<script>
+function loadReaderBorrowingInfo() {
+    const readerId = {{ reader.id }};
+    
+    fetch("{% url 'api_borrowing_readers' %}")
+        .then(response => response.ok ? response.json() : Promise.reject(response))
+        .then(data => {
+            const container = document.getElementById('readerBorrowingList');
+            
+            // Tìm độc giả hiện tại trong danh sách
+            const readerData = data.data?.find(r => r.reader_id == readerId);
+            
+            if (!readerData) {
+                container.innerHTML = '<div style="text-align: center; color: #27ae60;"><em>✓ Độc giả không có sách mượn</em></div>';
+            } else {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                let booksHtml = readerData.books.map(book => {
+                    const [day, month, year] = book.due_date.split('/');
+                    const dueDate = new Date(year, month - 1, day);
+                    const isOverdue = dueDate < today;
+                    
+                    return `
+                        <tr ${isOverdue ? 'class="overdue"' : ''}>
+                            <td><strong>${book.title}</strong></td>
+                            <td>${book.borrow_date}</td>
+                            <td>${book.due_date}</td>
+                            <td>
+                                ${isOverdue ? 
+                                    '<span class="badge badge-danger">⚠️ Quá hạn</span>' : 
+                                    '<span class="badge badge-success">✓ Còn hạn</span>'
+                                }
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                
+                container.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <strong style="color: #856404;">Tổng sách đang mượn:</strong><br>
+                            <span style="font-size: 1.5em; color: #007bff; font-weight: bold;">${readerData.borrowed_count} quyển</span>
+                        </div>
+                        <div>
+                            <strong style="color: #856404;">Phải trả trước:</strong><br>
+                            <span style="font-size: 1.2em; font-weight: bold; color: ${readerData.is_overdue ? '#dc3545' : '#27ae60'};">
+                                ${readerData.latest_due_date}
+                                ${readerData.is_overdue ? ' ⚠️' : ''}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <table class="reader-borrow-table">
+                        <thead>
+                            <tr>
+                                <th>Tên sách</th>
+                                <th>Ngày mượn</th>
+                                <th>Phải trả</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${booksHtml}
+                        </tbody>
+                    </table>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading borrowing info:', error);
+            document.getElementById('readerBorrowingList').innerHTML = '<div style="color: #c62828;"><em>Lỗi tải thông tin mượn sách</em></div>';
+        });
+}
+
+// Load data khi trang load
+document.addEventListener('DOMContentLoaded', function() {
+    loadReaderBorrowingInfo();
+    
+    // Refresh mỗi 30 giây
+    setInterval(loadReaderBorrowingInfo, 30000);
+});
+</script>
+{% endblock %}

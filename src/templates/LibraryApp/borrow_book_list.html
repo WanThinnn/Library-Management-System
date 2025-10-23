@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Danh sách phiếu mượn{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-3">
+                <i class="fas fa-list"></i> Danh sách phiếu mượn sách
+            </h1>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Lọc phiếu mượn</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="{% url 'borrow_book_list' %}?status=unreturned" class="btn btn-warning w-100">
+                        <i class="fas fa-hourglass-half"></i> Chưa trả
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'borrow_book_list' %}?status=overdue" class="btn btn-danger w-100">
+                        <i class="fas fa-exclamation-circle"></i> Quá hạn
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'borrow_book_list' %}?status=all" class="btn btn-info w-100">
+                        <i class="fas fa-list"></i> Tất cả
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách phiếu mượn -->
+    {% if receipts %}
+    <div class="table-responsive">
+        <table class="table table-hover table-striped">
+            <thead class="table-primary">
+                <tr>
+                    <th>Phiếu #</th>
+                    <th>Độc giả</th>
+                    <th>Sách</th>
+                    <th>Ngày mượn</th>
+                    <th>Phải trả</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receipt in receipts %}
+                <tr>
+                    <td><strong>#{{ receipt.id }}</strong></td>
+                    <td>
+                        {{ receipt.reader.reader_name }}
+                        <br>
+                        <small class="text-muted">({{ receipt.reader.reader_code }})</small>
+                    </td>
+                    <td>
+                        <strong>{{ receipt.book_item.book.book_title.book_title }}</strong>
+                        <br>
+                        <small class="text-muted">Barcode: {{ receipt.book_item.barcode }}</small>
+                    </td>
+                    <td>{{ receipt.borrow_date|date:"d/m/Y" }}</td>
+                    <td>
+                        {{ receipt.due_date|date:"d/m/Y" }}
+                        {% if receipt.is_overdue and not receipt.is_returned %}
+                        <br><span class="badge bg-danger">QUÁ HẠN {{ receipt.days_overdue }} NGÀY</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if receipt.is_returned %}
+                        <span class="badge bg-success"><i class="fas fa-check-circle"></i> ĐÃ TRẢ</span>
+                        {% elif receipt.is_overdue %}
+                        <span class="badge bg-danger"><i class="fas fa-exclamation-circle"></i> QUÁ HẠN</span>
+                        {% else %}
+                        <span class="badge bg-warning"><i class="fas fa-hourglass-half"></i> ĐANG MƯỢN</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'borrow_book_detail' receipt.id %}" class="btn btn-info btn-sm">
+                            <i class="fas fa-eye"></i> Xem
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        <i class="fas fa-info-circle"></i>
+        <strong>Không có phiếu mượn nào.</strong>
+    </div>
+    {% endif %}
+
+    <!-- Nút quay lại -->
+    <div class="mt-4">
+        <a href="{% url 'borrow_book' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Cho mượn sách mới
+        </a>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}Chi tiết phiếu mượn{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-3">
+                <i class="fas fa-receipt"></i> Chi tiết phiếu mượn
+            </h1>
+            <a href="{% url 'borrow_book_list' %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Thông tin phiếu mượn -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Phiếu mượn #{{ receipt.id }}</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Tên độc giả:</strong></label>
+                        <p>{{ receipt.reader.reader_name }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Email:</strong></label>
+                        <p><a href="mailto:{{ receipt.reader.email }}">{{ receipt.reader.email }}</a></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Ngày mượn:</strong></label>
+                        <p>{{ receipt.borrow_date|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Ngày phải trả:</strong></label>
+                        <p>
+                            {{ receipt.due_date|date:"d/m/Y" }}
+                            {% if receipt.is_overdue and not receipt.is_returned %}
+                            <span class="badge bg-danger">QUÁHẠN</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Trạng thái:</strong></label>
+                        <p>
+                            {% if receipt.is_returned %}
+                            <span class="badge bg-success">ĐÃ TRẢ</span>
+                            {% elif receipt.is_overdue %}
+                            <span class="badge bg-danger">QUÁ HẠN</span>
+                            {% else %}
+                            <span class="badge bg-warning">ĐANG MƯỢN</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Ngày thực trả:</strong></label>
+                        <p>
+                            {% if receipt.return_date %}
+                            {{ receipt.return_date|date:"d/m/Y H:i" }}
+                            {% else %}
+                            <em class="text-muted">Chưa trả</em>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin sách -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Thông tin sách</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Tên sách:</strong></label>
+                        <p>{{ receipt.book_item.book.book_title.book_title }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Thể loại:</strong></label>
+                        <p>{{ receipt.book_item.book.book_title.category.category_name }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Mã sách:</strong></label>
+                        <p><code>{{ receipt.book_item.book.id }}</code></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Barcode:</strong></label>
+                        <p><code>{{ receipt.book_item.barcode }}</code></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    <label class="form-label"><strong>Tác giả:</strong></label>
+                    <p>
+                        {% for author in receipt.book_item.book.book_title.authors.all %}
+                        <span class="badge bg-secondary">{{ author.author_name }}</span>
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin tiền phạt -->
+    {% if receipt.is_overdue %}
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">Thông tin tiền phạt</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Số ngày quá hạn:</strong></label>
+                        <p>{{ receipt.days_overdue }} ngày</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Tiền phạt:</strong></label>
+                        <p><strong>{{ receipt.fine_amount|default:"0" }} VNĐ</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Ghi chú -->
+    {% if receipt.notes %}
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Ghi chú</h5>
+        </div>
+        <div class="card-body">
+            <p>{{ receipt.notes }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

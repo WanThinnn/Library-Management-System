@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>📚 {{ page_title }}</h2>
+        <a href="{% url 'reader_create' %}" class="btn">
+            ➕ Lập thẻ mới
+        </a>
+    </div>
+    
+    <!-- Filters -->
+    <form method="get" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Tìm kiếm:</label>
+                <input type="text" name="search" value="{{ request.GET.search }}" 
+                       placeholder="Tên hoặc email..." 
+                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Loại độc giả:</label>
+                <select name="reader_type" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">-- Tất cả --</option>
+                    {% for rt in reader_types %}
+                    <option value="{{ rt.id }}" {% if request.GET.reader_type == rt.id|stringformat:"s" %}selected{% endif %}>
+                        {{ rt.reader_type_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <button type="submit" class="btn" style="padding: 8px 20px;">
+                    🔍 Lọc
+                </button>
+            </div>
+        </div>
+    </form>
+    
+    <!-- Readers table -->
+    {% if readers %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; background: white;">
+            <thead>
+                <tr style="background: #3498db; color: white;">
+                    <th style="padding: 12px; text-align: left; border: 1px solid #2980b9;">Mã</th>
+                    <th style="padding: 12px; text-align: left; border: 1px solid #2980b9;">Họ tên</th>
+                    <th style="padding: 12px; text-align: left; border: 1px solid #2980b9;">Loại ĐG</th>
+                    <th style="padding: 12px; text-align: left; border: 1px solid #2980b9;">Tuổi</th>
+                    <th style="padding: 12px; text-align: left; border: 1px solid #2980b9;">Email</th>
+                    <th style="padding: 12px; text-align: left; border: 1px solid #2980b9;">Ngày lập thẻ</th>
+                    <th style="padding: 12px; text-align: left; border: 1px solid #2980b9;">Hạn thẻ</th>
+                    <th style="padding: 12px; text-align: center; border: 1px solid #2980b9;">Trạng thái</th>
+                    <th style="padding: 12px; text-align: center; border: 1px solid #2980b9;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reader in readers %}
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 12px; border: 1px solid #ddd;">{{ reader.id }}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;">{{ reader.reader_name }}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">{{ reader.reader_type.reader_type_name }}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">{{ reader.age }} tuổi</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">{{ reader.email }}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">{{ reader.card_creation_date|date:"d/m/Y" }}</td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">
+                        {{ reader.expiration_date|date:"d/m/Y" }}
+                        {% if reader.is_card_expired %}
+                            <br><span style="color: #c62828; font-size: 0.85em;">⚠️ Hết hạn</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                        {% if reader.is_active %}
+                            <span style="background: #27ae60; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.85em;">
+                                ✅ Hoạt động
+                            </span>
+                        {% else %}
+                            <span style="background: #e74c3c; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.85em;">
+                                ❌ Khóa
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                        <a href="{% url 'reader_detail' reader.id %}" 
+                           style="background: #3498db; color: white; padding: 5px 15px; border-radius: 4px; text-decoration: none; font-size: 0.9em;">
+                            👁️ Xem
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="margin-top: 15px; color: #666; font-size: 0.9em;">
+        Tổng số: <strong>{{ readers.count }}</strong> độc giả
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px;">
+        <p style="font-size: 1.2em; color: #666;">📭 Chưa có độc giả nào</p>
+        <a href="{% url 'reader_create' %}" class="btn" style="margin-top: 15px;">
+            ➕ Lập thẻ độc giả đầu tiên
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

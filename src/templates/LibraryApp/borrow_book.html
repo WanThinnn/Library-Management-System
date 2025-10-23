@@ -1,0 +1,696 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý Cho mượn sách{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-3">
+                <i class="fas fa-book-reader"></i> Quản lý Cho mượn sách
+            </h1>
+            <p class="text-muted">BM4 - Phiếu Mượn Sách</p>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-borrow" data-bs-toggle="tab" data-bs-target="#content-borrow" type="button" role="tab">
+                <i class="fas fa-plus-circle"></i> Cho mượn
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-borrowing" data-bs-toggle="tab" data-bs-target="#content-borrowing" type="button" role="tab">
+                <i class="fas fa-clipboard-list"></i> Độc giả đang mượn
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-history" data-bs-toggle="tab" data-bs-target="#content-history" type="button" role="tab">
+                <i class="fas fa-history"></i> Lịch sử mượn
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Tab 1: Cho mượn -->
+        <div class="tab-pane fade show active" id="content-borrow" role="tabpanel">
+            <!-- Quy định 4 -->
+            <div class="alert alert-info mb-4" role="alert">
+                <h5><i class="fas fa-info-circle"></i> QĐ4 - Điều kiện cho mượn sách</h5>
+                <ul class="mb-0">
+                    <li>✓ Thẻ độc giả phải còn hạn sử dụng</li>
+                    <li>✓ Độc giả không có sách mượn quá hạn</li>
+                    <li>✓ Sách phải còn sẵn (không đang bị mượn)</li>
+                    <li>✓ Mỗi độc giả được mượn tối đa <strong>{{ params.max_borrowed_books }}</strong> quyển</li>
+                    <li>✓ Thời hạn mượn: <strong>{{ params.max_borrow_days }}</strong> ngày</li>
+                </ul>
+            </div>
+
+            <!-- Form cho mượn -->
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Nhập thông tin mượn sách</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" id="borrowForm">
+                                {% csrf_token %}
+                                
+                                <!-- Hidden fields -->
+                                <input type="hidden" name="reader_id" id="readerId" value="">
+                                <input type="hidden" name="book_id" id="bookId" value="">
+                                
+                                <!-- Ngày mượn -->
+                                <div class="mb-3">
+                                    <label class="form-label"><strong>{{ form.borrow_date.label }}</strong></label>
+                                    {{ form.borrow_date }}
+                                    {% if form.borrow_date.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.borrow_date.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Thông tin độc giả và sách đã chọn -->
+                                <div class="mb-3 p-3 bg-light rounded">
+                                    <div class="mb-2">
+                                        <strong>Độc giả đã chọn:</strong>
+                                        <div id="selectedReader" class="text-info">
+                                            <em>Chưa chọn</em>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div>
+                                        <strong>Sách đã chọn (có thể chọn nhiều):</strong>
+                                        <div id="selectedBook" class="text-info">
+                                            <em>Chưa chọn</em>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Lỗi -->
+                                {% if form.non_field_errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ form.non_field_errors.0 }}
+                                </div>
+                                {% endif %}
+                                
+                                <div class="mb-3">
+                                    <button type="submit" class="btn btn-primary w-100" id="submitBtn" disabled>
+                                        <i class="fas fa-plus-circle"></i> Cho mượn
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- Link quay lại -->
+                            <div class="mt-3">
+                                <a href="{% url 'home' %}" class="btn btn-secondary w-100">
+                                    <i class="fas fa-arrow-left"></i> Quay lại
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danh sách độc giả -->
+                <div class="col-md-7">
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-users"></i> Chọn độc giả
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Ô tìm kiếm độc giả -->
+                            <div class="mb-3">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="readerSearch" 
+                                    placeholder="🔍 Tìm kiếm theo tên, email..."
+                                >
+                            </div>
+                            
+                            <!-- Danh sách độc giả -->
+                            <div id="readerList" style="max-height: 400px; overflow-y: auto;">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danh sách sách -->
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fas fa-book"></i> Chọn sách
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Ô tìm kiếm sách -->
+                            <div class="mb-3">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="bookSearch" 
+                                    placeholder="🔍 Tìm kiếm theo tên sách, tác giả..."
+                                >
+                            </div>
+                            
+                            <!-- Danh sách sách -->
+                            <div id="bookList" style="max-height: 400px; overflow-y: auto;">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Độc giả đang mượn -->
+        <div class="tab-pane fade" id="content-borrowing" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard-list"></i> Danh sách độc giả đang mượn sách
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="borrowingReadersList" style="min-height: 400px;">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Lịch sử mượn -->
+        <div class="tab-pane fade" id="content-history" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history"></i> Danh sách phiếu mượn sách
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Bộ lọc:</strong></label>
+                        <div>
+                            <button class="btn btn-outline-primary btn-sm active" data-filter="all">Tất cả</button>
+                            <button class="btn btn-outline-warning btn-sm" data-filter="unreturned">Đang mượn</button>
+                            <button class="btn btn-outline-danger btn-sm" data-filter="overdue">Quá hạn</button>
+                            <button class="btn btn-outline-success btn-sm" data-filter="returned">Đã trả</button>
+                        </div>
+                    </div>
+                    <div id="historyList" style="overflow-x: auto; min-height: 400px;">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-spinner fa-spin"></i> Đang tải lịch sử...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .reader-item, .book-item {
+        padding: 12px;
+        border-left: 3px solid transparent;
+        cursor: pointer;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+    
+    .reader-item:hover, .book-item:hover {
+        background-color: #f8f9fa;
+        border-left-color: #007bff;
+    }
+    
+    .reader-item.selected, .book-item.selected {
+        background-color: #d4edda;
+        border-left-color: #28a745;
+        font-weight: 500;
+    }
+    
+    .book-item.selected::before {
+        content: '✓ ';
+        color: #28a745;
+        font-weight: bold;
+    }
+    
+    .reader-name, .book-title {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .reader-email, .book-info {
+        font-size: 0.9em;
+        color: #666;
+    }
+    
+    .book-remaining {
+        font-size: 0.85em;
+        padding: 2px 6px;
+        background-color: #d4edda;
+        border-radius: 3px;
+        color: #155724;
+    }
+    
+    .borrowing-reader-item {
+        padding: 12px;
+        border-left: 4px solid #ffc107;
+        background-color: #fffbf0;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .borrowing-reader-item:hover {
+        background-color: #fff8e1;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .borrowing-reader-item.overdue {
+        border-left-color: #dc3545;
+        background-color: #ffe5e5;
+    }
+    
+    .borrowing-reader-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .borrowing-reader-name {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .borrowing-reader-badge {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        color: white;
+        background-color: #007bff;
+        margin-left: 8px;
+    }
+    
+    .borrowing-reader-overdue-badge {
+        background-color: #dc3545;
+    }
+    
+    .borrowing-reader-email {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 4px;
+    }
+    
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
+    }
+    
+    .form-control {
+        border: 1px solid #ced4da;
+    }
+    
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .nav-tabs .nav-link {
+        color: #495057;
+        border: none;
+        border-bottom: 3px solid transparent;
+        margin-right: 10px;
+    }
+
+    .nav-tabs .nav-link:hover {
+        border-bottom-color: #0d6efd;
+        color: #0d6efd;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        border-bottom-color: #0d6efd;
+        background: none;
+    }
+
+    .history-table {
+        width: 100%;
+    }
+
+    .history-table thead {
+        background-color: #f8f9fa;
+    }
+
+    .history-row {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .history-row:hover {
+        background-color: #f8f9fa;
+    }
+
+    .receipt-id-link {
+        color: #0d6efd;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .receipt-id-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<script>
+let selectedReaderId = null;
+let selectedBooks = [];
+let currentFilter = 'all';
+
+// ============ TAB 1: CHO MƯỢN ============
+
+function loadReaders(search = '') {
+    const url = new URL("{% url 'api_readers' %}", window.location.origin);
+    if (search) url.searchParams.append('search', search);
+    
+    fetch(url)
+        .then(response => response.ok ? response.json() : Promise.reject(response))
+        .then(data => {
+            const readerList = document.getElementById('readerList');
+            if (!data.data?.length) {
+                readerList.innerHTML = '<div class="text-center text-muted"><em>Không tìm thấy độc giả</em></div>';
+            } else {
+                readerList.innerHTML = data.data.map(reader => `
+                    <div class="reader-item ${reader.id === selectedReaderId ? 'selected' : ''}" data-id="${reader.id}">
+                        <div class="reader-name">${reader.name}</div>
+                        <div class="reader-email">${reader.email}</div>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.reader-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        selectReader(this.dataset.id, 
+                            this.querySelector('.reader-name').textContent, 
+                            this.querySelector('.reader-email').textContent);
+                    });
+                });
+            }
+        })
+        .catch(error => {
+            document.getElementById('readerList').innerHTML = '<div class="text-danger"><em>Lỗi tải danh sách</em></div>';
+        });
+}
+
+function loadBooks(search = '') {
+    const url = new URL("{% url 'api_books' %}", window.location.origin);
+    if (search) url.searchParams.append('search', search);
+    
+    fetch(url)
+        .then(response => response.ok ? response.json() : Promise.reject(response))
+        .then(data => {
+            const bookList = document.getElementById('bookList');
+            if (!data.data?.length) {
+                bookList.innerHTML = '<div class="text-center text-muted"><em>Không tìm thấy sách</em></div>';
+            } else {
+                bookList.innerHTML = data.data.map(book => `
+                    <div class="book-item ${selectedBooks.includes(book.id) ? 'selected' : ''}" data-id="${book.id}">
+                        <div class="book-title">${book.title}</div>
+                        <div class="book-info">
+                            ${book.year} • ${book.category}
+                            <span class="book-remaining">Còn ${book.remaining}</span>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.book-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        selectBook(this.dataset.id, this.querySelector('.book-title').textContent);
+                    });
+                });
+            }
+        })
+        .catch(error => {
+            document.getElementById('bookList').innerHTML = '<div class="text-danger"><em>Lỗi tải danh sách</em></div>';
+        });
+}
+
+function selectReader(id, name, email) {
+    selectedReaderId = id;
+    document.getElementById('readerId').value = id;
+    document.getElementById('selectedReader').innerHTML = `<strong>${name}</strong><br><small>${email}</small>`;
+    
+    document.querySelectorAll('.reader-item').forEach(item => {
+        item.classList.toggle('selected', item.dataset.id == id);
+    });
+    
+    checkFormValid();
+}
+
+function selectBook(id, title) {
+    id = parseInt(id);
+    
+    if (selectedBooks.includes(id)) {
+        selectedBooks = selectedBooks.filter(bookId => bookId !== id);
+    } else {
+        selectedBooks.push(id);
+    }
+    
+    document.getElementById('bookId').value = selectedBooks.join(',');
+    
+    document.querySelectorAll('.book-item').forEach(item => {
+        item.classList.toggle('selected', selectedBooks.includes(parseInt(item.dataset.id)));
+    });
+    
+    updateBookDisplay();
+    checkFormValid();
+}
+
+function updateBookDisplay() {
+    const selectedBookDiv = document.getElementById('selectedBook');
+    if (selectedBooks.length === 0) {
+        selectedBookDiv.innerHTML = '<em>Chưa chọn</em>';
+    } else {
+        const bookNames = [];
+        selectedBooks.forEach(id => {
+            const item = document.querySelector(`.book-item[data-id="${id}"]`);
+            if (item) {
+                bookNames.push(item.querySelector('.book-title').textContent);
+            }
+        });
+        selectedBookDiv.innerHTML = `<strong>${bookNames.join(', ')}</strong><br><small class="text-muted">(${selectedBooks.length} quyển)</small>`;
+    }
+}
+
+function checkFormValid() {
+    const submitBtn = document.getElementById('submitBtn');
+    const borrowDate = document.getElementById('{{ form.borrow_date.id_for_label }}');
+    const hasDate = borrowDate?.value;
+    const isValid = selectedReaderId && selectedBooks.length > 0 && hasDate;
+    submitBtn.disabled = !isValid;
+}
+
+// ============ TAB 2: ĐỘCGIẢ ĐANG MƯỢN ============
+
+function loadBorrowingReaders() {
+    fetch("{% url 'api_borrowing_readers' %}")
+        .then(response => response.ok ? response.json() : Promise.reject(response))
+        .then(data => {
+            const container = document.getElementById('borrowingReadersList');
+            if (!data.data?.length) {
+                container.innerHTML = '<div class="text-center text-muted"><em>Không có độc giả đang mượn sách</em></div>';
+            } else {
+                container.innerHTML = data.data.map(reader => `
+                    <div class="borrowing-reader-item ${reader.is_overdue ? 'overdue' : ''}" 
+                         data-reader-id="${reader.reader_id}"
+                         data-reader-name="${reader.reader_name}"
+                         data-reader-email="${reader.reader_email}"
+                         data-books='${JSON.stringify(reader.books)}'>
+                        <div class="borrowing-reader-header">
+                            <div>
+                                <div class="borrowing-reader-name">${reader.reader_name}</div>
+                                <div class="borrowing-reader-email">${reader.reader_email}</div>
+                            </div>
+                            <div>
+                                <span class="borrowing-reader-badge ${reader.is_overdue ? 'borrowing-reader-overdue-badge' : ''}">
+                                    ${reader.is_overdue ? '⚠️ Quá hạn' : '📚 ' + reader.borrowed_count + ' quyển'}
+                                </span>
+                                <div style="font-size: 0.85em; color: #666; margin-top: 4px;">
+                                    Phải trả: ${reader.latest_due_date}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.borrowing-reader-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const readerId = this.dataset.readerId;
+                        const readerName = this.dataset.readerName;
+                        const readerEmail = this.dataset.readerEmail;
+                        const books = JSON.parse(this.dataset.books);
+                        showBorrowingDetail(readerId, readerName, readerEmail, books);
+                    });
+                });
+            }
+        })
+        .catch(error => {
+            document.getElementById('borrowingReadersList').innerHTML = '<div class="text-danger"><em>Lỗi tải danh sách</em></div>';
+        });
+}
+
+function showBorrowingDetail(readerId, readerName, readerEmail, books) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    let booksHtml = books.map(book => {
+        const [day, month, year] = book.due_date.split('/');
+        const dueDate = new Date(year, month - 1, day);
+        const isOverdue = dueDate < today;
+        
+        return `
+            <tr ${isOverdue ? 'class="table-danger"' : ''}>
+                <td><strong>${book.title}</strong></td>
+                <td>${book.borrow_date}</td>
+                <td>${book.due_date}</td>
+                <td>
+                    ${isOverdue ? '<span class="badge bg-danger">⚠️ Quá hạn</span>' : '<span class="badge bg-success">✓ Còn hạn</span>'}
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    const modalHtml = `
+        <div class="modal fade" id="borrowingDetailModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title"><i class="fas fa-info-circle"></i> Chi tiết sách mượn</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6>Thông tin độc giả</h6>
+                                <p class="mb-1"><strong>Tên:</strong> ${readerName}</p>
+                                <p class="mb-0"><strong>Email:</strong> <a href="mailto:${readerEmail}">${readerEmail}</a></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Thống kê</h6>
+                                <p class="mb-0"><strong>Tổng sách đang mượn:</strong> <span class="badge bg-primary">${books.length} quyển</span></p>
+                            </div>
+                        </div>
+                        <hr>
+                        <h6>Danh sách sách mượn</h6>
+                        <table class="table table-sm table-striped">
+                            <thead class="table-light">
+                                <tr><th>Tên sách</th><th>Ngày mượn</th><th>Phải trả</th><th>Trạng thái</th></tr>
+                            </thead>
+                            <tbody>${booksHtml}</tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const oldModal = document.getElementById('borrowingDetailModal');
+    if (oldModal) oldModal.remove();
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    try {
+        new bootstrap.Modal(document.getElementById('borrowingDetailModal')).show();
+    } catch (e) {
+        console.error('Modal error:', e);
+    }
+}
+
+// ============ TAB 3: LỊCH SỬ MƯỢN ============
+
+function loadBorrowHistory(filter = 'all') {
+    const historyList = document.getElementById('historyList');
+    
+    fetch("{% url 'borrow_book_list' %}?filter=" + filter)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const tableBody = doc.querySelector('tbody');
+            
+            if (tableBody && tableBody.innerHTML.trim()) {
+                historyList.innerHTML = `
+                    <div style="overflow-x: auto;">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Phiếu #</th>
+                                    <th>Độc giả</th>
+                                    <th>Ngày mượn</th>
+                                    <th>Phải trả</th>
+                                    <th>Ngày trả</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyBody"></tbody>
+                        </table>
+                    </div>
+                `;
+                
+                const rows = doc.querySelectorAll('tbody tr');
+                let historyBody = document.getElementById('historyBody');
+                rows.forEach(row => {
+                    const clonedRow = row.cloneNode(true);
+                    clonedRow.classList.add('history-row');
+                    historyBody.appendChild(clonedRow);
+                });
+            } else {
+                historyList.innerHTML = '<div class="alert alert-info">Không có dữ liệu</div>';
+            }
+        })
+        .catch(error => {
+            historyList.innerHTML = '<div class="alert alert-danger">Lỗi tải dữ liệu</div>';
+        });
+}
+
+// ============ EVENT LISTENERS ============
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab 1
+    document.getElementById('readerSearch')?.addEventListener('input', e => loadReaders(e.target.value));
+    document.getElementById('bookSearch')?.addEventListener('input', e => loadBooks(e.target.value));
+    document.getElementById('{{ form.borrow_date.id_for_label }}')?.addEventListener('change', checkFormValid);
+
+    // Tab 3: Filter
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
+            loadBorrowHistory(currentFilter);
+        });
+    });
+
+    // Initial
+    loadReaders();
+    loadBooks();
+    loadBorrowingReaders();
+    setInterval(loadBorrowingReaders, 30000);
+});
+</script>
+{% endblock %}
