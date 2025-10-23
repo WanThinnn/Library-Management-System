@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-3">
+                <i class="fas fa-receipt"></i> {{ page_title }}
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Chi tiết phiếu -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Thông tin phiếu thu tiền</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Mã phiếu</strong></label>
+                            <p class="form-control-static">#{{ receipt.id }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Ngày lập</strong></label>
+                            <p class="form-control-static">{{ receipt.created_date|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label"><strong>Độc giả</strong></label>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="mb-1">
+                                        <a href="{% url 'reader_detail' receipt.reader.id %}" class="text-decoration-none">
+                                            {{ receipt.reader.reader_name }}
+                                        </a>
+                                    </h6>
+                                    <small class="text-muted">Email: {{ receipt.reader.email }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Thông tin thu tiền -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Số tiền thu</strong></label>
+                            <p style="font-size: 1.5em; color: #27ae60; font-weight: 600;">
+                                {{ receipt.collected_amount|floatformat:0 }}đ
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><strong>Phương thức thanh toán</strong></label>
+                            <p class="form-control-static">
+                                <span class="badge bg-info">{{ receipt.payment_method }}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin nợ -->
+                    <div class="alert alert-info">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Nợ trước khi thu</strong>
+                                <h5 style="color: #004085;">
+                                    {{ receipt.reader.total_debt|add:receipt.collected_amount|floatformat:0 }}đ
+                                </h5>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Nợ sau khi thu</strong>
+                                <h5 style="color: #27ae60;">
+                                    {{ receipt.reader.total_debt|floatformat:0 }}đ
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ghi chú -->
+                    {% if receipt.notes %}
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Ghi chú</strong></label>
+                        <div class="alert alert-light">
+                            {{ receipt.notes }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Hành động -->
+                    <div class="mt-4">
+                        <a href="{% url 'receipt_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                        </a>
+                        <a href="{% url 'home' %}" class="btn btn-primary">
+                            <i class="fas fa-home"></i> Trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tóm tắt -->
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle"></i> Phiếu thu thành công
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong class="d-block mb-2">Được ghi nhận:</strong>
+                        <p class="text-muted" style="font-size: 0.9em;">
+                            {{ receipt.created_date|date:"Ngày d/m/Y lúc H:i" }}
+                        </p>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <strong class="d-block mb-2">Từ độc giả:</strong>
+                        <p class="text-muted" style="font-size: 0.9em;">
+                            {{ receipt.reader.reader_name }}
+                        </p>
+                    </div>
+                    <hr>
+                    <div>
+                        <strong class="d-block mb-2">Số tiền:</strong>
+                        <p style="font-size: 1.3em; color: #27ae60; font-weight: 600; margin-bottom: 0;">
+                            +{{ receipt.collected_amount|floatformat:0 }}đ
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông tin độc giả -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user"></i> Thông tin độc giả
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Tên</strong>
+                        <p class="text-muted">{{ receipt.reader.reader_name }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Email</strong>
+                        <p class="text-muted">{{ receipt.reader.email }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Tổng nợ hiện tại</strong>
+                        <p style="color: {% if receipt.reader.total_debt == 0 %}#27ae60{% else %}#c62828{% endif %}; font-weight: 600;">
+                            {{ receipt.reader.total_debt|floatformat:0 }}đ
+                        </p>
+                    </div>
+                    <div>
+                        <a href="{% url 'reader_detail' receipt.reader.id %}" class="btn btn-info btn-sm w-100">
+                            <i class="fas fa-eye"></i> Xem thông tin đầy đủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .form-control-static {
+        display: block;
+        padding: 0.375rem 0.75rem;
+        margin-top: 0.375rem;
+    }
+
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: none;
+    }
+
+    .badge {
+        padding: 0.5em 0.75em;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}

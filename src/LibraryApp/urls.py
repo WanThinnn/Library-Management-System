@@ -39,4 +39,12 @@ urlpatterns = [
     # API endpoints for return book
     path('api/unreturned-receipts/', views.api_unreturned_receipts, name='api_unreturned_receipts'),
     path('api/reader/<int:reader_id>/borrowed-books/', views.api_reader_borrowed_books, name='api_reader_borrowed_books'),
+    
+    # YC6: Lập phiếu thu tiền phạt
+    path('receipt/', views.receipt_form_view, name='receipt_form'),
+    path('receipt/<int:receipt_id>/', views.receipt_detail_view, name='receipt_detail'),
+    path('receipts/', views.receipt_list_view, name='receipt_list'),
+    
+    # API endpoints for receipt
+    path('api/reader/<int:reader_id>/debt/', views.api_reader_debt, name='api_reader_debt'),
 ]

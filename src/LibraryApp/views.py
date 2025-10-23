@@ -6,8 +6,8 @@ from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.utils import timezone
 from django.db import transaction
-from .models import Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt
-from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm
+from .models import Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt
+from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm
 
 
 def home_view(request):
@@ -886,4 +886,143 @@ def api_reader_borrowed_books(request, reader_id):
             continue
     
     return JsonResponse({'success': True, 'data': data})
+
+
+# ==================== PAYMENT MANAGEMENT (YC6) ====================
+
+@login_required
+def receipt_form_view(request):
+    """
+    Lập phiếu thu tiền phạt - YC6 (BM6)
+    GET: Hiển thị form chọn độc giả → hiển thị nợ → nhập số tiền → submit
+    POST: Xử lý submit, kiểm tra QĐ6, lưu phiếu, trừ nợ
+    """
+    import json
+    
+    # Lấy danh sách độc giả có nợ
+    readers_with_debt = Reader.objects.filter(
+        total_debt__gt=0
+    ).values('id', 'reader_name', 'email', 'total_debt')
+    
+    readers_json = json.dumps(list(readers_with_debt))
+    
+    # Lấy tham số hệ thống
+    try:
+        params = Parameter.objects.first()
+    except:
+        params = None
+    
+    if request.method == 'POST':
+        form = ReceiptForm(request.POST)
+        if form.is_valid():
+            receipt = form.save()
+            if receipt:
+                messages.success(
+                    request,
+                    f'✓ Đã ghi nhận thu tiền {receipt.collected_amount:,}đ từ {receipt.reader.reader_name}. '
+                    f'Nợ còn lại: {receipt.reader.total_debt:,}đ'
+                )
+                return redirect('receipt_list')
+            else:
+                messages.error(request, '❌ Lỗi khi lưu phiếu thu tiền')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'❌ {field}: {error}')
+    else:
+        form = ReceiptForm()
+    
+    context = {
+        'form': form,
+        'readers_json': readers_json,
+        'params': params,
+    }
+    
+    return render(request, 'LibraryApp/receipt_form.html', context)
+
+
+@login_required
+def receipt_list_view(request):
+    """
+    Danh sách phiếu thu tiền
+    Hỗ trợ tìm kiếm, lọc theo ngày
+    """
+    search = request.GET.get('search', '')
+    search_type = request.GET.get('search_type', 'reader_name')
+    from_date = request.GET.get('from_date', '')
+    to_date = request.GET.get('to_date', '')
+    
+    # Base query
+    receipts = Receipt.objects.select_related('reader').order_by('-created_date')
+    
+    # Tìm kiếm
+    if search and search_type == 'reader_name':
+        from django.db.models import Q
+        receipts = receipts.filter(
+            Q(reader__reader_name__icontains=search) |
+            Q(reader__email__icontains=search)
+        )
+    
+    # Lọc theo ngày
+    if from_date:
+        receipts = receipts.filter(created_date__gte=from_date)
+    if to_date:
+        receipts = receipts.filter(created_date__lte=to_date)
+    
+    # Phân trang
+    from django.core.paginator import Paginator
+    paginator = Paginator(receipts, 20)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_title': 'Danh sách phiếu thu tiền',
+        'page_obj': page_obj,
+        'receipts': page_obj.object_list,
+        'search': search,
+        'search_type': search_type,
+        'from_date': from_date,
+        'to_date': to_date,
+        'total_results': paginator.count,
+    }
+    
+    return render(request, 'LibraryApp/receipt_list.html', context)
+
+
+@login_required
+def receipt_detail_view(request, receipt_id):
+    """
+    Chi tiết phiếu thu tiền
+    """
+    receipt = get_object_or_404(Receipt, id=receipt_id)
+    
+    context = {
+        'receipt': receipt,
+        'page_title': f'Chi tiết phiếu thu #{receipt.id}'
+    }
+    
+    return render(request, 'LibraryApp/receipt_detail.html', context)
+
+
+@login_required
+@require_http_methods(["GET"])
+def api_reader_debt(request, reader_id):
+    """
+    API: Lấy thông tin nợ tiền phạt của độc giả
+    """
+    try:
+        reader = Reader.objects.get(id=reader_id)
+        
+        return JsonResponse({
+            'success': True,
+            'reader_id': reader.id,
+            'reader_name': reader.reader_name,
+            'email': reader.email,
+            'total_debt': reader.total_debt,
+        })
+    except Reader.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Độc giả không tồn tại'
+        }, status=404)
 

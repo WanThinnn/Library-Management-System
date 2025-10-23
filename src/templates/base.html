@@ -23,6 +23,7 @@
                 {% if user.is_authenticated %}
                     <a href="{% url 'borrow_book' %}">Cho mượn</a>
                     <a href="{% url 'return_book' %}">Nhận trả sách</a>
+                    <a href="{% url 'receipt_form' %}">💰 Thu tiền</a>
                     <a href="{% url 'reader_list' %}">Độc giả</a>
                     <a href="/admin/">Admin Panel</a>
                     <span style="color: #2c3e50;">👤 {{ user.username }}</span>

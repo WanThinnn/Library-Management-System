@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-3">
+                <i class="fas fa-list"></i> {{ page_title }}
+            </h1>
+            <p class="text-muted">Danh sách tất cả phiếu thu tiền phạt đã lập</p>
+        </div>
+    </div>
+
+    <!-- Bộ lọc -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Tiêu chí tìm kiếm</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label"><strong>Tìm kiếm</strong></label>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        class="form-control" 
+                        placeholder="Tên độc giả, email..."
+                        value="{{ search }}"
+                    >
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label"><strong>Từ ngày</strong></label>
+                    <input 
+                        type="date" 
+                        name="from_date" 
+                        class="form-control"
+                        value="{{ from_date }}"
+                    >
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label"><strong>Đến ngày</strong></label>
+                    <input 
+                        type="date" 
+                        name="to_date" 
+                        class="form-control"
+                        value="{{ to_date }}"
+                    >
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Tìm kiếm
+                    </button>
+                </div>
+                <div class="col-md-12">
+                    <a href="{% url 'receipt_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Xóa lọc
+                    </a>
+                    <a href="{% url 'receipt_form' %}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Lập phiếu thu
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Kết quả tìm kiếm -->
+    {% if total_results > 0 %}
+    <div class="alert alert-info">
+        <strong>Tìm thấy {{ total_results }} phiếu thu</strong>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-striped">
+            <thead class="table-primary">
+                <tr>
+                    <th>Phiếu #</th>
+                    <th>Độc giả</th>
+                    <th>Số tiền thu</th>
+                    <th>Phương thức</th>
+                    <th>Ngày thu</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receipt in receipts %}
+                <tr>
+                    <td>
+                        <strong>#{{ receipt.id }}</strong>
+                    </td>
+                    <td>
+                        <a href="{% url 'reader_detail' receipt.reader.id %}" class="text-decoration-none">
+                            {{ receipt.reader.reader_name }}
+                        </a>
+                        <br>
+                        <small class="text-muted">{{ receipt.reader.email }}</small>
+                    </td>
+                    <td>
+                        <strong style="color: #27ae60;">
+                            {{ receipt.collected_amount|floatformat:0 }}đ
+                        </strong>
+                    </td>
+                    <td>
+                        <span class="badge bg-info">{{ receipt.payment_method }}</span>
+                    </td>
+                    <td>
+                        {{ receipt.created_date|date:"d/m/Y H:i" }}
+                    </td>
+                    <td>
+                        <a href="{% url 'receipt_detail' receipt.id %}" class="btn btn-sm btn-info">
+                            <i class="fas fa-eye"></i> Xem
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Phân trang -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                    &laquo; Đầu tiên
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                    &lt; Trước
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        {{ num }}
+                    </a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                    Tiếp &gt;
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                    Cuối &raquo;
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% elif request.GET %}
+    <!-- Không có kết quả -->
+    <div class="alert alert-warning" role="alert">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>Không tìm thấy phiếu thu phù hợp với tiêu chí tìm kiếm.</strong>
+        <p class="mt-2">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'receipt_list' %}">xóa lọc</a>.</p>
+    </div>
+    {% else %}
+    <!-- Chưa tìm kiếm -->
+    <div class="alert alert-info" role="alert">
+        <i class="fas fa-info-circle"></i>
+        <strong>Nhập tiêu chí tìm kiếm ở trên để bắt đầu.</strong>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .badge {
+        padding: 4px 8px;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}

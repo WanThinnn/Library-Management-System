@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.utils import timezone
-from .models import Reader, ReaderType, Parameter, BookTitle, Category, Author, BookImportReceipt, BookImportDetail, Book, BookItem, BorrowReturnReceipt
+from .models import Reader, ReaderType, Parameter, BookTitle, Category, Author, BookImportReceipt, BookImportDetail, Book, BookItem, BorrowReturnReceipt, Receipt
 
 
 class SafeIntegerField(forms.IntegerField):
@@ -657,5 +657,125 @@ class ReturnBookForm(forms.Form):
                 receipts_updated.append(receipt)
                 
             return receipts_updated if receipts_updated else None
+        except Reader.DoesNotExist:
+            return None
+
+
+class ReceiptForm(forms.Form):
+    """
+    Form lập phiếu thu tiền phạt - YC6
+    Validate theo QĐ6: Số tiền thu không được vượt quá tổng nợ
+    """
+    reader_id = forms.IntegerField(
+        label='Chọn độc giả',
+        widget=forms.HiddenInput()
+    )
+    
+    collected_amount = forms.IntegerField(
+        label='Số tiền thu (VNĐ)',
+        validators=[],  # Will validate in clean()
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'type': 'number',
+            'min': '0',
+            'step': '1000',
+            'placeholder': 'Nhập số tiền thu (đơn vị: đồng)'
+        })
+    )
+    
+    payment_method = forms.ChoiceField(
+        label='Phương thức thanh toán',
+        choices=[
+            ('Tiền mặt', 'Tiền mặt'),
+            ('Chuyển khoản', 'Chuyển khoản'),
+            ('Thẻ', 'Thẻ'),
+        ],
+        initial='Tiền mặt',
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        })
+    )
+    
+    notes = forms.CharField(
+        label='Ghi chú (tùy chọn)',
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': 'Nhập ghi chú bổ sung'
+        })
+    )
+    
+    def clean_reader_id(self):
+        """Kiểm tra độc giả tồn tại"""
+        reader_id = self.cleaned_data.get('reader_id')
+        
+        try:
+            reader = Reader.objects.get(id=reader_id)
+        except Reader.DoesNotExist:
+            raise ValidationError('Độc giả không tồn tại')
+        
+        return reader_id
+    
+    def clean_collected_amount(self):
+        """Kiểm tra số tiền thu hợp lệ"""
+        collected_amount = self.cleaned_data.get('collected_amount')
+        
+        if collected_amount is None or collected_amount < 0:
+            raise ValidationError('Số tiền thu phải là số dương')
+        
+        if collected_amount == 0:
+            raise ValidationError('Vui lòng nhập số tiền thu')
+        
+        return collected_amount
+    
+    def clean(self):
+        """Kiểm tra theo QĐ6: số tiền không được vượt quá nợ"""
+        cleaned_data = super().clean()
+        
+        reader_id = cleaned_data.get('reader_id')
+        collected_amount = cleaned_data.get('collected_amount')
+        
+        if not reader_id or collected_amount is None:
+            return cleaned_data
+        
+        try:
+            reader = Reader.objects.get(id=reader_id)
+            
+            # QĐ6: Kiểm tra số tiền thu không được vượt quá tổng nợ
+            if collected_amount > reader.total_debt:
+                raise ValidationError({
+                    'collected_amount': (
+                        f'Số tiền thu không được vượt quá tổng nợ hiện tại ({reader.total_debt:,}đ). '
+                        f'Bạn nhập: {collected_amount:,}đ'
+                    )
+                })
+            
+            if reader.total_debt == 0:
+                raise ValidationError({
+                    'collected_amount': 'Độc giả này không có nợ tiền phạt'
+                })
+        except Reader.DoesNotExist:
+            raise ValidationError('Độc giả không tồn tại')
+        
+        return cleaned_data
+    
+    def save(self):
+        """Lưu phiếu thu tiền và cập nhật nợ của độc giả"""
+        try:
+            reader = Reader.objects.get(id=self.cleaned_data['reader_id'])
+            collected_amount = self.cleaned_data['collected_amount']
+            payment_method = self.cleaned_data['payment_method']
+            notes = self.cleaned_data.get('notes', '')
+            
+            # Tạo phiếu thu
+            receipt = Receipt.objects.create(
+                reader=reader,
+                collected_amount=collected_amount,
+                payment_method=payment_method,
+                notes=notes
+            )
+            
+            return receipt
         except Reader.DoesNotExist:
             return None
