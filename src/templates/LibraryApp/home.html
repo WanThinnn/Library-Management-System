@@ -19,57 +19,95 @@
                 {% endif %}
             </p>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                <!-- Quản lý độc giả -->
-                <div class="dropdown" style="text-align: center;">
-                    <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.9); color: #667eea; font-weight: bold; width: 100%; padding: 12px 30px; border: none; border-radius: 5px;" type="button" data-bs-toggle="dropdown">
-                        📖 Quản lý Độc giả
-                    </button>
-                    <ul class="dropdown-menu" style="min-width: 200px;">
-                        <li><a class="dropdown-item" href="{% url 'reader_create' %}">Lập thẻ độc giả (YC1)</a></li>
-                        <li><a class="dropdown-item" href="{% url 'reader_list' %}">Danh sách độc giả</a></li>
-                    </ul>
-                </div>
+            <!-- Phần 1: Các chức năng chính - Tạo mới / Thực hiện -->
+            <div style="margin-bottom: 2rem;">
+                <h4 style="color: rgba(255,255,255,0.95); text-align: left; margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">
+                    ✨ Chức năng Chính
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                    <!-- Quản lý độc giả -->
+                    <div class="dropdown">
+                        <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #3498db; font-weight: bold; width: 100%; padding: 15px 20px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
+                            � Quản lý Độc giả
+                        </button>
+                        <ul class="dropdown-menu" style="min-width: 220px;">
+                            <li><h6 class="dropdown-header" style="color: #3498db;">Tạo mới</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'reader_create' %}">📝 Lập thẻ độc giả (YC1)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header" style="color: #3498db;">Xem danh sách</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'reader_list' %}">📋 Danh sách độc giả</a></li>
+                        </ul>
+                    </div>
 
-                <!-- Quản lý sách -->
-                <div class="dropdown" style="text-align: center;">
-                    <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.9); color: #667eea; font-weight: bold; width: 100%; padding: 12px 30px; border: none; border-radius: 5px;" type="button" data-bs-toggle="dropdown">
-                        📚 Quản lý Sách
-                    </button>
-                    <ul class="dropdown-menu" style="min-width: 200px;">
-                        <li><a class="dropdown-item" href="{% url 'book_import' %}">Tiếp nhận sách (YC2)</a></li>
-                        <li><a class="dropdown-item" href="{% url 'book_search' %}">Tra cứu sách (YC3)</a></li>
-                    </ul>
-                </div>
+                    <!-- Quản lý sách -->
+                    <div class="dropdown">
+                        <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #e67e22; font-weight: bold; width: 100%; padding: 15px 20px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
+                            📚 Quản lý Sách
+                        </button>
+                        <ul class="dropdown-menu" style="min-width: 220px;">
+                            <li><h6 class="dropdown-header" style="color: #e67e22;">Tạo mới</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'book_import' %}">📥 Tiếp nhận sách (YC2)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header" style="color: #e67e22;">Tra cứu</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'book_search' %}">🔍 Tra cứu sách (YC3)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'book_import_list' %}">📋 Danh sách phiếu nhập</a></li>
+                        </ul>
+                    </div>
 
-                <!-- Mượn / Trả sách -->
-                <div class="dropdown" style="text-align: center;">
-                    <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.9); color: #667eea; font-weight: bold; width: 100%; padding: 12px 30px; border: none; border-radius: 5px;" type="button" data-bs-toggle="dropdown">
-                        🔄 Mượn / Trả Sách
-                    </button>
-                    <ul class="dropdown-menu" style="min-width: 200px;">
-                        <li><a class="dropdown-item" href="{% url 'borrow_book' %}">➡️ Cho mượn sách (YC4)</a></li>
-                        <li><a class="dropdown-item" href="{% url 'borrow_book_list' %}">Danh sách phiếu mượn</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{% url 'return_book' %}">⬅️ Nhận trả sách (YC5)</a></li>
-                        <li><a class="dropdown-item" href="{% url 'return_book_list' %}">Danh sách phiếu trả</a></li>
-                    </ul>
-                </div>
+                    <!-- Mượn / Trả sách -->
+                    <div class="dropdown">
+                        <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #9b59b6; font-weight: bold; width: 100%; padding: 15px 20px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
+                            🔄 Mượn / Trả Sách
+                        </button>
+                        <ul class="dropdown-menu" style="min-width: 220px;">
+                            <li><h6 class="dropdown-header" style="color: #9b59b6;">Cho mượn sách</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'borrow_book' %}">➡️ Lập phiếu mượn (YC4)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'borrow_book_list' %}">📋 Danh sách phiếu mượn</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header" style="color: #9b59b6;">Nhận trả sách</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'return_book' %}">⬅️ Lập phiếu trả (YC5)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'return_book_list' %}">📋 Danh sách phiếu trả</a></li>
+                        </ul>
+                    </div>
 
-                <!-- Thu tiền phạt -->
-                <div class="dropdown" style="text-align: center;">
-                    <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.9); color: #667eea; font-weight: bold; width: 100%; padding: 12px 30px; border: none; border-radius: 5px;" type="button" data-bs-toggle="dropdown">
-                        💰 Thu Tiền Phạt
-                    </button>
-                    <ul class="dropdown-menu" style="min-width: 200px;">
-                        <li><a class="dropdown-item" href="{% url 'receipt_form' %}">Lập phiếu thu tiền (YC6)</a></li>
-                        <li><a class="dropdown-item" href="{% url 'receipt_list' %}">Danh sách phiếu thu</a></li>
-                    </ul>
+                    <!-- Thu tiền phạt -->
+                    <div class="dropdown">
+                        <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #27ae60; font-weight: bold; width: 100%; padding: 15px 20px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
+                            💰 Thu Tiền Phạt
+                        </button>
+                        <ul class="dropdown-menu" style="min-width: 220px;">
+                            <li><h6 class="dropdown-header" style="color: #27ae60;">Tạo phiếu thu</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'receipt_form' %}">💵 Lập phiếu thu tiền (YC6)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header" style="color: #27ae60;">Xem danh sách</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'receipt_list' %}">📋 Danh sách phiếu thu</a></li>
+                        </ul>
+                    </div>
                 </div>
+            </div>
 
-                <!-- Admin -->
-                <div style="text-align: center;">
-                    <a href="/admin/" class="btn" style="background: rgba(255,255,255,0.9); color: #667eea; font-weight: bold; width: 100%; padding: 12px 30px; border: none; border-radius: 5px; text-decoration: none;">
+            <!-- Phần 2: Báo cáo và Quản trị -->
+            <div style="margin-top: 2rem;">
+                <h4 style="color: rgba(255,255,255,0.95); text-align: left; margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">
+                    📊 Báo cáo & Quản trị
+                </h4>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <!-- Xem tất cả danh sách -->
+                    <div class="dropdown">
+                        <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #34495e; font-weight: bold; padding: 12px 25px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
+                            📊 Xem Báo cáo
+                        </button>
+                        <ul class="dropdown-menu" style="min-width: 220px;">
+                            <li><a class="dropdown-item" href="{% url 'reader_list' %}">👥 Danh sách độc giả</a></li>
+                            <li><a class="dropdown-item" href="{% url 'book_import_list' %}">📚 Phiếu nhập sách</a></li>
+                            <li><a class="dropdown-item" href="{% url 'borrow_book_list' %}">➡️ Phiếu mượn sách</a></li>
+                            <li><a class="dropdown-item" href="{% url 'return_book_list' %}">⬅️ Phiếu trả sách</a></li>
+                            <li><a class="dropdown-item" href="{% url 'receipt_list' %}">💰 Phiếu thu tiền</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Admin Panel -->
+                    <a href="/admin/" class="btn" style="background: rgba(255,255,255,0.95); color: #e74c3c; font-weight: bold; padding: 12px 25px; border: none; border-radius: 8px; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                         ⚙️ Admin Panel
                     </a>
                 </div>

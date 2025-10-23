@@ -14,36 +14,134 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    <div class="header">
-        <div class="container">
-            <h1>🏛️ Hệ thống Quản lý Thư viện</h1>
-            <div class="nav">
-                <a href="{% url 'home' %}">Trang chủ</a>
-                <a href="{% url 'book_search' %}">Tra cứu sách</a>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'borrow_book' %}">Cho mượn</a>
-                    <a href="{% url 'return_book' %}">Nhận trả sách</a>
-                    <a href="{% url 'receipt_form' %}">💰 Thu tiền</a>
-                    <a href="{% url 'reader_list' %}">Độc giả</a>
-                    <a href="/admin/">Admin Panel</a>
-                    <span style="color: #2c3e50;">👤 {{ user.username }}</span>
-                    {% if user.is_superuser %}
-                        <span style="background: #e74c3c; color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.8em;">ADMIN</span>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 1.2rem 0;">
+        <div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 0 2rem;">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}" style="color: white; font-weight: bold; font-size: 1.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">
+                <span style="font-size: 2.2rem; margin-right: 12px;">🏛️</span>
+                <div style="line-height: 1.2;">
+                    <div style="font-size: 1.3rem;">Hệ thống Quản lý</div>
+                    <div style="font-size: 0.8rem; opacity: 0.95; letter-spacing: 1px;">THƯ VIỆN</div>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="border: 2px solid white;">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto ms-5">
+                    <!-- Trang chủ -->
+                    <li class="nav-item">
+                        <a class="nav-link px-3 py-2" href="{% url 'home' %}" style="color: white; font-weight: 500; font-size: 1.05rem; border-radius: 8px; transition: all 0.3s;">
+                            <i class="fas fa-home me-1"></i> Trang chủ
+                        </a>
+                    </li>
+
+                    {% if user.is_authenticated %}
+                        <!-- Quản lý độc giả -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle px-3 py-2" href="#" role="button" data-bs-toggle="dropdown" style="color: white; font-weight: 500; font-size: 1.05rem; border-radius: 8px; transition: all 0.3s;">
+                                <i class="fas fa-users me-1"></i> Độc giả
+                            </a>
+                            <ul class="dropdown-menu shadow-lg" style="border-radius: 12px; border: none; margin-top: 12px; padding: 8px 0;">
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'reader_create' %}"><i class="fas fa-user-plus text-primary me-2"></i> Lập thẻ độc giả</a></li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'reader_list' %}"><i class="fas fa-list text-info me-2"></i> Danh sách độc giả</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Quản lý sách -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle px-3 py-2" href="#" role="button" data-bs-toggle="dropdown" style="color: white; font-weight: 500; font-size: 1.05rem; border-radius: 8px; transition: all 0.3s;">
+                                <i class="fas fa-book me-1"></i> Sách
+                            </a>
+                            <ul class="dropdown-menu shadow-lg" style="border-radius: 12px; border: none; margin-top: 12px; padding: 8px 0;">
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'book_import' %}"><i class="fas fa-file-import text-success me-2"></i> Tiếp nhận sách</a></li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'book_search' %}"><i class="fas fa-search text-warning me-2"></i> Tra cứu sách</a></li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'book_import_list' %}"><i class="fas fa-list text-info me-2"></i> Phiếu nhập sách</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Mượn/Trả sách -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle px-3 py-2" href="#" role="button" data-bs-toggle="dropdown" style="color: white; font-weight: 500; font-size: 1.05rem; border-radius: 8px; transition: all 0.3s;">
+                                <i class="fas fa-exchange-alt me-1"></i> Mượn/Trả
+                            </a>
+                            <ul class="dropdown-menu shadow-lg" style="border-radius: 12px; border: none; margin-top: 12px; min-width: 260px; padding: 8px 0;">
+                                <li><h6 class="dropdown-header" style="color: #667eea; font-weight: bold; font-size: 0.85rem;"><i class="fas fa-arrow-right me-1"></i> CHO MƯỢN SÁCH</h6></li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'borrow_book' %}"><i class="fas fa-edit text-primary me-2"></i> Lập phiếu mượn</a></li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'borrow_book_list' %}"><i class="fas fa-list text-info me-2"></i> Danh sách phiếu mượn</a></li>
+                                <li><hr class="dropdown-divider my-2"></li>
+                                <li><h6 class="dropdown-header" style="color: #667eea; font-weight: bold; font-size: 0.85rem;"><i class="fas fa-arrow-left me-1"></i> NHẬN TRẢ SÁCH</h6></li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'return_book' %}"><i class="fas fa-edit text-success me-2"></i> Lập phiếu trả</a></li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'return_book_list' %}"><i class="fas fa-list text-info me-2"></i> Danh sách phiếu trả</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Thu tiền phạt -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle px-3 py-2" href="#" role="button" data-bs-toggle="dropdown" style="color: white; font-weight: 500; font-size: 1.05rem; border-radius: 8px; transition: all 0.3s;">
+                                <i class="fas fa-money-bill-wave me-1"></i> Thu tiền
+                            </a>
+                            <ul class="dropdown-menu shadow-lg" style="border-radius: 12px; border: none; margin-top: 12px; padding: 8px 0;">
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'receipt_form' %}"><i class="fas fa-receipt text-success me-2"></i> Lập phiếu thu</a></li>
+                                <li><a class="dropdown-item py-2 px-3" href="{% url 'receipt_list' %}"><i class="fas fa-list text-info me-2"></i> Danh sách phiếu thu</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <!-- Tra cứu công khai -->
+                        <li class="nav-item">
+                            <a class="nav-link px-3 py-2" href="{% url 'book_search' %}" style="color: white; font-weight: 500; font-size: 1.05rem; border-radius: 8px; transition: all 0.3s;">
+                                <i class="fas fa-search me-1"></i> Tra cứu sách
+                            </a>
+                        </li>
                     {% endif %}
-                    <a href="{% url 'logout' %}" style="background: #e74c3c; color: white; padding: 5px 15px; border-radius: 5px;">Đăng xuất</a>
-                {% else %}
-                    <a href="{% url 'login' %}" style="background: #3498db; color: white; padding: 5px 15px; border-radius: 5px;">Đăng nhập</a>
-                {% endif %}
+                </ul>
+
+                <!-- User info và actions -->
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <!-- Admin Panel (chỉ cho staff) -->
+                        {% if user.is_staff %}
+                            <li class="nav-item">
+                                <a class="nav-link px-3 py-2" href="/admin/" style="color: white; font-weight: 500; font-size: 1.05rem; border-radius: 8px; transition: all 0.3s;">
+                                    <i class="fas fa-cog me-1"></i> Admin
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <!-- User dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle px-3 py-2" href="#" role="button" data-bs-toggle="dropdown" style="color: white; font-weight: bold; font-size: 1.05rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">
+                                <i class="fas fa-user-circle me-1"></i> {{ user.username }}
+                                {% if user.is_superuser %}
+                                    <span class="badge bg-danger ms-1" style="font-size: 0.7em;">ADMIN</span>
+                                {% elif user.is_staff %}
+                                    <span class="badge bg-warning ms-1" style="font-size: 0.7em;">STAFF</span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg" style="border-radius: 12px; border: none; margin-top: 12px; padding: 8px 0;">
+                                <li><a class="dropdown-item py-2 px-3" href="#"><i class="fas fa-user text-primary me-2"></i> Thông tin tài khoản</a></li>
+                                <li><hr class="dropdown-divider my-2"></li>
+                                <li><a class="dropdown-item py-2 px-3 text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link px-4 py-2" href="{% url 'login' %}" style="background: white; color: #667eea; border-radius: 25px; font-weight: bold; font-size: 1.05rem; box-shadow: 0 2px 10px rgba(0,0,0,0.2); transition: all 0.3s;">
+                                <i class="fas fa-sign-in-alt me-1"></i> Đăng nhập
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
-    </div>
+    </nav>
 
-    <div class="container">
+    <div class="container" style="margin-top: 2rem;">
         {% if messages %}
             <div class="messages">
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                         {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 {% endfor %}
             </div>
