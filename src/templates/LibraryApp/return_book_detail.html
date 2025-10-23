@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-3">
+                <i class="fas fa-receipt"></i> {{ page_title }}
+            </h1>
+            <p class="text-muted">Chi tiết phiếu trả sách</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Thông tin phiếu -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle"></i> Thông tin phiếu trả sách
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Thông tin độc giả</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Tên:</strong></td>
+                                    <td>{{ receipt.reader.reader_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email:</strong></td>
+                                    <td><a href="mailto:{{ receipt.reader.email }}">{{ receipt.reader.email }}</a></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Loại:</strong></td>
+                                    <td>{{ receipt.reader.reader_type.reader_type_name }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Thông tin sách</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Tên:</strong></td>
+                                    <td>{{ receipt.book_item.book.book_title.book_title }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Thể loại:</strong></td>
+                                    <td>{{ receipt.book_item.book.category.category_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Mã sách:</strong></td>
+                                    <td><code>{{ receipt.book_item.barcode }}</code></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thời gian mượn/trả -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar"></i> Thời gian mượn/trả
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h6>Ngày mượn</h6>
+                            <p class="mb-0" style="font-size: 1.2em; color: #007bff; font-weight: bold;">
+                                {{ receipt.borrow_date|date:"d/m/Y H:i" }}
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Phải trả trước</h6>
+                            <p class="mb-0" style="font-size: 1.2em; color: #ffc107; font-weight: bold;">
+                                {{ receipt.due_date|date:"d/m/Y" }}
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Ngày thực trả</h6>
+                            <p class="mb-0" style="font-size: 1.2em; color: #27ae60; font-weight: bold;">
+                                {{ receipt.return_date|date:"d/m/Y H:i" }}
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Tổng ngày mượn</h6>
+                            <p class="mb-0" style="font-size: 1.2em; color: #666; font-weight: bold;">
+                                {% with total_days=receipt.return_date|timesince:receipt.borrow_date %}
+                                    {{ total_days }}
+                                {% endwith %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tính tiền phạt -->
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-money-bill-alt"></i> Tính tiền phạt
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Số ngày trả trễ</strong></label>
+                                <div style="font-size: 1.5em; color: {% if days_overdue > 0 %}#c62828{% else %}#27ae60{% endif %}; font-weight: bold; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+                                    {% if days_overdue > 0 %}
+                                        {{ days_overdue }} ngày ⚠️
+                                    {% else %}
+                                        0 ngày (Trả đúng hạn) ✓
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Tiền phạt kỳ này</strong></label>
+                                <div style="font-size: 1.5em; color: #c62828; font-weight: bold; padding: 10px; background-color: #fff3cd; border-radius: 4px;">
+                                    {{ fine_amount|floatformat:0 }}đ
+                                </div>
+                                <small class="text-muted">
+                                    ({{ days_overdue }} ngày × {{ fine_rate }}đ/ngày)
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if receipt.reader.total_debt %}
+                    <div class="alert alert-info mb-0">
+                        <strong>💰 Tổng nợ của độc giả:</strong> 
+                        <span style="font-size: 1.2em; font-weight: bold;">
+                            {{ receipt.reader.total_debt|floatformat:0 }}đ
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Thẻ tóm tắt -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard-check"></i> Tóm tắt
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Phiếu #{{ receipt.id }}</strong>
+                        <span class="badge bg-success">Đã trả</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <strong>Trạng thái:</strong><br>
+                        {% if receipt.is_overdue %}
+                            <span class="badge bg-danger" style="font-size: 1em;">⚠️ TRẢ QUÁ HẠN</span>
+                        {% else %}
+                            <span class="badge bg-success" style="font-size: 1em;">✓ TRẢ ĐÚNG HẠN</span>
+                        {% endif %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <strong>Đơn giá phạt:</strong><br>
+                        <p class="mb-0" style="font-size: 1.1em; color: #666;">
+                            {{ fine_rate }}đ / ngày
+                        </p>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <strong>Tiền phạt:</strong><br>
+                        <p class="mb-0" style="font-size: 1.3em; color: #c62828; font-weight: bold;">
+                            {{ fine_amount|floatformat:0 }}đ
+                        </p>
+                    </div>
+
+                    {% if receipt.reader.is_card_expired %}
+                    <div class="alert alert-warning mb-0">
+                        <strong>⚠️ Thẻ hết hạn</strong><br>
+                        <small>{{ receipt.reader.expiration_date|date:"d/m/Y" }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="card">
+                <div class="card-body">
+                    <a href="{% url 'return_book' %}" class="btn btn-primary w-100 mb-2">
+                        <i class="fas fa-plus-circle"></i> Trả sách khác
+                    </a>
+                    <a href="{% url 'return_book_list' %}" class="btn btn-info w-100 mb-2">
+                        <i class="fas fa-list"></i> Danh sách trả sách
+                    </a>
+                    <a href="{% url 'reader_detail' receipt.reader.id %}" class="btn btn-warning w-100 mb-2">
+                        <i class="fas fa-user"></i> Xem độc giả
+                    </a>
+                    <a href="{% url 'home' %}" class="btn btn-secondary w-100">
+                        <i class="fas fa-home"></i> Trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-sm {
+        margin-bottom: 0;
+    }
+
+    .table-sm th, .table-sm td {
+        padding: 0.5rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .table-sm td:first-child {
+        width: 40%;
+        font-weight: 500;
+    }
+
+    .badge {
+        padding: 6px 10px;
+        font-size: 0.85em;
+    }
+</style>
+{% endblock %}
