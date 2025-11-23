@@ -12,6 +12,9 @@ services:
       - ./gunicorn.conf.py:/app/gunicorn.conf.py:ro
       - static_volume:/app/staticfiles
       - sqlite_volume:/app/data
+      - ./init_data.py:/app/init_data.py:ro
+      - ./src/LibraryApp/migrations:/app/LibraryApp/migrations
+
     expose:
       - "8000"
     env_file:
