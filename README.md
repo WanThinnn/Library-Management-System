@@ -113,7 +113,21 @@ nano .env  # Edit configuration
 Pre-built image: `wanthinnn/library-management-system:latest`
 
 ```bash
+# Pull latest image
 docker pull wanthinnn/library-management-system:latest
+
+# Run with volumes
+docker run -d \
+  --name library-app \
+  -p 443:443 \
+  -v library_db:/app/db \
+  -v library_static:/app/static \
+  wanthinnn/library-management-system:latest
+
+# Check
+docker volume ls
+
+
 ```
 
 ## Quick Commands
