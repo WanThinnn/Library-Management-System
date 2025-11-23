@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     image: wanthinnn/library-management-system:latest
@@ -10,6 +8,8 @@ services:
       - sqlite_volume:/app/data
       - static_volume:/app/staticfiles
       - ./gunicorn.conf.py:/app/gunicorn.conf.py:ro
+      - ./init_data.py:/app/init_data.py:ro
+      - ./src/LibraryApp/migrations:/app/LibraryApp/migrations
     expose:
       - "8000"
     restart: unless-stopped
