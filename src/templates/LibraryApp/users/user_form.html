@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-{% if edit_user %}edit{% else %}plus{% endif %}"></i> 
+                        {{ page_title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update">
+                        
+                        {% if edit_user %}
+                            <!-- Chế độ chỉnh sửa -->
+                            <div class="mb-3">
+                                <label class="form-label">Tên đăng nhập</label>
+                                <input type="text" class="form-control" value="{{ edit_user.username }}" disabled>
+                                <small class="text-muted">Không thể thay đổi tên đăng nhập</small>
+                            </div>
+                        {% else %}
+                            <!-- Chế độ tạo mới -->
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Tên đăng nhập <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                                <small class="text-muted">Chỉ gồm chữ, số và dấu gạch dưới</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password_confirm" class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Họ</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" 
+                                       value="{% if edit_user %}{{ edit_user.last_name }}{% endif %}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">Tên</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name"
+                                       value="{% if edit_user %}{{ edit_user.first_name }}{% endif %}">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                   value="{% if edit_user %}{{ edit_user.email }}{% endif %}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Vai trò <span class="text-danger">*</span></label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="staff" {% if edit_user and current_role == 'staff' %}selected{% endif %}>
+                                    📚 Thủ thư (Nhân viên)
+                                </option>
+                                <option value="manager" {% if edit_user and current_role == 'manager' %}selected{% endif %}>
+                                    👑 Quản lý (Toàn quyền)
+                                </option>
+                            </select>
+                            <small class="text-muted">
+                                Thủ thư: Truy cập các chức năng nghiệp vụ | 
+                                Quản lý: Toàn quyền + Quản lý người dùng & thay đổi quy định
+                            </small>
+                        </div>
+                        
+                        {% if edit_user %}
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
+                                       {% if edit_user.is_active %}checked{% endif %}>
+                                <label class="form-check-label" for="is_active">
+                                    Kích hoạt tài khoản
+                                </label>
+                            </div>
+                            <small class="text-muted">Tài khoản bị khóa sẽ không thể đăng nhập</small>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> 
+                                {% if edit_user %}Cập nhật{% else %}Tạo tài khoản{% endif %}
+                            </button>
+                            <a href="{% url 'user_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Hủy bỏ
+                            </a>
+                        </div>
+                    </form>
+                    
+                    {% if edit_user %}
+                    <hr class="my-4">
+                    
+                    <!-- Reset mật khẩu -->
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-key"></i> Reset mật khẩu</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="reset_password">
+                                
+                                <div class="mb-3">
+                                    <label for="new_password" class="form-label">Mật khẩu mới <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="confirm_password" class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-warning" onclick="return confirm('Bạn có chắc muốn reset mật khẩu?')">
+                                    <i class="fas fa-key"></i> Reset mật khẩu
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

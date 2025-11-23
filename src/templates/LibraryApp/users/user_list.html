@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <h4 class="mb-0">
+                <i class="fas fa-users"></i> {{ page_title }}
+            </h4>
+            <a href="{% url 'user_create' %}" class="btn btn-light">
+                <i class="fas fa-user-plus"></i> Tạo người dùng mới
+            </a>
+        </div>
+        <div class="card-body">
+            {% if user_data %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead style="background-color: #f8f9fa;">
+                            <tr>
+                                <th>#</th>
+                                <th>Tên đăng nhập</th>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>Vai trò</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in user_data %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <strong>{{ item.user.username }}</strong>
+                                    {% if item.user.id == request.user.id %}
+                                        <span class="badge bg-primary">Bạn</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.user.get_full_name|default:"-" }}</td>
+                                <td>{{ item.user.email|default:"-" }}</td>
+                                <td>
+                                    {% if item.user.is_superuser %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-crown"></i> {{ item.role }}
+                                        </span>
+                                    {% elif item.user.is_staff %}
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-book"></i> {{ item.role }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ item.role }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.user.is_active %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle"></i> {{ item.is_active_text }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-lock"></i> {{ item.is_active_text }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.user.date_joined|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'user_edit' item.user.id %}" 
+                                           class="btn btn-sm btn-outline-primary" 
+                                           title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% if item.user.id != request.user.id %}
+                                        <a href="{% url 'user_delete' item.user.id %}" 
+                                           class="btn btn-sm btn-outline-danger" 
+                                           title="Xóa"
+                                           onclick="return confirm('Bạn có chắc muốn xóa người dùng {{ item.user.username }}?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-3">
+                    <p class="text-muted">
+                        <i class="fas fa-info-circle"></i> 
+                        Tổng số người dùng: <strong>{{ user_data|length }}</strong>
+                    </p>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Chưa có người dùng nào trong hệ thống.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <a href="{% url 'home' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Về trang chủ
+        </a>
+    </div>
+</div>
+{% endblock %}

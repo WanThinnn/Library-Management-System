@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.utils import timezone
@@ -11,6 +12,7 @@ from django.db.models import Count, Q
 from datetime import datetime, timedelta
 from .models import Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt, Category
 from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm, ParameterForm
+from .decorators import manager_required, staff_required
 
 
 def home_view(request):
@@ -58,7 +60,7 @@ def login_view(request):
         'page_title': 'Đăng nhập'
     }
     
-    return render(request, 'LibraryApp/login.html', context)
+    return render(request, 'Accounts/login.html', context)
 
 
 def logout_view(request):
@@ -72,7 +74,7 @@ def logout_view(request):
 
 # ==================== YC1: LẬP THẺ ĐỘC GIẢ ====================
 
-@login_required(login_url='login')
+@staff_required
 def reader_create_view(request):
     """
     View lập thẻ độc giả mới - YC1
@@ -118,10 +120,10 @@ def reader_create_view(request):
         'page_title': 'Lập thẻ độc giả mới'
     }
     
-    return render(request, 'LibraryApp/reader_create.html', context)
+    return render(request, 'LibraryApp/readers/reader_create.html', context)
 
 
-@login_required(login_url='login')
+@staff_required
 def reader_detail_view(request, reader_id):
     """
     Xem chi tiết thẻ độc giả - Hiển thị thông tin sau khi lập thẻ
@@ -133,10 +135,10 @@ def reader_detail_view(request, reader_id):
         'page_title': f'Thẻ độc giả - {reader.reader_name}'
     }
     
-    return render(request, 'LibraryApp/reader_detail.html', context)
+    return render(request, 'LibraryApp/readers/reader_detail.html', context)
 
 
-@login_required(login_url='login')
+@staff_required
 def reader_list_view(request):
     """
     Danh sách độc giả - Để tra cứu và quản lý
@@ -163,12 +165,12 @@ def reader_list_view(request):
         'page_title': 'Danh sách độc giả'
     }
     
-    return render(request, 'LibraryApp/reader_list.html', context)
+    return render(request, 'LibraryApp/readers/reader_list.html', context)
 
 
 # ==================== YC2: TIẾP NHẬN SÁCH MỚI ====================
 
-@login_required(login_url='login')
+@staff_required
 def book_import_view(request):
     """
     View tiếp nhận sách mới - YC2
@@ -293,10 +295,10 @@ def book_import_view(request):
         'page_title': 'Tiếp nhận sách mới'
     }
     
-    return render(request, 'LibraryApp/book_import.html', context)
+    return render(request, 'LibraryApp/books/book_import.html', context)
 
 
-@login_required(login_url='login')
+@staff_required
 def book_import_detail_view(request, import_id):
     """
     Xem chi tiết phiếu nhập sách
@@ -310,10 +312,10 @@ def book_import_detail_view(request, import_id):
         'page_title': f'Phiếu nhập sách #{receipt.id}'
     }
     
-    return render(request, 'LibraryApp/book_import_detail.html', context)
+    return render(request, 'LibraryApp/books/book_import_detail.html', context)
 
 
-@login_required(login_url='login')
+@staff_required
 def book_import_list_view(request):
     """
     Danh sách phiếu nhập sách
@@ -337,7 +339,7 @@ def book_import_list_view(request):
         'page_title': 'Danh sách phiếu nhập sách'
     }
     
-    return render(request, 'LibraryApp/book_import_list.html', context)
+    return render(request, 'LibraryApp/books/book_import_list.html', context)
 
 
 # ==================== BOOK SEARCH (YC3) ====================
@@ -395,12 +397,12 @@ def book_search_view(request):
         'page_title': 'Tra cứu sách'
     }
     
-    return render(request, 'LibraryApp/book_search.html', context)
+    return render(request, 'LibraryApp/books/book_search.html', context)
 
 
 # ==================== BORROW BOOK (YC4) ====================
 
-@login_required(login_url='login')
+@staff_required
 def borrow_book_view(request):
     """
     Cho mượn sách - YC4
@@ -490,10 +492,10 @@ def borrow_book_view(request):
         'page_title': 'Cho mượn sách'
     }
     
-    return render(request, 'LibraryApp/borrow_book.html', context)
+    return render(request, 'LibraryApp/borrowing/borrow_book.html', context)
 
 
-@login_required(login_url='login')
+@staff_required
 def borrow_book_detail_view(request, receipt_id):
     """
     Xem chi tiết phiếu mượn sách
@@ -505,10 +507,10 @@ def borrow_book_detail_view(request, receipt_id):
         'page_title': f'Phiếu mượn #{receipt.id}'
     }
     
-    return render(request, 'LibraryApp/borrow_book_detail.html', context)
+    return render(request, 'LibraryApp/borrowing/borrow_book_detail.html', context)
 
 
-@login_required(login_url='login')
+@staff_required
 def borrow_book_list_view(request):
     """
     Danh sách phiếu mượn sách
@@ -537,7 +539,7 @@ def borrow_book_list_view(request):
         'page_title': 'Danh sách phiếu mượn sách'
     }
     
-    return render(request, 'LibraryApp/borrow_book_list.html', context)
+    return render(request, 'LibraryApp/borrowing/borrow_book_list.html', context)
 
 
 # ==================== API ENDPOINTS FOR BORROW BOOK ====================
@@ -546,6 +548,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 
+@staff_required
 @require_http_methods(["GET"])
 def api_readers_list(request):
     """
@@ -576,6 +579,7 @@ def api_readers_list(request):
     return JsonResponse({'success': True, 'data': data})
 
 
+@staff_required
 @require_http_methods(["GET"])
 def api_books_list(request):
     """
@@ -610,6 +614,7 @@ def api_books_list(request):
     return JsonResponse({'success': True, 'data': data})
 
 
+@staff_required
 @require_http_methods(["GET"])
 def api_borrowing_readers(request):
     """
@@ -673,7 +678,7 @@ from .models import BorrowReturnReceipt, Parameter, Reader
 from .forms import ReturnBookForm
 
 
-@login_required
+@staff_required
 def return_book_view(request):
     """
     Trang nhận trả sách - YC5
@@ -714,10 +719,10 @@ def return_book_view(request):
     context['params_json'] = params_json
     context['readers'] = list(readers)
     context['readers_json'] = json.dumps(list(readers))
-    return render(request, 'LibraryApp/return_book.html', context)
+    return render(request, 'LibraryApp/borrowing/return_book.html', context)
 
 
-@login_required
+@staff_required
 def return_book_detail_view(request, receipt_id):
     """
     Xem chi tiết phiếu trả sách - YC5
@@ -739,10 +744,10 @@ def return_book_detail_view(request, receipt_id):
         'fine_rate': fine_rate,
     }
     
-    return render(request, 'LibraryApp/return_book_detail.html', context)
+    return render(request, 'LibraryApp/borrowing/return_book_detail.html', context)
 
 
-@login_required
+@staff_required
 def return_book_list_view(request):
     """
     Danh sách phiếu trả sách - YC5
@@ -803,10 +808,11 @@ def return_book_list_view(request):
         'total_results': paginator.count,
     }
     
-    return render(request, 'LibraryApp/return_book_list.html', context)
+    return render(request, 'LibraryApp/borrowing/return_book_list.html', context)
 
 
 @login_required
+@staff_required
 @require_http_methods(["GET"])
 def api_unreturned_receipts(request):
     """
@@ -862,6 +868,7 @@ def api_unreturned_receipts(request):
 
 
 @login_required
+@staff_required
 @require_http_methods(["GET"])
 def api_reader_borrowed_books(request, reader_id):
     """
@@ -905,7 +912,7 @@ def api_reader_borrowed_books(request, reader_id):
 
 # ==================== PAYMENT MANAGEMENT (YC6) ====================
 
-@login_required
+@staff_required
 def receipt_form_view(request):
     """
     Lập phiếu thu tiền phạt - YC6 (BM6)
@@ -953,10 +960,10 @@ def receipt_form_view(request):
         'params': params,
     }
     
-    return render(request, 'LibraryApp/receipt_form.html', context)
+    return render(request, 'LibraryApp/receipts/receipt_form.html', context)
 
 
-@login_required
+@staff_required
 def receipt_list_view(request):
     """
     Danh sách phiếu thu tiền
@@ -1001,10 +1008,10 @@ def receipt_list_view(request):
         'total_results': paginator.count,
     }
     
-    return render(request, 'LibraryApp/receipt_list.html', context)
+    return render(request, 'LibraryApp/receipts/receipt_list.html', context)
 
 
-@login_required
+@staff_required
 def receipt_detail_view(request, receipt_id):
     """
     Chi tiết phiếu thu tiền
@@ -1016,10 +1023,11 @@ def receipt_detail_view(request, receipt_id):
         'page_title': f'Chi tiết phiếu thu #{receipt.id}'
     }
     
-    return render(request, 'LibraryApp/receipt_detail.html', context)
+    return render(request, 'LibraryApp/receipts/receipt_detail.html', context)
 
 
 @login_required
+@staff_required
 @require_http_methods(["GET"])
 def api_reader_debt(request, reader_id):
     """
@@ -1044,7 +1052,7 @@ def api_reader_debt(request, reader_id):
 
 # ==================== REPORTS - YC7 ====================
 
-@login_required
+@staff_required
 def report_borrow_by_category_view(request):
     """
     YC7 - BM7.1: Báo cáo thống kê tình hình mượn sách theo thể loại
@@ -1108,10 +1116,10 @@ def report_borrow_by_category_view(request):
         'page_title': f'Báo cáo mượn sách theo thể loại - Tháng {month}/{year}'
     }
     
-    return render(request, 'LibraryApp/report_borrow_by_category.html', context)
+    return render(request, 'LibraryApp/reports/report_borrow_by_category.html', context)
 
 
-@login_required
+@staff_required
 def report_overdue_books_view(request):
     """
     YC7 - BM7.2: Báo cáo thống kê sách trả trễ
@@ -1156,12 +1164,12 @@ def report_overdue_books_view(request):
         'page_title': f'Báo cáo sách trả trễ - Ngày {report_date.strftime("%d/%m/%Y")}'
     }
     
-    return render(request, 'LibraryApp/report_overdue_books.html', context)
+    return render(request, 'LibraryApp/reports/report_overdue_books.html', context)
 
 
 # ==================== SYSTEM PARAMETERS - YC8 ====================
 
-@login_required
+@manager_required
 def parameter_update_view(request):
     """
     YC8 - Thay đổi quy định hệ thống
@@ -1210,4 +1218,277 @@ def parameter_update_view(request):
         'page_title': 'Thay đổi quy định hệ thống'
     }
     
-    return render(request, 'LibraryApp/parameter_update.html', context)
+    return render(request, 'LibraryApp/settings/parameter_update.html', context)
+
+
+# ==================== QUẢN LÝ NGƯỜI DÙNG ====================
+
+@manager_required
+def user_list_view(request):
+    """
+    Danh sách người dùng - Chỉ dành cho Quản lý
+    Hiển thị tất cả users với vai trò của họ
+    """
+    users = User.objects.all().order_by('-date_joined')
+    
+    # Thêm thông tin vai trò cho mỗi user
+    user_data = []
+    for user in users:
+        role = 'Quản lý' if user.is_superuser else ('Thủ thư' if user.is_staff else 'Người dùng')
+        user_data.append({
+            'user': user,
+            'role': role,
+            'is_active_text': 'Đang hoạt động' if user.is_active else 'Đã khóa'
+        })
+    
+    context = {
+        'user_data': user_data,
+        'page_title': 'Quản lý người dùng'
+    }
+    
+    return render(request, 'LibraryApp/users/user_list.html', context)
+
+
+@manager_required
+def user_create_view(request):
+    """
+    Tạo người dùng mới - Chỉ dành cho Quản lý
+    
+    Cho phép tạo:
+    - Thủ thư (is_staff=True)
+    - Quản lý (is_superuser=True)
+    """
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        password_confirm = request.POST.get('password_confirm', '')
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        role = request.POST.get('role', 'staff')  # staff hoặc manager
+        
+        # Validation
+        if not username or not password:
+            messages.error(request, 'Tên đăng nhập và mật khẩu là bắt buộc.')
+        elif password != password_confirm:
+            messages.error(request, 'Mật khẩu xác nhận không khớp.')
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, f'Tên đăng nhập "{username}" đã tồn tại.')
+        elif email and User.objects.filter(email=email).exists():
+            messages.error(request, f'Email "{email}" đã được sử dụng.')
+        else:
+            try:
+                with transaction.atomic():
+                    # Tạo user mới
+                    user = User.objects.create_user(
+                        username=username,
+                        email=email,
+                        password=password,
+                        first_name=first_name,
+                        last_name=last_name
+                    )
+                    
+                    # Gán vai trò
+                    if role == 'manager':
+                        user.is_staff = True
+                        user.is_superuser = True
+                        role_text = 'Quản lý'
+                    else:
+                        user.is_staff = True
+                        user.is_superuser = False
+                        role_text = 'Thủ thư'
+                    
+                    user.save()
+                    
+                    messages.success(
+                        request,
+                        f'Đã tạo tài khoản {role_text} "{username}" thành công!'
+                    )
+                    return redirect('user_list')
+                    
+            except Exception as e:
+                messages.error(request, f'Có lỗi xảy ra: {str(e)}')
+    
+    context = {
+        'page_title': 'Tạo người dùng mới'
+    }
+    
+    return render(request, 'LibraryApp/users/user_form.html', context)
+
+
+@manager_required
+def user_edit_view(request, user_id):
+    """
+    Chỉnh sửa thông tin người dùng - Chỉ dành cho Quản lý
+    
+    Cho phép:
+    - Thay đổi thông tin cơ bản
+    - Thay đổi vai trò
+    - Khóa/Mở khóa tài khoản
+    - Reset mật khẩu
+    """
+    user = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        action = request.POST.get('action', 'update')
+        
+        if action == 'update':
+            email = request.POST.get('email', '').strip()
+            first_name = request.POST.get('first_name', '').strip()
+            last_name = request.POST.get('last_name', '').strip()
+            role = request.POST.get('role', 'staff')
+            is_active = request.POST.get('is_active') == 'on'
+            
+            # Validation email
+            if email and User.objects.filter(email=email).exclude(id=user_id).exists():
+                messages.error(request, f'Email "{email}" đã được sử dụng bởi tài khoản khác.')
+            else:
+                try:
+                    with transaction.atomic():
+                        user.email = email
+                        user.first_name = first_name
+                        user.last_name = last_name
+                        user.is_active = is_active
+                        
+                        # Cập nhật vai trò
+                        if role == 'manager':
+                            user.is_staff = True
+                            user.is_superuser = True
+                        else:
+                            user.is_staff = True
+                            user.is_superuser = False
+                        
+                        user.save()
+                        
+                        messages.success(request, f'Đã cập nhật thông tin người dùng "{user.username}".')
+                        return redirect('user_list')
+                        
+                except Exception as e:
+                    messages.error(request, f'Có lỗi xảy ra: {str(e)}')
+        
+        elif action == 'reset_password':
+            new_password = request.POST.get('new_password', '')
+            confirm_password = request.POST.get('confirm_password', '')
+            
+            if not new_password:
+                messages.error(request, 'Vui lòng nhập mật khẩu mới.')
+            elif new_password != confirm_password:
+                messages.error(request, 'Mật khẩu xác nhận không khớp.')
+            else:
+                try:
+                    user.set_password(new_password)
+                    user.save()
+                    messages.success(request, f'Đã reset mật khẩu cho người dùng "{user.username}".')
+                    return redirect('user_list')
+                except Exception as e:
+                    messages.error(request, f'Có lỗi xảy ra: {str(e)}')
+    
+    # Xác định vai trò hiện tại
+    current_role = 'manager' if user.is_superuser else 'staff'
+    
+    context = {
+        'edit_user': user,
+        'current_role': current_role,
+        'page_title': f'Chỉnh sửa người dùng: {user.username}'
+    }
+    
+    return render(request, 'LibraryApp/users/user_form.html', context)
+
+
+@manager_required
+def user_delete_view(request, user_id):
+    """
+    Xóa người dùng - Chỉ dành cho Quản lý
+    
+    Lưu ý:
+    - Không thể xóa chính mình
+    - Xóa vĩnh viễn (cẩn thận!)
+    """
+    user = get_object_or_404(User, id=user_id)
+    
+    # Không cho phép xóa chính mình
+    if user.id == request.user.id:
+        messages.error(request, 'Không thể xóa tài khoản của chính bạn!')
+        return redirect('user_list')
+    
+    if request.method == 'POST':
+        username = user.username
+        try:
+            user.delete()
+            messages.success(request, f'Đã xóa người dùng "{username}" khỏi hệ thống.')
+        except Exception as e:
+            messages.error(request, f'Có lỗi xảy ra khi xóa: {str(e)}')
+        
+        return redirect('user_list')
+    
+    context = {
+        'delete_user': user,
+        'page_title': 'Xác nhận xóa người dùng'
+    }
+    
+    return render(request, 'LibraryApp/users/user_delete_confirm.html', context)
+
+
+# ==================== ĐĂNG KÝ TÀI KHOẢN ====================
+
+def register_view(request):
+    """
+    Đăng ký tài khoản mới
+    
+    - Tài khoản mới mặc định: is_active=False (cần Quản lý kích hoạt)
+    - Vai trò mặc định: Thủ thư (is_staff=True, is_superuser=False)
+    - Sau khi đăng ký, hiển thị thông báo chờ duyệt
+    """
+    # Nếu đã đăng nhập, chuyển về trang chủ
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        password_confirm = request.POST.get('password_confirm', '')
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        
+        # Validation
+        if not username or not email or not password:
+            messages.error(request, 'Vui lòng điền đầy đủ thông tin bắt buộc.')
+        elif password != password_confirm:
+            messages.error(request, 'Mật khẩu xác nhận không khớp.')
+        elif len(password) < 8:
+            messages.error(request, 'Mật khẩu phải có ít nhất 8 ký tự.')
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, f'Tên đăng nhập "{username}" đã tồn tại.')
+        elif User.objects.filter(email=email).exists():
+            messages.error(request, f'Email "{email}" đã được sử dụng.')
+        else:
+            try:
+                with transaction.atomic():
+                    # Tạo user mới (CHƯA KÍCH HOẠT)
+                    user = User.objects.create_user(
+                        username=username,
+                        email=email,
+                        password=password,
+                        first_name=first_name,
+                        last_name=last_name,
+                        is_active=False,  # Cần Quản lý kích hoạt
+                        is_staff=True,    # Mặc định là Thủ thư
+                        is_superuser=False
+                    )
+                    
+                    messages.success(
+                        request,
+                        f'Đăng ký tài khoản "{username}" thành công! '
+                        'Vui lòng chờ quản trị viên kích hoạt tài khoản.'
+                    )
+                    return redirect('login')
+                    
+            except Exception as e:
+                messages.error(request, f'Có lỗi xảy ra: {str(e)}')
+    
+    context = {
+        'page_title': 'Đăng ký tài khoản'
+    }
+    
+    return render(request, 'Accounts/register.html', context)

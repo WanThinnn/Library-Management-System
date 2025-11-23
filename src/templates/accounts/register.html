@@ -1,101 +1,62 @@
 {% extends 'base.html' %}
 
-{% block title %}Đăng ký - {{ block.super }}{% endblock %}
+{% block title %}Đăng ký tài khoản - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="card auth-card-wide">
+<div class="card auth-card">
     <h2 class="text-center mb-2" style="color: #2c3e50;">Đăng ký tài khoản</h2>
+    <p class="text-center text-muted mb-3">Tạo tài khoản Thủ thư mới</p>
     
     <form method="post">
         {% csrf_token %}
         
         <div class="form-group">
-            <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
-            {{ form.email }}
-            {% if form.email.errors %}
-                <div class="form-errors">
-                    {% for error in form.email.errors %}
-                        <div>{{ error }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+            <label for="username">Tên đăng nhập <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="username" name="username" required>
+            <small class="form-text text-muted">Chỉ gồm chữ, số và dấu gạch dưới</small>
         </div>
 
-        <div class="form-group">
-            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
-            {{ form.username }}
-            {% if form.username.errors %}
-                <div class="form-errors">
-                    {% for error in form.username.errors %}
-                        <div>{{ error }}</div>
-                    {% endfor %}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="last_name">Họ</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name">
                 </div>
-            {% endif %}
-        </div>
-
-        <div class="flex gap-10">
-            <div class="form-group flex-1">
-                <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
-                {{ form.first_name }}
-                {% if form.first_name.errors %}
-                    <div class="form-errors">
-                        {% for error in form.first_name.errors %}
-                            <div>{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
             </div>
-
-            <div class="form-group flex-1">
-                <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
-                {{ form.last_name }}
-                {% if form.last_name.errors %}
-                    <div class="form-errors">
-                        {% for error in form.last_name.errors %}
-                            <div>{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="first_name">Tên</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name">
+                </div>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
-            {{ form.password1 }}
-            {% if form.password1.errors %}
-                <div class="form-errors">
-                    {% for error in form.password1.errors %}
-                        <div>{{ error }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+            <label for="email">Email <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" id="email" name="email" required>
         </div>
 
         <div class="form-group">
-            <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
-            {{ form.password2 }}
-            {% if form.password2.errors %}
-                <div class="form-errors">
-                    {% for error in form.password2.errors %}
-                        <div>{{ error }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+            <label for="password">Mật khẩu <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="password" name="password" required>
+            <small class="form-text text-muted">Tối thiểu 8 ký tự</small>
         </div>
 
-        {% if form.non_field_errors %}
-            <div class="form-errors mb-1">
-                {% for error in form.non_field_errors %}
-                    <div>{{ error }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
+        <div class="form-group">
+            <label for="password_confirm">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
+        </div>
+
+        <div class="alert alert-info" style="font-size: 0.9rem;">
+            <i class="fas fa-info-circle"></i> 
+            <strong>Lưu ý:</strong> Tài khoản mới sẽ cần được Quản trị viên kích hoạt trước khi sử dụng.
+        </div>
 
         <button type="submit" class="btn w-100 mb-1">Đăng ký</button>
     </form>
 
     <div class="text-center">
-        <p><a href="{% url 'login' %}">Đã có tài khoản? Đăng nhập</a></p>
+        <p><a href="{% url 'login' %}">Đã có tài khoản? Đăng nhập ngay</a></p>
     </div>
 </div>
 {% endblock %}

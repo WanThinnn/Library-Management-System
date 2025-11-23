@@ -111,8 +111,8 @@
                         </ul>
                     </div>
 
-                    <!-- Quản trị hệ thống -->
-                    {% if user.is_staff %}
+                    <!-- Quản trị hệ thống (CHỈ QUẢN LÝ - superuser) -->
+                    {% if user.is_superuser %}
                     <div class="dropdown">
                         <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #e74c3c; font-weight: bold; padding: 12px 25px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
                             ⚙️ Quản trị
@@ -120,7 +120,8 @@
                         <ul class="dropdown-menu" style="min-width: 220px;">
                             <li><a class="dropdown-item" href="{% url 'parameter_update' %}">🔧 Thay đổi quy định</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/admin/">⚙️ Admin Panel</a></li>
+                            <li><a class="dropdown-item" href="{% url 'user_list' %}">👥 Quản lý người dùng</a></li>
+                            <li><a class="dropdown-item" href="/admin/">⚙️ Admin Panel (Chuyên nghiệp)</a></li>
                         </ul>
                     </div>
                     {% endif %}

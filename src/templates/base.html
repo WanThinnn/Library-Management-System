@@ -109,8 +109,8 @@
                 <!-- User info và actions -->
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
-                        <!-- Quản lý hệ thống (chỉ cho staff) -->
-                        {% if user.is_staff %}
+                        <!-- Quản lý hệ thống (chỉ cho Quản lý - superuser) -->
+                        {% if user.is_superuser %}
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle px-3 py-2" href="#" role="button" data-bs-toggle="dropdown" style="color: white; font-weight: 500; font-size: 1.05rem; border-radius: 8px; transition: all 0.3s;">
                                     <i class="fas fa-cog me-1"></i> Quản trị
@@ -118,7 +118,8 @@
                                 <ul class="dropdown-menu dropdown-menu-end shadow-lg" style="border-radius: 12px; border: none; margin-top: 12px; padding: 8px 0;">
                                     <li><a class="dropdown-item py-2 px-3" href="{% url 'parameter_update' %}"><i class="fas fa-sliders-h text-primary me-2"></i> Thay đổi quy định</a></li>
                                     <li><hr class="dropdown-divider my-2"></li>
-                                    <li><a class="dropdown-item py-2 px-3" href="/admin/"><i class="fas fa-cog text-danger me-2"></i> Admin Panel</a></li>
+                                    <li><a class="dropdown-item py-2 px-3" href="{% url 'user_list' %}"><i class="fas fa-users text-info me-2"></i> Quản lý người dùng</a></li>
+                                    <li><a class="dropdown-item py-2 px-3" href="/admin/"><i class="fas fa-tools text-warning me-2"></i> Admin Panel (Chuyên nghiệp)</a></li>
                                 </ul>
                             </li>
                         {% endif %}
@@ -128,13 +129,24 @@
                             <a class="nav-link dropdown-toggle px-3 py-2" href="#" role="button" data-bs-toggle="dropdown" style="color: white; font-weight: bold; font-size: 1.05rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">
                                 <i class="fas fa-user-circle me-1"></i> {{ user.username }}
                                 {% if user.is_superuser %}
-                                    <span class="badge bg-danger ms-1" style="font-size: 0.7em;">ADMIN</span>
+                                    <span class="badge bg-danger ms-1" style="font-size: 0.7em;">QUẢN LÝ</span>
                                 {% elif user.is_staff %}
-                                    <span class="badge bg-warning ms-1" style="font-size: 0.7em;">STAFF</span>
+                                    <span class="badge bg-info ms-1" style="font-size: 0.7em;">THỦ THƯ</span>
                                 {% endif %}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-lg" style="border-radius: 12px; border: none; margin-top: 12px; padding: 8px 0;">
-                                <li><a class="dropdown-item py-2 px-3" href="#"><i class="fas fa-user text-primary me-2"></i> Thông tin tài khoản</a></li>
+                                <li class="dropdown-header">
+                                    <small class="text-muted">Vai trò:</small><br>
+                                    <strong>
+                                        {% if user.is_superuser %}
+                                            👑 Quản lý
+                                        {% elif user.is_staff %}
+                                            📚 Thủ thư
+                                        {% else %}
+                                            👤 Người dùng
+                                        {% endif %}
+                                    </strong>
+                                </li>
                                 <li><hr class="dropdown-divider my-2"></li>
                                 <li><a class="dropdown-item py-2 px-3 text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i> Đăng xuất</a></li>
                             </ul>

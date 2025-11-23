@@ -7,6 +7,13 @@ urlpatterns = [
     # Authentication
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('register/', views.register_view, name='register'),
+    
+    # Quản lý người dùng (CHỈ QUẢN LÝ)
+    path('users/', views.user_list_view, name='user_list'),
+    path('user/create/', views.user_create_view, name='user_create'),
+    path('user/<int:user_id>/edit/', views.user_edit_view, name='user_edit'),
+    path('user/<int:user_id>/delete/', views.user_delete_view, name='user_delete'),
     
     # YC1: Lập thẻ độc giả
     path('reader/create/', views.reader_create_view, name='reader_create'),

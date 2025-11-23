@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> {{ page_title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5><i class="fas fa-exclamation-circle"></i> Cảnh báo!</h5>
+                        <p class="mb-0">Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan đến người dùng này sẽ bị xóa vĩnh viễn.</p>
+                    </div>
+                    
+                    <h5>Thông tin người dùng sẽ bị xóa:</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Tên đăng nhập:</th>
+                            <td><strong>{{ delete_user.username }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Họ tên:</th>
+                            <td>{{ delete_user.get_full_name|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ delete_user.email|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Vai trò:</th>
+                            <td>
+                                {% if delete_user.is_superuser %}
+                                    <span class="badge bg-danger">👑 Quản lý</span>
+                                {% elif delete_user.is_staff %}
+                                    <span class="badge bg-info">📚 Thủ thư</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Người dùng</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Ngày tạo:</th>
+                            <td>{{ delete_user.date_joined|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                    </table>
+                    
+                    <p class="text-danger">
+                        <i class="fas fa-question-circle"></i> 
+                        Bạn có chắc chắn muốn xóa người dùng <strong>{{ delete_user.username }}</strong> không?
+                    </p>
+                    
+                    <form method="post" class="d-grid gap-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Xác nhận xóa
+                        </button>
+                        <a href="{% url 'user_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Hủy bỏ
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
