@@ -1020,7 +1020,7 @@ class LateReturnReport(models.Model):
 class UserGroup(models.Model):
     """
     Nhóm người dùng (User Group)
-    Phân quyền theo nhóm cho thủ thư
+    Phân quyền theo nhóm cho người dùng (thủ thư/quản lý sử dụng ứng dụng thư viện, không phải người mượn sách)
     """
     user_group_name = models.CharField(
         max_length=100,
@@ -1186,8 +1186,8 @@ class LibraryUser(models.Model):
     
     class Meta:
         db_table = 'library_user'
-        verbose_name = 'Thủ thư'
-        verbose_name_plural = 'Thủ thư'
+        verbose_name = 'Người Dùng'
+        verbose_name_plural = 'Người Dùng'
         ordering = ['full_name']
         indexes = [
             models.Index(fields=['user_group']),
