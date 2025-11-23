@@ -23,10 +23,7 @@ RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install gunicorn
 
-# Copy init_data.py first (from root)
-COPY src/init_data.py /app/
-
-# Copy project
+# Copy project (includes init_data.py)
 COPY src/ /app/
 
 # Create directories for SQLite and static files
