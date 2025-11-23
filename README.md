@@ -59,6 +59,7 @@ This will:
 ```bash
 make build
 make up
+make makemigrations
 make migrate
 make initdata
 ```
@@ -87,16 +88,16 @@ nano .env  # Edit configuration
 **Step 3: Pull and Run**
 
 ```bash
-docker compose -f docker-compose.prod.yml pull
-docker compose -f docker-compose.prod.yml up -d
+make --prod build
+make --prod up
 ```
 
 **Step 4: Initialize Database**
 
 ```bash
-docker compose -f docker-compose.prod.yml exec web python manage.py makemigrations
-docker compose -f docker-compose.prod.yml exec web python manage.py migrate
-docker compose -f docker-compose.prod.yml exec web python init_data.py
+make --prod makemigrations
+make --prod migrate
+make --prod initdata
 ```
 
 **Step 5: Access Application**
@@ -114,20 +115,32 @@ docker pull wanthinnn/library-management-system:latest
 
 ## Make Commands
 
+All commands work with optional `--prod` flag for production mode:
+
 ```bash
-make help          # Show all available commands
-make setup         # Initial setup
-make build         # Build Docker images
-make up            # Start services
-make down          # Stop services
-make restart       # Restart services
-make logs          # View logs
-make migrate       # Run database migrations
-make initdata      # Initialize sample data
-make createsuperuser # Create admin user
-make shell         # Open Django shell
-make clean         # Remove containers and volumes
-make rebuild       # Clean rebuild
+# Development (default)
+make build              # Build development images
+make up                 # Start development services
+make logs               # View development logs
+make migrate            # Run migrations
+make initdata           # Initialize sample data
+
+# Production (add --prod flag)
+make --prod build       # Pull and build production
+make --prod up          # Start production services
+make --prod logs        # View production logs
+make --prod migrate     # Run migrations (production)
+make --prod initdata    # Initialize sample data (production)
+
+# Common commands (works with --prod flag)
+make help               # Show all commands
+make setup              # Initial setup (certificates, .env)
+make down [--prod]      # Stop services
+make restart [--prod]   # Restart services
+make makemigrations [--prod] # Create migrations
+make shell [--prod]     # Open Django shell
+make clean [--prod]     # Remove containers and volumes
+make rebuild [--prod]   # Clean rebuild
 ```
 
 ## Project Structure
@@ -216,9 +229,7 @@ docker compose exec web python manage.py test
 
 ## Production Deployment
 
-For production deployment on a server, use **Option 2** (Pre-built Image) from the Deployment section above.
-
-Additional production considerations:
+For production deployment on a server, use `--prod` flag:
 
 ```bash
 # On production server
@@ -230,10 +241,11 @@ cp .env.example .env
 nano .env  # Set DEBUG=False, strong SECRET_KEY, proper ALLOWED_HOSTS
 
 # Deploy
-docker compose -f docker-compose.prod.yml pull
-docker compose -f docker-compose.prod.yml up -d
-docker compose -f docker-compose.prod.yml exec web python manage.py migrate
-docker compose -f docker-compose.prod.yml exec web python init_data.py
+make --prod build
+make --prod up
+make --prod makemigrations
+make --prod migrate
+make --prod initdata
 ```
 
 ## CI/CD
