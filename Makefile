@@ -1,4 +1,4 @@
-.PHONY: help setup build up down restart logs clean migrate createsuperuser shell
+.PHONY: help setup build up down restart logs clean migrate createsuperuser shell initdata
 
 help:
 	@echo "Library Management System - Docker Commands"
@@ -11,6 +11,7 @@ help:
 	@echo "  make restart        - Restart all services"
 	@echo "  make logs           - View logs"
 	@echo "  make migrate        - Run Django migrations"
+	@echo "  make initdata       - Initialize sample data (admin, books, readers)"
 	@echo "  make createsuperuser - Create Django superuser"
 	@echo "  make shell          - Open Django shell"
 	@echo "  make clean          - Remove containers and volumes"
@@ -37,6 +38,9 @@ logs:
 
 migrate:
 	docker compose exec web python manage.py migrate
+
+initdata:
+	docker compose exec web python init_data.py
 
 createsuperuser:
 	docker compose exec web python manage.py createsuperuser

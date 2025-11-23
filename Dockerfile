@@ -25,6 +25,7 @@ RUN pip install --upgrade pip && \
 
 # Copy project
 COPY src/ /app/
+COPY init_data.py /app/
 
 # Create directories for SQLite and static files
 RUN mkdir -p /app/data /app/staticfiles
