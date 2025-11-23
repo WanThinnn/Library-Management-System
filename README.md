@@ -57,11 +57,11 @@ This will:
 **Step 3: Build and Run**
 
 ```bash
-make build
-make up
-make makemigrations
-make migrate
-make initdata
+./start build
+./start up
+./start makemigrations
+./start migrate
+./start initdata
 ```
 
 **Step 4: Access Application**
@@ -88,16 +88,16 @@ nano .env  # Edit configuration
 **Step 3: Pull and Run**
 
 ```bash
-make --prod build
-make --prod up
+./start --prod build
+./start --prod up
 ```
 
 **Step 4: Initialize Database**
 
 ```bash
-make --prod makemigrations
-make --prod migrate
-make --prod initdata
+./start --prod makemigrations
+./start --prod migrate
+./start --prod initdata
 ```
 
 **Step 5: Access Application**
@@ -113,7 +113,37 @@ Pre-built image: `wanthinnn/library-management-system:latest`
 docker pull wanthinnn/library-management-system:latest
 ```
 
-## Make Commands
+## Quick Commands
+
+Use the `./start` script with `--prod` or `--dev` flags:
+
+```bash
+# Development (default)
+./start build               # Build development images
+./start up                  # Start development services
+./start logs                # View development logs
+./start migrate             # Run migrations
+./start initdata            # Initialize sample data
+
+# Production (add --prod flag)
+./start --prod build        # Pull and build production
+./start --prod up           # Start production services
+./start --prod logs         # View production logs
+./start --prod migrate      # Run migrations (production)
+./start --prod initdata     # Initialize sample data (production)
+
+# Other commands
+./start help                # Show all commands
+./start setup               # Initial setup (certificates, .env)
+./start down [--prod]       # Stop services
+./start restart [--prod]    # Restart services
+./start makemigrations [--prod] # Create migrations
+./start shell [--prod]      # Open Django shell
+./start clean [--prod]      # Remove containers and volumes
+./start rebuild [--prod]    # Clean rebuild
+```
+
+## Make Commands (Alternative)
 
 All commands work with optional `--prod` flag for production mode:
 
@@ -229,23 +259,26 @@ docker compose exec web python manage.py test
 
 ## Production Deployment
 
-For production deployment on a server, use `--prod` flag:
+For production deployment on a server:
 
 ```bash
 # On production server
 git clone https://github.com/WanThinnn/Library-Management-System.git
 cd Library-Management-System
 
+# Make start script executable
+chmod +x start
+
 # Configure environment
 cp .env.example .env
 nano .env  # Set DEBUG=False, strong SECRET_KEY, proper ALLOWED_HOSTS
 
 # Deploy
-make --prod build
-make --prod up
-make --prod makemigrations
-make --prod migrate
-make --prod initdata
+./start --prod build
+./start --prod up
+./start --prod makemigrations
+./start --prod migrate
+./start --prod initdata
 ```
 
 ## CI/CD
