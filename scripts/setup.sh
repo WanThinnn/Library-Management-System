@@ -25,22 +25,37 @@ if [ ! -f .env ]; then
     echo ""
 fi
 
-# Generate SSL certificates
+# Check SSL certificates
 echo "Checking SSL certificates..."
-if [ ! -f ./certs/cert.pem ] || [ ! -f ./certs/key.pem ]; then
-    echo "SSL certificates not found. Generating self-signed certificates..."
-    bash scripts/generate-certs.sh
+if [ -f ./certs/_.cyberfortress.local.crt ] && [ -f ./certs/_.cyberfortress.local.key ] && [ -f ./certs/CyberFortress-RootCA.crt ]; then
+    echo "SSL certificates found:"
+    echo "   - _.cyberfortress.local.crt"
+    echo "   - _.cyberfortress.local.key"
+    echo "   - CyberFortress-RootCA.crt"
 else
-    echo "SSL certificates already exist."
+    echo "Error: SSL certificates not found in ./certs/"
+    echo "Please ensure the following files exist:"
+    echo "   - certs/_.cyberfortress.local.crt"
+    echo "   - certs/_.cyberfortress.local.key"
+    echo "   - certs/CyberFortress-RootCA.crt"
+    exit 1
 fi
 
+echo ""
+echo "Install Root CA certificate on client machines:"
+echo "   Windows: certutil -addstore -f ROOT certs/CyberFortress-RootCA.crt"
+echo "   Linux: sudo cp certs/CyberFortress-RootCA.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates"
 echo ""
 echo "=== Setup completed! ==="
 echo ""
 echo "Next steps:"
 echo "1. Review and update .env file with your settings"
-echo "2. Run: docker compose build"
-echo "3. Run: docker compose up -d"
-echo "4. Access the application at https://library.cyberfortress.local"
+echo "2. Install Root CA: certutil -addstore -f ROOT certs/CyberFortress-RootCA.crt (Windows)"
+echo "3. Run: docker compose build"
+echo "4. Run: docker compose up -d"
+echo "5. Run: docker compose exec web python manage.py migrate"
+echo "6. Run: docker compose exec web python init_data.py"
+echo "7. Access the application at https://library.cyberfortress.local"
 echo ""
-echo "For production, replace self-signed certificates with trusted ones."
+echo "📌 Login credentials: admin / admin123"
+echo ""
