@@ -56,7 +56,7 @@ def init_parameters():
         print(f"   - Số ngày mượn tối đa: {param.max_borrow_days} ngày")
         print(f"   - Tiền phạt trễ hạn: {param.fine_rate:,}đ/ngày")
     else:
-        print("ℹ️  Tham số hệ thống đã tồn tại")
+        print("Tham số hệ thống đã tồn tại")
     
     return param
 
@@ -89,9 +89,9 @@ def init_reader_types():
             defaults={'description': rt_data['description']}
         )
         if created:
-            print(f"   ✅ {rt.reader_type_name}")
+            print(f"{rt.reader_type_name}")
         else:
-            print(f"   ℹ️  {rt.reader_type_name} (đã tồn tại)")
+            print(f"{rt.reader_type_name} (đã tồn tại)")
 
 
 def init_categories():
@@ -114,9 +114,9 @@ def init_categories():
             defaults={'description': cat['desc']}
         )
         if created:
-            print(f"   ✅ {c.category_name}")
+            print(f"{c.category_name}")
         else:
-            print(f"   ℹ️  {c.category_name} (đã tồn tại)")
+            print(f"{c.category_name} (đã tồn tại)")
 
 
 def init_authors():
@@ -160,8 +160,8 @@ def init_authors():
         if created:
             count += 1
     
-    print(f"   ✅ Đã thêm {count} tác giả mới")
-    print(f"   ℹ️  Tổng: {Author.objects.count()} tác giả")
+    print(f"Đã thêm {count} tác giả mới")
+    print(f"Tổng: {Author.objects.count()} tác giả")
 
 
 def init_books():
@@ -342,7 +342,7 @@ def init_books():
         else:
             print(f"   [INFO] {book_data['title']} (da ton tai)")
     
-    print(f"\n   📊 Tổng kết:")
+    print(f"\nTổng kết:")
     print(f"   - Đầu sách mới: {created_books}")
     print(f"   - BookItem mới: {created_items}")
     print(f"   - Tổng đầu sách: {Book.objects.count()}")
@@ -436,7 +436,7 @@ def create_superuser():
     
     if User.objects.filter(is_superuser=True).exists():
         admin = User.objects.filter(is_superuser=True).first()
-        print(f"   ℹ️  Đã có superuser: {admin.username}")
+        print(f"Đã có superuser: {admin.username}")
         return admin
     
     try:
@@ -447,10 +447,10 @@ def create_superuser():
             first_name='Admin',
             last_name='System'
         )
-        print(f"   ✅ Đã tạo superuser: admin / admin123")
+        print(f"Đã tạo superuser: admin / admin123")
         return admin
     except Exception as e:
-        print(f"   ⚠️  Lỗi tạo superuser: {e}")
+        print(f"Lỗi tạo superuser: {e}")
         return None
 
 
@@ -482,12 +482,12 @@ def main():
         init_sample_readers()
         
         print("\n" + "="*70)
-        print("✅ HOÀN TẤT! Hệ thống đã sẵn sàng với dữ liệu đầy đủ.")
+        print("HOÀN TẤT! Hệ thống đã sẵn sàng với dữ liệu đầy đủ.")
         print("="*70)
-        print("\n📌 Thông tin đăng nhập:")
-        print("   👤 Username: admin")
-        print("   🔑 Password: admin123")
-        print("\n📌 Bước tiếp theo:")
+        print("\nThông tin đăng nhập:")
+        print("   Username: admin")
+        print("   Password: admin123")
+        print("\nBước tiếp theo:")
         print("   1. Truy cập: https://library.cyberfortress.local/")
         print("   2. Đăng nhập với tài khoản admin")
         print("   3. Thử nghiệm các chức năng:")
@@ -497,7 +497,7 @@ def main():
         print("      - Lập phiếu trả")
         print("      - Lập phiếu thu tiền phạt")
         print("      - Báo cáo thống kê")
-        print("\n📊 Dữ liệu đã tạo:")
+        print("\nDữ liệu đã tạo:")
         print(f"   - Tham số hệ thống: 1")
         print(f"   - Loại độc giả: {ReaderType.objects.count()}")
         print(f"   - Thể loại sách: {Category.objects.count()}")
@@ -509,7 +509,7 @@ def main():
         print()
         
     except Exception as e:
-        print(f"\n❌ Lỗi: {e}")
+        print(f"\nLỗi: {e}")
         import traceback
         traceback.print_exc()
 
