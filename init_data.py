@@ -19,7 +19,8 @@ django.setup()
 from django.contrib.auth.models import User
 from LibraryApp.models import (
     Parameter, ReaderType, Category, Author, AuthorDetail,
-    BookTitle, Book, BookItem, Reader
+    BookTitle, Book, BookItem, Reader,
+    UserGroup, Function, Permission, LibraryUser
 )
 
 def init_parameters():
@@ -454,6 +455,235 @@ def create_superuser():
         return None
 
 
+def init_user_groups():
+    """Khởi tạo nhóm người dùng (User Groups) - Chỉ 2 nhóm: Quản lý và Thủ thư"""
+    user_groups = [
+        {
+            'name': 'Quản lý',
+            'description': 'Quản lý thư viện, có toàn quyền với tất cả chức năng'
+        },
+        {
+            'name': 'Thủ thư',
+            'description': 'Nhân viên thư viện, xử lý nghiệp vụ hàng ngày'
+        }
+    ]
+    
+    print("\n[*] Khoi tao nhom nguoi dung:")
+    created_count = 0
+    
+    for group_data in user_groups:
+        group, created = UserGroup.objects.get_or_create(
+            user_group_name=group_data['name'],
+            defaults={'description': group_data['description']}
+        )
+        
+        if created:
+            created_count += 1
+            print(f"   [OK] {group.user_group_name}")
+        else:
+            print(f"   [INFO] {group.user_group_name} (đã tồn tại)")
+    
+    print(f"Tổng: {created_count} nhóm mới / {UserGroup.objects.count()} nhóm")
+
+
+def init_functions():
+    """Khởi tạo các chức năng/màn hình trong hệ thống"""
+    functions = [
+        # Quản lý độc giả
+        {'name': 'Quản lý độc giả', 'screen': 'Danh sách độc giả', 'url': '/readers/'},
+        {'name': 'Lập thẻ độc giả', 'screen': 'Tạo thẻ độc giả mới', 'url': '/readers/create/'},
+        
+        # Quản lý sách
+        {'name': 'Tra cứu sách', 'screen': 'Tìm kiếm sách', 'url': '/books/search/'},
+        {'name': 'Lập phiếu nhập sách', 'screen': 'Nhập sách vào kho', 'url': '/books/import/'},
+        {'name': 'Quản lý kho sách', 'screen': 'Danh sách sách trong kho', 'url': '/books/'},
+        
+        # Mượn/Trả sách
+        {'name': 'Lập phiếu mượn sách', 'screen': 'Tạo phiếu mượn', 'url': '/borrow/'},
+        {'name': 'Lập phiếu trả sách', 'screen': 'Xử lý trả sách', 'url': '/return/'},
+        {'name': 'Quản lý mượn/trả', 'screen': 'Danh sách phiếu mượn/trả', 'url': '/borrow/list/'},
+        
+        # Thu tiền
+        {'name': 'Lập phiếu thu tiền phạt', 'screen': 'Thu tiền phạt trả trễ', 'url': '/receipts/create/'},
+        {'name': 'Quản lý phiếu thu', 'screen': 'Danh sách phiếu thu', 'url': '/receipts/'},
+        
+        # Báo cáo
+        {'name': 'Báo cáo mượn sách theo thể loại', 'screen': 'Thống kê theo thể loại', 'url': '/reports/borrow-by-category/'},
+        {'name': 'Báo cáo sách trả trễ', 'screen': 'Danh sách sách trả trễ', 'url': '/reports/overdue-books/'},
+        
+        # Quản trị hệ thống
+        {'name': 'Quản lý người dùng', 'screen': 'Danh sách thủ thư', 'url': '/users/'},
+        {'name': 'Thay đổi quy định', 'screen': 'Cập nhật tham số hệ thống', 'url': '/settings/'},
+    ]
+    
+    print("\n[*] Khoi tao chuc nang he thong:")
+    created_count = 0
+    
+    for func_data in functions:
+        func, created = Function.objects.get_or_create(
+            function_name=func_data['name'],
+            defaults={
+                'screen_name': func_data['screen'],
+                'url_pattern': func_data['url'],
+                'description': f"Chức năng {func_data['name']}"
+            }
+        )
+        
+        if created:
+            created_count += 1
+            print(f"   [OK] {func.function_name}")
+        else:
+            print(f"   [INFO] {func.function_name} (đã tồn tại)")
+    
+    print(f"Tổng: {created_count} chức năng mới / {Function.objects.count()} chức năng")
+
+
+def init_permissions():
+    """Phân quyền cho từng nhóm người dùng - Quản lý và Thủ thư"""
+    quan_ly = UserGroup.objects.filter(user_group_name='Quản lý').first()
+    thu_thu = UserGroup.objects.filter(user_group_name='Thủ thư').first()
+    
+    permissions_config = {
+        'Quản lý': {
+            # Toàn quyền tất cả chức năng
+            'all': {'view': True, 'add': True, 'edit': True, 'delete': True}
+        },
+        'Thủ thư': {
+            # Xử lý nghiệp vụ hàng ngày, không có quyền xóa và thay đổi quy định
+            'Quản lý độc giả': {'view': True, 'add': True, 'edit': True, 'delete': False},
+            'Lập thẻ độc giả': {'view': True, 'add': True, 'edit': True, 'delete': False},
+            'Tra cứu sách': {'view': True, 'add': False, 'edit': False, 'delete': False},
+            'Lập phiếu nhập sách': {'view': True, 'add': True, 'edit': True, 'delete': False},
+            'Quản lý kho sách': {'view': True, 'add': True, 'edit': True, 'delete': False},
+            'Lập phiếu mượn sách': {'view': True, 'add': True, 'edit': True, 'delete': False},
+            'Lập phiếu trả sách': {'view': True, 'add': True, 'edit': True, 'delete': False},
+            'Quản lý mượn/trả': {'view': True, 'add': True, 'edit': True, 'delete': False},
+            'Lập phiếu thu tiền phạt': {'view': True, 'add': True, 'edit': True, 'delete': False},
+            'Quản lý phiếu thu': {'view': True, 'add': True, 'edit': True, 'delete': False},
+            'Báo cáo mượn sách theo thể loại': {'view': True, 'add': False, 'edit': False, 'delete': False},
+            'Báo cáo sách trả trễ': {'view': True, 'add': False, 'edit': False, 'delete': False},
+            # Thủ thư KHÔNG có quyền quản lý người dùng và thay đổi quy định
+        }
+    }
+    
+    print("\n[*] Phan quyen cho cac nhom nguoi dung:")
+    created_count = 0
+    
+    # Quản lý - toàn quyền tất cả chức năng
+    if quan_ly:
+        print(f"\n   Nhóm: {quan_ly.user_group_name}")
+        for func in Function.objects.all():
+            perm, created = Permission.objects.get_or_create(
+                user_group=quan_ly,
+                function=func,
+                defaults={
+                    'can_view': True,
+                    'can_add': True,
+                    'can_edit': True,
+                    'can_delete': True
+                }
+            )
+            if created:
+                created_count += 1
+                print(f"      [OK] {func.function_name} - Toàn quyền")
+    
+    # Thủ thư - quyền hạn chế
+    if thu_thu:
+        print(f"\n   Nhóm: {thu_thu.user_group_name}")
+        for func_name, perm_data in permissions_config['Thủ thư'].items():
+            func = Function.objects.filter(function_name=func_name).first()
+            if not func:
+                continue
+            
+            perm, created = Permission.objects.get_or_create(
+                user_group=thu_thu,
+                function=func,
+                defaults={
+                    'can_view': perm_data['view'],
+                    'can_add': perm_data['add'],
+                    'can_edit': perm_data['edit'],
+                    'can_delete': perm_data['delete']
+                }
+            )
+            
+            if created:
+                created_count += 1
+                perms_str = []
+                if perm_data['view']: perms_str.append('Xem')
+                if perm_data['add']: perms_str.append('Thêm')
+                if perm_data['edit']: perms_str.append('Sửa')
+                if perm_data['delete']: perms_str.append('Xóa')
+                print(f"      [OK] {func.function_name} - {', '.join(perms_str)}")
+    
+    print(f"\nTổng: {created_count} quyền mới / {Permission.objects.count()} quyền")
+
+
+def init_library_users():
+    """Tạo tài khoản thủ thư mẫu - Quản lý và Thủ thư"""
+    # Lấy superuser đã tạo
+    admin_user = User.objects.filter(username='admin').first()
+    quan_ly_group = UserGroup.objects.filter(user_group_name='Quản lý').first()
+    
+    # Tạo LibraryUser cho admin (Quản lý)
+    if admin_user and quan_ly_group:
+        lib_admin, created = LibraryUser.objects.get_or_create(
+            user=admin_user,
+            defaults={
+                'full_name': 'Nguyễn Văn Quản Lý',
+                'date_of_birth': datetime(1985, 1, 15).date(),
+                'position': 'Quản lý thư viện',
+                'user_group': quan_ly_group,
+                'phone_number': '0900000000',
+                'email': 'admin@library.local',
+                'address': 'Thư viện trường',
+                'is_active': True
+            }
+        )
+        
+        if created:
+            print("\n[*] Tao tai khoan LibraryUser:")
+            print(f"   [OK] {lib_admin.full_name} - {lib_admin.position}")
+            print(f"        Username: admin / Password: admin123")
+    
+    # Tạo thêm thủ thư mẫu
+    thu_thu_group = UserGroup.objects.filter(user_group_name='Thủ thư').first()
+    
+    if thu_thu_group:
+        # Tạo Django User
+        user, created = User.objects.get_or_create(
+            username='thuthu01',
+            defaults={
+                'email': 'thuthu01@library.local',
+                'first_name': 'Thủ',
+                'last_name': 'Thư 01',
+                'is_staff': True
+            }
+        )
+        
+        if created:
+            user.set_password('thuthu123')
+            user.save()
+        
+        # Tạo LibraryUser
+        lib_user, created = LibraryUser.objects.get_or_create(
+            user=user,
+            defaults={
+                'full_name': 'Trần Thị Thu Thư',
+                'date_of_birth': datetime(1995, 5, 20).date(),
+                'position': 'Thủ thư',
+                'user_group': thu_thu_group,
+                'phone_number': '0911111111',
+                'email': 'thuthu01@library.local',
+                'address': 'TP.HCM',
+                'is_active': True
+            }
+        )
+        
+        if created:
+            print(f"   [OK] {lib_user.full_name} - {lib_user.position}")
+            print(f"        Username: thuthu01 / Password: thuthu123")
+
+
 def main():
     print("="*70)
     print("KHOI TAO DU LIEU DAY DU - HE THONG QUAN LY THU VIEN")
@@ -481,15 +711,33 @@ def main():
         # 6. Độc giả mẫu
         init_sample_readers()
         
+        # 7. Nhóm người dùng (User Groups)
+        init_user_groups()
+        
+        # 8. Chức năng hệ thống (Functions)
+        init_functions()
+        
+        # 9. Phân quyền (Permissions)
+        init_permissions()
+        
+        # 10. Tài khoản thủ thư (LibraryUsers)
+        init_library_users()
+        
         print("\n" + "="*70)
         print("HOÀN TẤT! Hệ thống đã sẵn sàng với dữ liệu đầy đủ.")
         print("="*70)
         print("\nThông tin đăng nhập:")
-        print("   Username: admin")
-        print("   Password: admin123")
+        print("   Quản lý:")
+        print("      Username: admin")
+        print("      Password: admin123")
+        print("      Quyền: Toàn quyền tất cả chức năng")
+        print("\n   Thủ thư:")
+        print("      Username: thuthu01")
+        print("      Password: thuthu123")
+        print("      Quyền: Xử lý nghiệp vụ (không xóa, không thay đổi quy định)")
         print("\nBước tiếp theo:")
         print("   1. Truy cập: https://library.cyberfortress.local/")
-        print("   2. Đăng nhập với tài khoản admin")
+        print("   2. Đăng nhập với tài khoản admin hoặc thuthu01")
         print("   3. Thử nghiệm các chức năng:")
         print("      - Quản lý độc giả")
         print("      - Nhập sách")
@@ -506,6 +754,10 @@ def main():
         print(f"   - Số sách vật lý: {BookItem.objects.count()}")
         print(f"   - Độc giả: {Reader.objects.count()}")
         print(f"   - Tài khoản admin: {User.objects.filter(is_superuser=True).count()}")
+        print(f"   - Nhóm người dùng: {UserGroup.objects.count()} (Quản lý + Thủ thư)")
+        print(f"   - Chức năng hệ thống: {Function.objects.count()}")
+        print(f"   - Phân quyền: {Permission.objects.count()}")
+        print(f"   - Thủ thư: {LibraryUser.objects.count()}")
         print()
         
     except Exception as e:

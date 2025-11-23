@@ -217,7 +217,7 @@ Edit `.env` file:
 ```env
 DEBUG=False
 SECRET_KEY=your-secret-key
-ALLOWED_HOSTS=library.cyberfortress.local,cyberfortress.local,siem-dacn.local
+ALLOWED_HOSTS=library.cyberfortress.local,127.0.0.1
 DATABASE_URL=sqlite:///data/db.sqlite3
 ```
 
