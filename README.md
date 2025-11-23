@@ -45,7 +45,8 @@ cd Library-Management-System
 **Step 2: Setup Environment**
 
 ```bash
-make setup
+chmod +x start  # Make start script executable
+./start setup
 ```
 
 This will:
@@ -81,6 +82,7 @@ cd Library-Management-System
 **Step 2: Configure Environment**
 
 ```bash
+chmod +x start  # Make start script executable
 cp .env.example .env
 nano .env  # Edit configuration
 ```
@@ -116,6 +118,12 @@ docker pull wanthinnn/library-management-system:latest
 ## Quick Commands
 
 Use the `./start` script with `--prod` or `--dev` flags:
+
+**Note:** On Linux/macOS, you may need to use `sudo` for Docker commands:
+```bash
+sudo ./start build
+sudo ./start --prod up
+```
 
 ```bash
 # Development (default)
@@ -226,9 +234,9 @@ Add to `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Wind
 127.0.0.1 library.cyberfortress.local
 ```
 
-## Make Commands
+## Sample Data
 
-The `make initdata` command creates:
+The `./start initdata` command creates:
 - 1 Admin user (admin/admin123)
 - 5 System parameters
 - 3 Reader types
@@ -254,12 +262,20 @@ python manage.py runserver
 ### Run Tests
 
 ```bash
+./start shell
+# Then inside shell: python manage.py test
+```
+
+Or use docker compose directly:
+```bash
 docker compose exec web python manage.py test
 ```
 
 ## Production Deployment
 
 For production deployment on a server:
+
+**Note:** Use `sudo` for all commands on Linux servers.
 
 ```bash
 # On production server
@@ -273,12 +289,12 @@ chmod +x start
 cp .env.example .env
 nano .env  # Set DEBUG=False, strong SECRET_KEY, proper ALLOWED_HOSTS
 
-# Deploy
-./start --prod build
-./start --prod up
-./start --prod makemigrations
-./start --prod migrate
-./start --prod initdata
+# Deploy (use sudo on Linux)
+sudo ./start --prod build
+sudo ./start --prod up
+sudo ./start --prod makemigrations
+sudo ./start --prod migrate
+sudo ./start --prod initdata
 ```
 
 ## CI/CD
@@ -296,23 +312,29 @@ Add to GitHub repository secrets:
 
 ```bash
 # View logs
-make logs
+./start logs
 
 # Restart services
-make restart
+./start restart
 
 # Clean rebuild
-make rebuild
+./start rebuild
+```
+
+Or use sudo on Linux:
+```bash
+sudo ./start --prod logs
+sudo ./start --prod restart
 ```
 
 ### Database Reset
 
 ```bash
-make clean
-make build
-make up
-make migrate
-make initdata
+./start clean
+./start build
+./start up
+./start migrate
+./start initdata
 ```
 
 ### SSL Certificate Issues
