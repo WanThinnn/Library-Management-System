@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-bar"></i> {{ page_title }}</h2>
+        <a href="{% url 'home' %}" class="btn btn-secondary">
+            <i class="fas fa-home"></i> Trang chủ
+        </a>
+    </div>
+
+    <!-- Form chọn tháng/năm -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <i class="fas fa-calendar-alt"></i> Chọn Tháng/Năm
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="month" class="form-label">Tháng</label>
+                    <select name="month" id="month" class="form-select" required>
+                        {% for m in "123456789012" %}
+                            <option value="{{ forloop.counter }}" {% if forloop.counter == month %}selected{% endif %}>
+                                Tháng {{ forloop.counter }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="year" class="form-label">Năm</label>
+                    <input type="number" name="year" id="year" class="form-control" 
+                           value="{{ year }}" min="2000" max="2100" required>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Xem báo cáo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Báo cáo BM7.1 -->
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-file-alt"></i> 
+                BM7.1 – Báo Cáo Thống Kê Tình Hình Mượn Sách Theo Thể Loại
+            </h5>
+            <p class="mb-0 mt-2">Tháng: <strong>{{ month }}/{{ year }}</strong></p>
+        </div>
+        <div class="card-body">
+            {% if report_data %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered">
+                        <thead class="table-dark">
+                            <tr class="text-center">
+                                <th>STT</th>
+                                <th>Tên Thể Loại</th>
+                                <th>Số Lượt Mượn</th>
+                                <th>Tỉ Lệ (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in report_data %}
+                            <tr>
+                                <td class="text-center">{{ item.stt }}</td>
+                                <td>{{ item.category_name }}</td>
+                                <td class="text-center">{{ item.borrow_count }}</td>
+                                <td class="text-center">{{ item.percentage }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="table-secondary">
+                            <tr>
+                                <td colspan="2" class="text-end"><strong>Tổng số lượt mượn:</strong></td>
+                                <td class="text-center"><strong>{{ total_borrows }}</strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Nút in và xuất -->
+                <div class="mt-3 d-flex gap-2">
+                    <button onclick="window.print()" class="btn btn-info">
+                        <i class="fas fa-print"></i> In báo cáo
+                    </button>
+                    <button onclick="exportToCSV()" class="btn btn-success">
+                        <i class="fas fa-file-csv"></i> Xuất CSV
+                    </button>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 
+                    Không có dữ liệu mượn sách trong tháng {{ month }}/{{ year }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function exportToCSV() {
+    let csv = 'STT,Tên Thể Loại,Số Lượt Mượn,Tỉ Lệ (%)\n';
+    {% for item in report_data %}
+    csv += '{{ item.stt }},{{ item.category_name }},{{ item.borrow_count }},{{ item.percentage }}\n';
+    {% endfor %}
+    csv += ',Tổng số lượt mượn,{{ total_borrows }},\n';
+    
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'bao_cao_muon_sach_{{ month }}_{{ year }}.csv';
+    link.click();
+}
+</script>
+
+<style>
+@media print {
+    .btn, .card-header form, nav, .navbar {
+        display: none !important;
+    }
+    .card {
+        border: none !important;
+    }
+}
+</style>
+{% endblock %}

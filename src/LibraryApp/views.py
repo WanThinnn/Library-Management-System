@@ -6,7 +6,10 @@ from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.utils import timezone
 from django.db import transaction
-from .models import Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt
+from django.core.exceptions import ValidationError
+from django.db.models import Count, Q
+from datetime import datetime, timedelta
+from .models import Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt, Category
 from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm
 
 
@@ -225,13 +228,19 @@ def book_import_view(request):
                         publisher=publisher,
                         isbn=isbn if isbn else None,
                         defaults={
-                            'quantity': 0,
-                            'remaining_quantity': 0,
+                            'quantity': quantity,  # Dùng quantity từ form, không hardcode!
+                            'remaining_quantity': quantity,  # Ban đầu = quantity (chưa mượn)
                             'unit_price': unit_price,
                             'edition': edition,
                             'language': language
                         }
                     )
+                    
+                    # Nếu book đã tồn tại, cập nhật số lượng
+                    if not book_created:
+                        book.quantity += quantity
+                        book.remaining_quantity += quantity
+                        book.save(update_fields=['quantity', 'remaining_quantity'])
                     
                     # Tạo phiếu nhập
                     receipt = BookImportReceipt.objects.create(
@@ -257,13 +266,19 @@ def book_import_view(request):
                         f'Phiếu nhập #{receipt.id}.'
                     )
                     return redirect('book_import_detail', import_id=receipt.id)
+            except ValidationError as e:
+                # Lỗi validation từ model
+                messages.error(request, f'Lỗi validation: {e.message if hasattr(e, "message") else str(e)}')
             except Exception as e:
+                # Lỗi hệ thống khác
                 messages.error(request, f'Có lỗi xảy ra: {str(e)}')
         else:
             # Hiển thị lỗi validation cho user
             for field, errors in form.errors.items():
+                # Lấy label thân thiện từ form field
+                field_label = form.fields[field].label if field in form.fields else field
                 for error in errors:
-                    messages.error(request, f'{field}: {error}')
+                    messages.error(request, f'{field_label}: {error}')
     else:
         form = BookImportForm()
     
@@ -1026,3 +1041,119 @@ def api_reader_debt(request, reader_id):
             'error': 'Độc giả không tồn tại'
         }, status=404)
 
+
+# ==================== REPORTS - YC7 ====================
+
+@login_required
+def report_borrow_by_category_view(request):
+    """
+    YC7 - BM7.1: Báo cáo thống kê tình hình mượn sách theo thể loại
+    """
+    # Lấy tháng/năm từ request, mặc định là tháng hiện tại
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    
+    if not month or not year:
+        now = timezone.now()
+        month = now.month
+        year = now.year
+    else:
+        month = int(month)
+        year = int(year)
+    
+    # Tính ngày đầu và cuối tháng
+    from calendar import monthrange
+    first_day = timezone.datetime(year, month, 1, tzinfo=timezone.get_current_timezone())
+    last_day_num = monthrange(year, month)[1]
+    last_day = timezone.datetime(year, month, last_day_num, 23, 59, 59, tzinfo=timezone.get_current_timezone())
+    
+    # Lấy danh sách phiếu mượn trong tháng (D3)
+    borrow_receipts = BorrowReturnReceipt.objects.filter(
+        borrow_date__gte=first_day,
+        borrow_date__lte=last_day
+    )
+    
+    # Đếm số lượt mượn theo thể loại (D4)
+    category_stats = {}
+    total_borrows = 0
+    
+    for receipt in borrow_receipts:
+        # Lấy thể loại từ book_item -> book -> book_title -> category
+        if receipt.book_item and receipt.book_item.book:
+            category = receipt.book_item.book.book_title.category
+            category_name = category.category_name
+            
+            if category_name not in category_stats:
+                category_stats[category_name] = 0
+            
+            category_stats[category_name] += 1
+            total_borrows += 1
+    
+    # Tính tỉ lệ (%)
+    report_data = []
+    for idx, (category_name, borrow_count) in enumerate(sorted(category_stats.items()), start=1):
+        percentage = (borrow_count / total_borrows * 100) if total_borrows > 0 else 0
+        report_data.append({
+            'stt': idx,
+            'category_name': category_name,
+            'borrow_count': borrow_count,
+            'percentage': round(percentage, 2)
+        })
+    
+    context = {
+        'report_data': report_data,
+        'total_borrows': total_borrows,
+        'month': month,
+        'year': year,
+        'page_title': f'Báo cáo mượn sách theo thể loại - Tháng {month}/{year}'
+    }
+    
+    return render(request, 'LibraryApp/report_borrow_by_category.html', context)
+
+
+@login_required
+def report_overdue_books_view(request):
+    """
+    YC7 - BM7.2: Báo cáo thống kê sách trả trễ
+    """
+    # Lấy ngày báo cáo từ request, mặc định là ngày hiện tại
+    report_date_str = request.GET.get('report_date')
+    
+    if report_date_str:
+        try:
+            report_date = timezone.datetime.strptime(report_date_str, '%Y-%m-%d')
+            report_date = timezone.make_aware(report_date, timezone.get_current_timezone())
+        except ValueError:
+            report_date = timezone.now()
+    else:
+        report_date = timezone.now()
+    
+    # Lấy danh sách phiếu mượn chưa trả và quá hạn (D3)
+    # return_date = NULL và due_date < report_date
+    overdue_receipts = BorrowReturnReceipt.objects.filter(
+        return_date__isnull=True,  # Chưa trả
+        due_date__lt=report_date   # Quá hạn
+    ).select_related('book_item__book__book_title')
+    
+    # Tạo danh sách thống kê (D4)
+    report_data = []
+    for idx, receipt in enumerate(overdue_receipts, start=1):
+        # Tính số ngày trễ
+        overdue_days = (report_date.date() - receipt.due_date.date()).days
+        
+        book_title = receipt.book_item.book.book_title.book_title if receipt.book_item else "N/A"
+        
+        report_data.append({
+            'stt': idx,
+            'book_title': book_title,
+            'borrow_date': receipt.borrow_date,
+            'overdue_days': overdue_days
+        })
+    
+    context = {
+        'report_data': report_data,
+        'report_date': report_date,
+        'page_title': f'Báo cáo sách trả trễ - Ngày {report_date.strftime("%d/%m/%Y")}'
+    }
+    
+    return render(request, 'LibraryApp/report_overdue_books.html', context)

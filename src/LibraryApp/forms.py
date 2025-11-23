@@ -10,8 +10,10 @@ class SafeIntegerField(forms.IntegerField):
     """Custom IntegerField that defaults to min_value if value is less"""
     
     def __init__(self, min_value=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        # Lưu min_value trước khi gọi super
         self.min_value_default = min_value
+        # Gọi super với min_value để kích hoạt validation
+        super().__init__(min_value=min_value, *args, **kwargs)
     
     def to_python(self, value):
         """Convert to python int, default to min_value if needed"""
@@ -21,13 +23,13 @@ class SafeIntegerField(forms.IntegerField):
             return None
         
         try:
-            return int(value)
+            value_int = int(value)
+            # Nếu giá trị < min_value_default, auto-set về min_value
+            if self.min_value_default is not None and value_int < self.min_value_default:
+                return self.min_value_default
+            return value_int
         except (ValueError, TypeError):
             raise ValidationError(self.error_messages['invalid'], code='invalid')
-    
-    def validate(self, value):
-        """Skip min/max validation to allow defaults"""
-        pass  # Skip parent validation
 
 
 class LibraryLoginForm(AuthenticationForm):

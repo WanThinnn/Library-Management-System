@@ -47,4 +47,8 @@ urlpatterns = [
     
     # API endpoints for receipt
     path('api/reader/<int:reader_id>/debt/', views.api_reader_debt, name='api_reader_debt'),
+    
+    # YC7: Lập báo cáo
+    path('report/borrow-by-category/', views.report_borrow_by_category_view, name='report_borrow_by_category'),
+    path('report/overdue-books/', views.report_overdue_books_view, name='report_overdue_books'),
 ]

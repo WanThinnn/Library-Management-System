@@ -98,11 +98,16 @@
                             📊 Xem Báo cáo
                         </button>
                         <ul class="dropdown-menu" style="min-width: 220px;">
+                            <li><h6 class="dropdown-header">📋 Danh sách</h6></li>
                             <li><a class="dropdown-item" href="{% url 'reader_list' %}">👥 Danh sách độc giả</a></li>
                             <li><a class="dropdown-item" href="{% url 'book_import_list' %}">📚 Phiếu nhập sách</a></li>
                             <li><a class="dropdown-item" href="{% url 'borrow_book_list' %}">➡️ Phiếu mượn sách</a></li>
                             <li><a class="dropdown-item" href="{% url 'return_book_list' %}">⬅️ Phiếu trả sách</a></li>
                             <li><a class="dropdown-item" href="{% url 'receipt_list' %}">💰 Phiếu thu tiền</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><h6 class="dropdown-header">📊 Báo cáo thống kê</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'report_borrow_by_category' %}">📈 Mượn sách theo thể loại</a></li>
+                            <li><a class="dropdown-item" href="{% url 'report_overdue_books' %}">⚠️ Sách trả trễ</a></li>
                         </ul>
                     </div>
 
