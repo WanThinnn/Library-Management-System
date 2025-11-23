@@ -111,10 +111,19 @@
                         </ul>
                     </div>
 
-                    <!-- Admin Panel -->
-                    <a href="/admin/" class="btn" style="background: rgba(255,255,255,0.95); color: #e74c3c; font-weight: bold; padding: 12px 25px; border: none; border-radius: 8px; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        ⚙️ Admin Panel
-                    </a>
+                    <!-- Quản trị hệ thống -->
+                    {% if user.is_staff %}
+                    <div class="dropdown">
+                        <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #e74c3c; font-weight: bold; padding: 12px 25px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
+                            ⚙️ Quản trị
+                        </button>
+                        <ul class="dropdown-menu" style="min-width: 220px;">
+                            <li><a class="dropdown-item" href="{% url 'parameter_update' %}">🔧 Thay đổi quy định</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/">⚙️ Admin Panel</a></li>
+                        </ul>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 

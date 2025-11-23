@@ -781,3 +781,82 @@ class ReceiptForm(forms.Form):
             return receipt
         except Reader.DoesNotExist:
             return None
+
+
+# ==================== PARAMETER FORM - YC8 ====================
+
+class ParameterForm(forms.ModelForm):
+    """
+    Form thay đổi các tham số hệ thống - YC8
+    
+    Bao gồm:
+    - QĐ1: Tuổi độc giả, thời hạn thẻ
+    - QĐ2: Khoảng cách năm xuất bản
+    - QĐ4: Số sách mượn tối đa, số ngày mượn
+    - QĐ5: Đơn giá phạt
+    - QĐ6: Quy định kiểm tra số tiền thu
+    """
+    
+    class Meta:
+        model = Parameter
+        fields = [
+            'min_age', 'max_age', 'card_validity_period',
+            'book_return_period', 
+            'max_borrowed_books', 'max_borrow_days',
+            'fine_rate',
+            'enable_receipt_amount_validation'
+        ]
+        widgets = {
+            'min_age': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'max': '100',
+                'placeholder': 'Tuổi tối thiểu'
+            }),
+            'max_age': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'max': '100',
+                'placeholder': 'Tuổi tối đa'
+            }),
+            'card_validity_period': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'placeholder': 'Số tháng'
+            }),
+            'book_return_period': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'placeholder': 'Số năm'
+            }),
+            'max_borrowed_books': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'placeholder': 'Số sách'
+            }),
+            'max_borrow_days': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'placeholder': 'Số ngày'
+            }),
+            'fine_rate': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'step': '1000',
+                'placeholder': 'VNĐ/ngày'
+            }),
+            'enable_receipt_amount_validation': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            })
+        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        min_age = cleaned_data.get('min_age')
+        max_age = cleaned_data.get('max_age')
+        
+        # Kiểm tra min_age < max_age
+        if min_age and max_age and min_age >= max_age:
+            raise ValidationError('Tuổi tối thiểu phải nhỏ hơn tuổi tối đa')
+        
+        return cleaned_data

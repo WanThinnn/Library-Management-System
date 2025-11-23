@@ -51,4 +51,7 @@ urlpatterns = [
     # YC7: Lập báo cáo
     path('report/borrow-by-category/', views.report_borrow_by_category_view, name='report_borrow_by_category'),
     path('report/overdue-books/', views.report_overdue_books_view, name='report_overdue_books'),
+    
+    # YC8: Thay đổi quy định
+    path('parameters/', views.parameter_update_view, name='parameter_update'),
 ]

@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 from datetime import datetime, timedelta
 from .models import Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt, Category
-from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm
+from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm, ParameterForm
 
 
 def home_view(request):
@@ -1157,3 +1157,57 @@ def report_overdue_books_view(request):
     }
     
     return render(request, 'LibraryApp/report_overdue_books.html', context)
+
+
+# ==================== SYSTEM PARAMETERS - YC8 ====================
+
+@login_required
+def parameter_update_view(request):
+    """
+    YC8 - Thay đổi quy định hệ thống
+    
+    Cho phép thay đổi:
+    - QĐ1: Tuổi độc giả, thời hạn thẻ
+    - QĐ2: Khoảng cách năm xuất bản
+    - QĐ4: Số sách mượn tối đa, số ngày mượn
+    - QĐ5: Đơn giá phạt
+    - QĐ6: Quy định kiểm tra số tiền thu
+    """
+    # Lấy hoặc tạo bản ghi Parameter duy nhất
+    parameter, created = Parameter.objects.get_or_create(id=1)
+    
+    if request.method == 'POST':
+        form = ParameterForm(request.POST, instance=parameter)
+        if form.is_valid():
+            try:
+                # Lưu các thay đổi (D4, D5)
+                updated_param = form.save()
+                
+                messages.success(
+                    request,
+                    '✅ Cập nhật quy định thành công! '
+                    f'Tuổi: {updated_param.min_age}-{updated_param.max_age}, '
+                    f'Thời hạn thẻ: {updated_param.card_validity_period} tháng, '
+                    f'Số sách mượn tối đa: {updated_param.max_borrowed_books}, '
+                    f'Số ngày mượn tối đa: {updated_param.max_borrow_days}, '
+                    f'Tiền phạt: {updated_param.fine_rate:,}đ/ngày'
+                )
+                return redirect('parameter_update')
+            except Exception as e:
+                messages.error(request, f'Có lỗi xảy ra: {str(e)}')
+        else:
+            # Hiển thị lỗi validation
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        # GET: Hiển thị form với giá trị hiện tại (D3)
+        form = ParameterForm(instance=parameter)
+    
+    context = {
+        'form': form,
+        'parameter': parameter,
+        'page_title': 'Thay đổi quy định hệ thống'
+    }
+    
+    return render(request, 'LibraryApp/parameter_update.html', context)

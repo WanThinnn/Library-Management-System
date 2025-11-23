@@ -109,12 +109,17 @@
                 <!-- User info và actions -->
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
-                        <!-- Admin Panel (chỉ cho staff) -->
+                        <!-- Quản lý hệ thống (chỉ cho staff) -->
                         {% if user.is_staff %}
-                            <li class="nav-item">
-                                <a class="nav-link px-3 py-2" href="/admin/" style="color: white; font-weight: 500; font-size: 1.05rem; border-radius: 8px; transition: all 0.3s;">
-                                    <i class="fas fa-cog me-1"></i> Admin
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle px-3 py-2" href="#" role="button" data-bs-toggle="dropdown" style="color: white; font-weight: 500; font-size: 1.05rem; border-radius: 8px; transition: all 0.3s;">
+                                    <i class="fas fa-cog me-1"></i> Quản trị
                                 </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-lg" style="border-radius: 12px; border: none; margin-top: 12px; padding: 8px 0;">
+                                    <li><a class="dropdown-item py-2 px-3" href="{% url 'parameter_update' %}"><i class="fas fa-sliders-h text-primary me-2"></i> Thay đổi quy định</a></li>
+                                    <li><hr class="dropdown-divider my-2"></li>
+                                    <li><a class="dropdown-item py-2 px-3" href="/admin/"><i class="fas fa-cog text-danger me-2"></i> Admin Panel</a></li>
+                                </ul>
                             </li>
                         {% endif %}
 
