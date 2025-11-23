@@ -329,10 +329,10 @@ def init_books():
             for i in range(book_data['quantity']):
                 item, item_created = BookItem.objects.get_or_create(
                     book=book,
-                    item_code=f"{book.id:04d}-{i+1:03d}",
+                    barcode=f"{book.id:04d}-{i+1:03d}",
                     defaults={
-                        'status': 'available',
-                        'condition': 'good'
+                        'is_borrowed': False,
+                        'notes': ''
                     }
                 )
                 if item_created:
