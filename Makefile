@@ -20,38 +20,38 @@ setup:
 	@bash scripts/setup.sh
 
 build:
-	docker-compose build
+	docker compose build
 
 up:
-	docker-compose up -d
+	docker compose up -d
 	@echo "Services started. Access at https://localhost"
 
 down:
-	docker-compose down
+	docker compose down
 
 restart:
-	docker-compose restart
+	docker compose restart
 
 logs:
-	docker-compose logs -f
+	docker compose logs -f
 
 migrate:
-	docker-compose exec web python manage.py migrate
+	docker compose exec web python manage.py migrate
 
 createsuperuser:
-	docker-compose exec web python manage.py createsuperuser
+	docker compose exec web python manage.py createsuperuser
 
 shell:
-	docker-compose exec web python manage.py shell
+	docker compose exec web python manage.py shell
 
 collectstatic:
-	docker-compose exec web python manage.py collectstatic --noinput
+	docker compose exec web python manage.py collectstatic --noinput
 
 clean:
-	docker-compose down -v
+	docker compose down -v
 	docker system prune -f
 
 rebuild:
-	docker-compose down
-	docker-compose build --no-cache
-	docker-compose up -d
+	docker compose down
+	docker compose build --no-cache
+	docker compose up -d

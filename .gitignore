@@ -22,10 +22,7 @@ ENV/
 *.log
 *.pot
 local_settings.py
-db.sqlite3
-db.sqlite3-journal
-/src/staticfiles/
-/src/static/
+
 
 # Environment variables
 .env
