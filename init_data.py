@@ -48,7 +48,7 @@ def init_parameters():
     )
     
     if created:
-        print("✅ Đã tạo tham số hệ thống mặc định:")
+        print("[OK] Da tao tham so he thong mac dinh:")
         print(f"   - Độ tuổi độc giả: {param.min_age} - {param.max_age} tuổi")
         print(f"   - Thời hạn thẻ: {param.card_validity_period} tháng")
         print(f"   - Sách xuất bản trong: {param.book_return_period} năm gần đây")
@@ -82,7 +82,7 @@ def init_reader_types():
         }
     ]
     
-    print("\n📋 Khởi tạo loại độc giả:")
+    print("\n[*] Khoi tao loai doc gia:")
     for rt_data in reader_types:
         rt, created = ReaderType.objects.get_or_create(
             reader_type_name=rt_data['reader_type_name'],
@@ -107,7 +107,7 @@ def init_categories():
         {'name': 'Khác', 'desc': 'Các thể loại khác'}
     ]
     
-    print("\n📚 Khởi tạo thể loại sách:")
+    print("\n[*] Khoi tao the loai sach:")
     for cat in categories:
         c, created = Category.objects.get_or_create(
             category_name=cat['name'],
@@ -151,7 +151,7 @@ def init_authors():
         'Paulo Coelho',
     ]
     
-    print("\n✍️  Khởi tạo tác giả mẫu:")
+    print("\n[*] Khoi tao tac gia mau:")
     count = 0
     for author_name in authors:
         a, created = Author.objects.get_or_create(
@@ -277,7 +277,7 @@ def init_books():
         },
     ]
     
-    print("\n📚 Khởi tạo sách mẫu:")
+    print("\n[*] Khoi tao sach mau:")
     created_books = 0
     created_items = 0
     
@@ -297,7 +297,7 @@ def init_books():
         
         # Create BookTitle
         book_title, title_created = BookTitle.objects.get_or_create(
-            book_title_name=book_data['title'],
+            book_title=book_data['title'],
             defaults={
                 'category': category,
                 'description': f"Mô tả sách {book_data['title']}"
@@ -333,9 +333,9 @@ def init_books():
                 if item_created:
                     created_items += 1
             
-            print(f"   ✅ {book_data['title']} ({book_data['quantity']} cuốn)")
+            print(f"   [OK] {book_data['title']} ({book_data['quantity']} cuon)")
         else:
-            print(f"   ℹ️  {book_data['title']} (đã tồn tại)")
+            print(f"   [INFO] {book_data['title']} (da ton tai)")
     
     print(f"\n   📊 Tổng kết:")
     print(f"   - Đầu sách mới: {created_books}")
@@ -389,7 +389,7 @@ def init_sample_readers():
         },
     ]
     
-    print("\n👥 Khởi tạo độc giả mẫu:")
+    print("\n[*] Khoi tao doc gia mau:")
     created_count = 0
     card_expiry = datetime.now().date() + timedelta(days=180)  # 6 tháng
     
@@ -427,7 +427,7 @@ def init_sample_readers():
 
 def create_superuser():
     """Tạo tài khoản superuser nếu chưa có"""
-    print("\n👤 Kiểm tra tài khoản superuser:")
+    print("\n[*] Kiem tra tai khoan superuser:")
     
     if User.objects.filter(is_superuser=True).exists():
         admin = User.objects.filter(is_superuser=True).first()
@@ -451,7 +451,7 @@ def create_superuser():
 
 def main():
     print("="*70)
-    print("🚀 KHỞI TẠO DỮ LIỆU ĐẦY ĐỦ - HỆ THỐNG QUẢN LÝ THƯ VIỆN")
+    print("KHOI TAO DU LIEU DAY DU - HE THONG QUAN LY THU VIEN")
     print("="*70)
     
     try:
