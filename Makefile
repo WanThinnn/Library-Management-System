@@ -25,7 +25,7 @@ build:
 
 up:
 	docker compose up -d
-	@echo "Services started. Access at https://localhost"
+	@echo "Services started. Access at https://library.cyberfortress.local"
 
 down:
 	docker compose down
