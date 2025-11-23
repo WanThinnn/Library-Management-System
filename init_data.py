@@ -18,7 +18,7 @@ django.setup()
 
 from django.contrib.auth.models import User
 from LibraryApp.models import (
-    Parameter, ReaderType, Category, Author, 
+    Parameter, ReaderType, Category, Author, AuthorDetail,
     BookTitle, Book, BookItem, Reader
 )
 
@@ -304,16 +304,21 @@ def init_books():
             }
         )
         
+        # Create AuthorDetail (link author to book_title)
+        author_detail, _ = AuthorDetail.objects.get_or_create(
+            author=author,
+            book_title=book_title
+        )
+        
         # Create Book
         book, book_created = Book.objects.get_or_create(
             book_title=book_title,
-            author=author,
             defaults={
                 'publisher': book_data['publisher'],
                 'publish_year': book_data['publish_year'],
                 'unit_price': Decimal(str(book_data['price'])),
                 'quantity': book_data['quantity'],
-                'available_quantity': book_data['quantity']
+                'remaining_quantity': book_data['quantity']
             }
         )
         
