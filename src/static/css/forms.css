@@ -44,7 +44,16 @@
 /* Input fields */
 .form-input,
 .form-select,
-.form-textarea {
+.form-textarea,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="tel"],
+input[type="url"],
+select,
+textarea {
   width: 100%;
   padding: var(--space-3) var(--space-4);
   
@@ -55,7 +64,7 @@
   color: var(--color-text-primary);
   
   background: var(--color-white);
-  border: 2px solid var(--color-gray-200);
+  border: 2px solid #d1d5db;
   border-radius: var(--radius-lg);
   
   transition: all var(--transition-base);
@@ -64,15 +73,33 @@
 
 .form-input:focus,
 .form-select:focus,
-.form-textarea:focus {
+.form-textarea:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+select:focus,
+textarea:focus {
   border-color: var(--color-blue-primary);
   box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
 }
 
 .form-input:hover,
 .form-select:hover,
-.form-textarea:hover {
-  border-color: var(--color-gray-300);
+.form-textarea:hover,
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+input[type="number"]:hover,
+input[type="date"]:hover,
+input[type="tel"]:hover,
+input[type="url"]:hover,
+select:hover,
+textarea:hover {
+  border-color: #9ca3af;
 }
 
 /* Disabled state */

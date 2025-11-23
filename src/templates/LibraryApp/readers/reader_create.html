@@ -3,147 +3,143 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2>📝 {{ page_title }}</h2>
-    
-    <!-- Hiển thị quy định -->
-    <div style="background: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-        <h3 style="color: #2980b9; margin-top: 0;">📋 Quy định lập thẻ (QĐ1):</h3>
-        <ul style="margin: 10px 0;">
-            <li>✅ Độ tuổi: <strong>{{ params.min_age }} - {{ params.max_age }} tuổi</strong></li>
-            <li>✅ Loại độc giả: 
-                {% for rt in reader_types %}
-                    <strong>{{ rt.reader_type_name }}</strong>{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </li>
-            <li>✅ Thẻ có hiệu lực: <strong>{{ params.card_validity_period }} tháng</strong></li>
-        </ul>
-    </div>
-    
-    <!-- Form lập thẻ -->
-    <form method="post" novalidate>
-        {% csrf_token %}
-        
-        {% if form.non_field_errors %}
-        <div style="background: #ffebee; color: #c62828; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
-            {{ form.non_field_errors }}
-        </div>
-        {% endif %}
-        
-        <div style="display: grid; gap: 15px;">
-            <!-- Họ và tên -->
-            <div>
-                <label for="{{ form.reader_name.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold;">
-                    {{ form.reader_name.label }}
-                    <span style="color: red;">*</span>
-                </label>
-                {{ form.reader_name }}
-                {% if form.reader_name.errors %}
-                <div style="color: #c62828; font-size: 0.9em; margin-top: 5px;">
-                    {{ form.reader_name.errors }}
-                </div>
-                {% endif %}
-            </div>
-            
-            <!-- Loại độc giả -->
-            <div>
-                <label for="{{ form.reader_type.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold;">
-                    {{ form.reader_type.label }}
-                    <span style="color: red;">*</span>
-                </label>
-                {{ form.reader_type }}
-                {% if form.reader_type.errors %}
-                <div style="color: #c62828; font-size: 0.9em; margin-top: 5px;">
-                    {{ form.reader_type.errors }}
-                </div>
-                {% endif %}
-            </div>
-            
-            <!-- Ngày sinh -->
-            <div>
-                <label for="{{ form.date_of_birth.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold;">
-                    {{ form.date_of_birth.label }}
-                    <span style="color: red;">*</span>
-                </label>
-                {{ form.date_of_birth }}
-                {% if form.date_of_birth.errors %}
-                <div style="color: #c62828; font-size: 0.9em; margin-top: 5px;">
-                    {{ form.date_of_birth.errors }}
-                </div>
-                {% endif %}
-                <div style="color: #666; font-size: 0.9em; margin-top: 5px;">
-                    ℹ️ Độ tuổi phải từ {{ params.min_age }} đến {{ params.max_age }} tuổi
-                </div>
-            </div>
-            
-            <!-- Email -->
-            <div>
-                <label for="{{ form.email.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold;">
-                    {{ form.email.label }}
-                    <span style="color: red;">*</span>
-                </label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                <div style="color: #c62828; font-size: 0.9em; margin-top: 5px;">
-                    {{ form.email.errors }}
-                </div>
-                {% endif %}
-            </div>
-            
-            <!-- Địa chỉ -->
-            <div>
-                <label for="{{ form.address.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold;">
-                    {{ form.address.label }}
-                    <span style="color: red;">*</span>
-                </label>
-                {{ form.address }}
-                {% if form.address.errors %}
-                <div style="color: #c62828; font-size: 0.9em; margin-top: 5px;">
-                    {{ form.address.errors }}
-                </div>
-                {% endif %}
-            </div>
-            
-            <!-- Ngày lập thẻ -->
-            <div>
-                <label for="{{ form.card_creation_date.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold;">
-                    {{ form.card_creation_date.label }}
-                    <span style="color: red;">*</span>
-                </label>
-                {{ form.card_creation_date }}
-                {% if form.card_creation_date.errors %}
-                <div style="color: #c62828; font-size: 0.9em; margin-top: 5px;">
-                    {{ form.card_creation_date.errors }}
-                </div>
-                {% endif %}
-            </div>
-        </div>
-        
-        <!-- Buttons -->
-        <div style="margin-top: 25px; display: flex; gap: 10px;">
-            <button type="submit" class="btn" style="flex: 1;">
-                ✅ Lập thẻ độc giả
-            </button>
-            <a href="{% url 'reader_list' %}" class="btn btn-secondary" style="flex: 1; text-align: center;">
-                ❌ Hủy
-            </a>
-        </div>
-    </form>
+<!-- Page Header -->
+<div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">{{ page_title }}</h1>
+    <p style="color: var(--text-secondary);">Tạo thẻ độc giả mới theo quy định của thư viện</p>
 </div>
 
-<style>
-.form-control {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1em;
-}
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+    <!-- Form -->
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+                
+                <div style="display: grid; gap: 1.5rem;">
+                    <!-- Họ và tên -->
+                    <div class="form-group">
+                        <label for="{{ form.reader_name.id_for_label }}" class="form-label">
+                            {{ form.reader_name.label }}
+                            <span style="color: var(--error);">*</span>
+                        </label>
+                        {{ form.reader_name }}
+                        {% if form.reader_name.errors %}
+                        <div style="color: var(--error); font-size: 0.875rem; margin-top: 0.25rem;">
+                            {{ form.reader_name.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Loại độc giả -->
+                    <div class="form-group">
+                        <label for="{{ form.reader_type.id_for_label }}" class="form-label">
+                            {{ form.reader_type.label }}
+                            <span style="color: var(--error);">*</span>
+                        </label>
+                        {{ form.reader_type }}
+                        {% if form.reader_type.errors %}
+                        <div style="color: var(--error); font-size: 0.875rem; margin-top: 0.25rem;">
+                            {{ form.reader_type.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Ngày sinh -->
+                    <div class="form-group">
+                        <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">
+                            {{ form.date_of_birth.label }}
+                            <span style="color: var(--error);">*</span>
+                        </label>
+                        {{ form.date_of_birth }}
+                        {% if form.date_of_birth.errors %}
+                        <div style="color: var(--error); font-size: 0.875rem; margin-top: 0.25rem;">
+                            {{ form.date_of_birth.errors }}
+                        </div>
+                        {% endif %}
+                        <div style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.25rem;">
+                            Độ tuổi phải từ {{ params.min_age }} đến {{ params.max_age }} tuổi
+                        </div>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">
+                            {{ form.email.label }}
+                            <span style="color: var(--error);">*</span>
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div style="color: var(--error); font-size: 0.875rem; margin-top: 0.25rem;">
+                            {{ form.email.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Địa chỉ -->
+                    <div class="form-group">
+                        <label for="{{ form.address.id_for_label }}" class="form-label">
+                            {{ form.address.label }}
+                            <span style="color: var(--error);">*</span>
+                        </label>
+                        {{ form.address }}
+                        {% if form.address.errors %}
+                        <div style="color: var(--error); font-size: 0.875rem; margin-top: 0.25rem;">
+                            {{ form.address.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Ngày lập thẻ -->
+                    <div class="form-group">
+                        <label for="{{ form.card_creation_date.id_for_label }}" class="form-label">
+                            {{ form.card_creation_date.label }}
+                            <span style="color: var(--error);">*</span>
+                        </label>
+                        {{ form.card_creation_date }}
+                        {% if form.card_creation_date.errors %}
+                        <div style="color: var(--error); font-size: 0.875rem; margin-top: 0.25rem;">
+                            {{ form.card_creation_date.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Buttons -->
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        Lập thẻ độc giả
+                    </button>
+                    <a href="{% url 'reader_list' %}" class="btn btn-outline" style="flex: 1; text-align: center;">
+                        Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 
-.form-control:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-}
-</style>
+    <!-- Quy định -->
+    <div>
+        <div class="card card-blue">
+            <div class="card-body">
+                <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: white;">Quy định lập thẻ (QĐ1)</h3>
+                <ul style="margin: 0; padding-left: 1.25rem; color: rgba(255,255,255,0.95); line-height: 2;">
+                    <li>Độ tuổi: <strong>{{ params.min_age }} - {{ params.max_age }} tuổi</strong></li>
+                    <li>Loại độc giả: 
+                        {% for rt in reader_types %}
+                            <strong>{{ rt.reader_type_name }}</strong>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </li>
+                    <li>Thẻ có hiệu lực: <strong>{{ params.card_validity_period }} tháng</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -16,8 +16,29 @@ from .decorators import manager_required, staff_required
 
 
 def home_view(request):
-    """Trang chủ hệ thống"""
-    return render(request, 'LibraryApp/home.html')
+    """Trang chủ hệ thống với dashboard statistics"""
+    context = {}
+    
+    if request.user.is_authenticated:
+        # Đếm tổng số độc giả
+        context['total_readers'] = Reader.objects.filter(is_active=True).count()
+        
+        # Đếm tổng số đầu sách (BookTitle)
+        context['total_books'] = BookTitle.objects.count()
+        
+        # Đếm số phiếu mượn đang hoạt động (chưa trả)
+        context['active_borrows'] = BorrowReturnReceipt.objects.filter(
+            return_date__isnull=True
+        ).count()
+        
+        # Đếm số sách quá hạn
+        from datetime import date
+        context['overdue_books'] = BorrowReturnReceipt.objects.filter(
+            return_date__isnull=True,
+            due_date__lt=date.today()
+        ).count()
+    
+    return render(request, 'LibraryApp/home.html', context)
 
 
 # ==================== AUTHENTICATION ====================

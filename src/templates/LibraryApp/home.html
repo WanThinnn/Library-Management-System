@@ -1,147 +1,149 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="card">
-    <h2 class="text-center" style="color: #2c3e50;">📚 Hệ thống Quản lý Thư viện</h2>
-
-    <p class="text-center" style="color: #7f8c8d; font-size: 1.1rem; margin-top: 1rem;">
-        Dành cho Thủ thư và Quản trị viên
-    </p>
-
-    <div class="text-center" style="margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white;">
-        {% if user.is_authenticated %}
-            <h3 style="margin-bottom: 1rem;">👋 Chào mừng, {{ user.username }}!</h3>
-            <p style="margin-bottom: 1.5rem; font-size: 1.1rem;">
-                {% if user.is_superuser %}
-                    Bạn đang đăng nhập với quyền <strong>Quản trị viên</strong> (Toàn quyền)
-                {% elif user.is_staff %}
-                    Bạn đang đăng nhập với quyền <strong>Nhân viên</strong>
-                {% endif %}
-            </p>
-
-            <!-- Phần 1: Các chức năng chính - Tạo mới / Thực hiện -->
-            <div style="margin-bottom: 2rem;">
-                <h4 style="color: rgba(255,255,255,0.95); text-align: left; margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">
-                    ✨ Chức năng Chính
-                </h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
-                    <!-- Quản lý độc giả -->
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #3498db; font-weight: bold; width: 100%; padding: 15px 20px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
-                            � Quản lý Độc giả
-                        </button>
-                        <ul class="dropdown-menu" style="min-width: 220px;">
-                            <li><h6 class="dropdown-header" style="color: #3498db;">Tạo mới</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'reader_create' %}">📝 Lập thẻ độc giả (YC1)</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header" style="color: #3498db;">Xem danh sách</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'reader_list' %}">📋 Danh sách độc giả</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Quản lý sách -->
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #e67e22; font-weight: bold; width: 100%; padding: 15px 20px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
-                            📚 Quản lý Sách
-                        </button>
-                        <ul class="dropdown-menu" style="min-width: 220px;">
-                            <li><h6 class="dropdown-header" style="color: #e67e22;">Tạo mới</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'book_import' %}">📥 Tiếp nhận sách (YC2)</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header" style="color: #e67e22;">Tra cứu</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'book_search' %}">🔍 Tra cứu sách (YC3)</a></li>
-                            <li><a class="dropdown-item" href="{% url 'book_import_list' %}">📋 Danh sách phiếu nhập</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Mượn / Trả sách -->
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #9b59b6; font-weight: bold; width: 100%; padding: 15px 20px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
-                            🔄 Mượn / Trả Sách
-                        </button>
-                        <ul class="dropdown-menu" style="min-width: 220px;">
-                            <li><h6 class="dropdown-header" style="color: #9b59b6;">Cho mượn sách</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'borrow_book' %}">➡️ Lập phiếu mượn (YC4)</a></li>
-                            <li><a class="dropdown-item" href="{% url 'borrow_book_list' %}">📋 Danh sách phiếu mượn</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header" style="color: #9b59b6;">Nhận trả sách</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'return_book' %}">⬅️ Lập phiếu trả (YC5)</a></li>
-                            <li><a class="dropdown-item" href="{% url 'return_book_list' %}">📋 Danh sách phiếu trả</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Thu tiền phạt -->
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #27ae60; font-weight: bold; width: 100%; padding: 15px 20px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
-                            💰 Thu Tiền Phạt
-                        </button>
-                        <ul class="dropdown-menu" style="min-width: 220px;">
-                            <li><h6 class="dropdown-header" style="color: #27ae60;">Tạo phiếu thu</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'receipt_form' %}">💵 Lập phiếu thu tiền (YC6)</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header" style="color: #27ae60;">Xem danh sách</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'receipt_list' %}">📋 Danh sách phiếu thu</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Phần 2: Báo cáo và Quản trị -->
-            <div style="margin-top: 2rem;">
-                <h4 style="color: rgba(255,255,255,0.95); text-align: left; margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">
-                    📊 Báo cáo & Quản trị
-                </h4>
-                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                    <!-- Xem tất cả danh sách -->
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #34495e; font-weight: bold; padding: 12px 25px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
-                            📊 Xem Báo cáo
-                        </button>
-                        <ul class="dropdown-menu" style="min-width: 220px;">
-                            <li><h6 class="dropdown-header">📋 Danh sách</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'reader_list' %}">👥 Danh sách độc giả</a></li>
-                            <li><a class="dropdown-item" href="{% url 'book_import_list' %}">📚 Phiếu nhập sách</a></li>
-                            <li><a class="dropdown-item" href="{% url 'borrow_book_list' %}">➡️ Phiếu mượn sách</a></li>
-                            <li><a class="dropdown-item" href="{% url 'return_book_list' %}">⬅️ Phiếu trả sách</a></li>
-                            <li><a class="dropdown-item" href="{% url 'receipt_list' %}">💰 Phiếu thu tiền</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><h6 class="dropdown-header">📊 Báo cáo thống kê</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'report_borrow_by_category' %}">📈 Mượn sách theo thể loại</a></li>
-                            <li><a class="dropdown-item" href="{% url 'report_overdue_books' %}">⚠️ Sách trả trễ</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Quản trị hệ thống (CHỈ QUẢN LÝ - superuser) -->
-                    {% if user.is_superuser %}
-                    <div class="dropdown">
-                        <button class="btn dropdown-toggle" style="background: rgba(255,255,255,0.95); color: #e74c3c; font-weight: bold; padding: 12px 25px; border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" type="button" data-bs-toggle="dropdown">
-                            ⚙️ Quản trị
-                        </button>
-                        <ul class="dropdown-menu" style="min-width: 220px;">
-                            <li><a class="dropdown-item" href="{% url 'parameter_update' %}">🔧 Thay đổi quy định</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'user_list' %}">👥 Quản lý người dùng</a></li>
-                            <li><a class="dropdown-item" href="/admin/">⚙️ Admin Panel (Chuyên nghiệp)</a></li>
-                        </ul>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-        {% else %}
-            <h3 style="margin-bottom: 1rem;">🔐 Truy cập Hệ thống</h3>
-            <p style="margin-bottom: 1.5rem; font-size: 1.1rem;">
-                Vui lòng đăng nhập để sử dụng các chức năng quản lý
-            </p>
-            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                <a href="{% url 'login' %}" class="btn" style="background: white; color: #667eea; padding: 12px 30px; font-size: 1.1rem; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
-                    🔑 Đăng nhập
-                </a>
-                <a href="/admin/" class="btn" style="background: white; color: #667eea; padding: 12px 30px; font-size: 1.1rem; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
-                    ⚙️ Admin Panel
-                </a>
-            </div>
-        {% endif %}
+{% if user.is_authenticated %}
+    <!-- Welcome Header -->
+    <div style="margin-bottom: 2rem;">
+        <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">
+            Chào mừng, {{ user.username }}
+            {% if user.is_superuser %}
+                <span class="badge" style="background: var(--gradient-blue); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.875rem; margin-left: 0.5rem;">Quản trị viên</span>
+            {% elif user.is_staff %}
+                <span class="badge" style="background: var(--gradient-pink-purple); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.875rem; margin-left: 0.5rem;">Nhân viên</span>
+            {% endif %}
+        </h1>
+        <p style="color: var(--text-secondary);">Tổng quan hệ thống quản lý thư viện</p>
     </div>
-</div>
+
+    <!-- Dashboard Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Stat Card 1 - Độc giả -->
+        <div class="card card-blue">
+            <div class="card-body" style="text-align: center;">
+                <div style="font-size: 3rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">
+                    {{ total_readers|default:"0" }}
+                </div>
+                <div style="font-size: 1.125rem; color: rgba(255,255,255,0.9);">
+                    Độc giả
+                </div>
+            </div>
+        </div>
+
+        <!-- Stat Card 2 - Sách -->
+        <div class="card card-gradient-pink">
+            <div class="card-body" style="text-align: center;">
+                <div style="font-size: 3rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">
+                    {{ total_books|default:"0" }}
+                </div>
+                <div style="font-size: 1.125rem; color: rgba(255,255,255,0.9);">
+                    Đầu sách
+                </div>
+            </div>
+        </div>
+
+        <!-- Stat Card 3 - Đang mượn -->
+        <div class="card card-gradient-purple">
+            <div class="card-body" style="text-align: center;">
+                <div style="font-size: 3rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">
+                    {{ active_borrows|default:"0" }}
+                </div>
+                <div style="font-size: 1.125rem; color: rgba(255,255,255,0.9);">
+                    Đang mượn
+                </div>
+            </div>
+        </div>
+
+        <!-- Stat Card 4 - Quá hạn -->
+        <div class="card" style="background: linear-gradient(135deg, #ff3b30 0%, #ff6b6b 100%);">
+            <div class="card-body" style="text-align: center;">
+                <div style="font-size: 3rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">
+                    {{ overdue_books|default:"0" }}
+                </div>
+                <div style="font-size: 1.125rem; color: rgba(255,255,255,0.9);">
+                    Quá hạn
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">Tính năng chính</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+            <!-- Độc giả -->
+            <div class="card card-glass">
+                <div class="card-body">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Quản lý Độc giả</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <a href="{% url 'reader_create' %}" class="btn btn-primary">Lập thẻ độc giả (YC1)</a>
+                        <a href="{% url 'reader_list' %}" class="btn btn-outline">Danh sách độc giả</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sách -->
+            <div class="card card-glass">
+                <div class="card-body">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Quản lý Sách</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <a href="{% url 'book_import' %}" class="btn btn-primary">Tiếp nhận sách (YC2)</a>
+                        <a href="{% url 'book_search' %}" class="btn btn-outline">Tra cứu sách (YC3)</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mượn/Trả -->
+            <div class="card card-glass">
+                <div class="card-body">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Mượn / Trả Sách</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <a href="{% url 'borrow_book' %}" class="btn btn-primary">Lập phiếu mượn (YC4)</a>
+                        <a href="{% url 'return_book' %}" class="btn btn-outline">Lập phiếu trả (YC5)</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thu tiền -->
+            <div class="card card-glass">
+                <div class="card-body">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Thu Tiền & Báo cáo</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <a href="{% url 'receipt_form' %}" class="btn btn-primary">Lập phiếu thu (YC6)</a>
+                        <a href="{% url 'report_borrow_by_category' %}" class="btn btn-outline">Báo cáo thống kê</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Section -->
+    {% if user.is_superuser %}
+    <div class="card card-blue">
+        <div class="card-body">
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: white;">Quản trị Hệ thống</h2>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="{% url 'parameter_update' %}" class="btn btn-light">Thay đổi quy định</a>
+                <a href="{% url 'user_list' %}" class="btn btn-light">Quản lý người dùng</a>
+                <a href="/admin/" class="btn btn-outline-light">Admin Panel</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+{% else %}
+    <!-- Unauthenticated View -->
+    <div style="text-align: center; padding: 4rem 2rem;">
+        <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;">
+            Hệ thống Quản lý Thư viện
+        </h1>
+        <p style="font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 3rem;">
+            Vui lòng đăng nhập để sử dụng các chức năng quản lý
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Đăng nhập</a>
+            <a href="/admin/" class="btn btn-outline btn-lg">Admin Panel</a>
+        </div>
+    </div>
+{% endif %}
 {% endblock %}
