@@ -1,0 +1,258 @@
+/* ===================================
+   Button Components
+   Apple-style modern buttons với gradient
+   Hạn chế icon, tập trung typography
+   =================================== */
+
+/* Base Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  
+  border: none;
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Primary Button - Blue Gradient */
+.btn-primary {
+  background: var(--gradient-blue);
+  color: var(--color-white);
+  box-shadow: var(--shadow-blue);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 122, 255, 0.25);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary Button - Pink-Purple Gradient */
+.btn-secondary {
+  background: var(--gradient-pink-purple);
+  color: var(--color-white);
+  box-shadow: var(--shadow-pink);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(255, 125, 233, 0.25);
+}
+
+/* Outline Button - Minimal */
+.btn-outline {
+  background: transparent;
+  color: var(--color-blue-primary);
+  border: 2px solid var(--color-blue-primary);
+  box-shadow: none;
+}
+
+.btn-outline:hover {
+  background: var(--color-blue-primary);
+  color: var(--color-white);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-blue);
+}
+
+/* Ghost Button - No border */
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-primary);
+  box-shadow: none;
+}
+
+.btn-ghost:hover {
+  background: var(--color-gray-100);
+}
+
+/* Success Button */
+.btn-success {
+  background: linear-gradient(135deg, #34c759 0%, #8ee6a3 100%);
+  color: var(--color-white);
+  box-shadow: 0 8px 16px rgba(52, 199, 89, 0.15);
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(52, 199, 89, 0.25);
+}
+
+/* Danger Button */
+.btn-danger {
+  background: linear-gradient(135deg, #ff3b30 0%, #ff8a80 100%);
+  color: var(--color-white);
+  box-shadow: 0 8px 16px rgba(255, 59, 48, 0.15);
+}
+
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(255, 59, 48, 0.25);
+}
+
+/* Warning Button */
+.btn-warning {
+  background: linear-gradient(135deg, #ff9500 0%, #ffb84d 100%);
+  color: var(--color-white);
+  box-shadow: 0 8px 16px rgba(255, 149, 0, 0.15);
+}
+
+.btn-warning:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(255, 149, 0, 0.25);
+}
+
+/* Button Sizes */
+.btn-sm {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-lg);
+}
+
+.btn-lg {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--font-size-lg);
+  border-radius: var(--radius-2xl);
+}
+
+.btn-xl {
+  padding: var(--space-5) var(--space-10);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-2xl);
+}
+
+/* Full width button */
+.btn-block {
+  width: 100%;
+  display: flex;
+}
+
+/* Icon only buttons */
+.btn-icon {
+  padding: var(--space-3);
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+}
+
+/* Button group */
+.btn-group {
+  display: inline-flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Floating Action Button (FAB) */
+.btn-fab {
+  position: fixed;
+  bottom: var(--space-8);
+  right: var(--space-8);
+  padding: var(--space-4);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-2xl);
+  z-index: var(--z-fixed);
+  width: 64px;
+  height: 64px;
+}
+
+.btn-fab:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 20px 40px rgba(0, 122, 255, 0.3);
+}
+
+/* Shimmer effect on hover (premium feel) */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left var(--transition-slow);
+}
+
+.btn-shimmer:hover::before {
+  left: 100%;
+}
+
+/* Loading state */
+.btn-loading {
+  pointer-events: none;
+  position: relative;
+  color: transparent;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: button-spin 0.6s linear infinite;
+  color: inherit;
+  opacity: 1;
+}
+
+@keyframes button-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .btn {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--font-size-sm);
+  }
+  
+  .btn-lg {
+    padding: var(--space-3) var(--space-6);
+    font-size: var(--font-size-base);
+  }
+  
+  .btn-fab {
+    bottom: var(--space-4);
+    right: var(--space-4);
+    width: 56px;
+    height: 56px;
+  }
+}

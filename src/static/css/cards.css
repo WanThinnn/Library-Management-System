@@ -1,0 +1,321 @@
+/* ===================================
+   Card Components - Bento Grid Style
+   Apple-inspired cards với gradient backgrounds
+   Large rounded corners, soft shadows
+   =================================== */
+
+/* Base Card */
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-3xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-lg);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-2xl);
+}
+
+/* Card with gradient background */
+.card-gradient {
+  color: var(--color-white);
+  position: relative;
+}
+
+.card-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-overlay-medium);
+  opacity: 0.9;
+  z-index: 0;
+}
+
+.card-gradient > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Gradient variations */
+.card-blue {
+  background: var(--gradient-blue);
+  color: var(--color-white);
+  box-shadow: var(--shadow-blue);
+}
+
+.card-pink {
+  background: var(--gradient-pink-purple);
+  color: var(--color-white);
+  box-shadow: var(--shadow-pink);
+}
+
+.card-purple {
+  background: var(--gradient-blue-purple);
+  color: var(--color-white);
+  box-shadow: var(--shadow-purple);
+}
+
+.card-ocean {
+  background: var(--gradient-ocean);
+  color: var(--color-white);
+  box-shadow: var(--shadow-blue);
+}
+
+.card-sunset {
+  background: var(--gradient-sunset);
+  color: var(--color-white);
+  box-shadow: var(--shadow-pink);
+}
+
+/* Glass card (glassmorphism) */
+.card-glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Card header */
+.card-header {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card-gradient .card-header,
+.card-blue .card-header,
+.card-pink .card-header,
+.card-purple .card-header,
+.card-ocean .card-header,
+.card-sunset .card-header {
+  border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
+.card-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  margin: 0;
+  color: inherit;
+}
+
+.card-subtitle {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  opacity: 0.8;
+  margin-top: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Card body */
+.card-body {
+  color: inherit;
+}
+
+.card-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Card footer */
+.card-footer {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-gradient .card-footer,
+.card-blue .card-footer,
+.card-pink .card-footer,
+.card-purple .card-footer,
+.card-ocean .card-footer,
+.card-sunset .card-footer {
+  border-top-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Card sizes */
+.card-sm {
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+}
+
+.card-lg {
+  padding: var(--space-10);
+  border-radius: var(--radius-3xl);
+}
+
+/* Card with hover effect */
+.card-hover {
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-2xl);
+}
+
+/* Card with interactive elements */
+.card-interactive {
+  cursor: pointer;
+  user-select: none;
+}
+
+.card-interactive:active {
+  transform: scale(0.98);
+}
+
+/* Stat card - for dashboard metrics */
+.card-stat {
+  text-align: center;
+  padding: var(--space-6);
+}
+
+.card-stat-value {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-extrabold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-2);
+  background: var(--gradient-blue);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card-stat-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-secondary);
+}
+
+.card-stat-change {
+  margin-top: var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.card-stat-change.positive {
+  color: var(--color-success);
+}
+
+.card-stat-change.negative {
+  color: var(--color-danger);
+}
+
+/* Feature card - highlight key features */
+.card-feature {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-8);
+}
+
+.card-feature::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(0, 122, 255, 0.1) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.card-feature-icon {
+  font-size: var(--font-size-4xl);
+  margin-bottom: var(--space-4);
+}
+
+/* Image card */
+.card-image {
+  padding: 0;
+  overflow: hidden;
+}
+
+.card-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform var(--transition-slow);
+}
+
+.card-image:hover img {
+  transform: scale(1.05);
+}
+
+.card-image-content {
+  padding: var(--space-6);
+}
+
+/* List card */
+.card-list {
+  padding: 0;
+}
+
+.card-list-item {
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-gray-100);
+  transition: background var(--transition-fast);
+}
+
+.card-list-item:last-child {
+  border-bottom: none;
+}
+
+.card-list-item:hover {
+  background: var(--color-gray-50);
+}
+
+/* Compact card - minimal padding */
+.card-compact {
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+}
+
+/* Card with badge/tag */
+.card-badge {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  padding: var(--space-1) var(--space-3);
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--color-white);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: var(--radius-full);
+  z-index: 2;
+}
+
+/* Responsive cards */
+@media (max-width: 768px) {
+  .card {
+    padding: var(--space-5);
+    border-radius: var(--radius-2xl);
+  }
+  
+  .card-lg {
+    padding: var(--space-6);
+  }
+  
+  .card-stat-value {
+    font-size: var(--font-size-4xl);
+  }
+}
