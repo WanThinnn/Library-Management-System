@@ -85,6 +85,7 @@ cd Library-Management-System
 chmod +x start  # Make start script executable
 cp .env.example .env
 nano .env  # Edit configuration
+./start --prod setup
 ```
 
 **Step 3: Pull and Run**
