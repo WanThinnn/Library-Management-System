@@ -1186,8 +1186,8 @@ class LibraryUser(models.Model):
     
     class Meta:
         db_table = 'library_user'
-        verbose_name = 'Người Dùng'
-        verbose_name_plural = 'Người Dùng'
+        verbose_name = 'Người dùng'
+        verbose_name_plural = 'Người dùng'
         ordering = ['full_name']
         indexes = [
             models.Index(fields=['user_group']),

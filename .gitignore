@@ -11,7 +11,7 @@ dist/
 build/
 .eggs/
 *.pyc
-
+LibraryApp/__pycache__/
 # Virtual environment
 env/
 venv/
