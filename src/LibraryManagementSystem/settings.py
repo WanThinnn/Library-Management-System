@@ -24,12 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@kl970*(&4#b427!q380o_0a@y1igby2+5ra&knin!@kf0xbuq'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-@kl970*(&4#b427!q380o_0a@y1igby2+5ra&knin!@kf0xbuq')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 
 # Application definition
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -85,7 +86,10 @@ WSGI_APPLICATION = 'LibraryManagementSystem.wsgi.application'
 # }
 
 env = environ.Env()
-environ.Env.read_env(BASE_DIR / "env/.env")  # chỉ định file .env
+# Đọc .env từ thư mục root của project
+# Trong Docker: /app/.env
+# Local development: src/.env hoặc có thể đặt ở root
+environ.Env.read_env(BASE_DIR.parent / ".env")  # Đọc từ root project
 
 DATABASES = {
     'default': env.db(
@@ -128,10 +132,21 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+# Whitenoise configuration for serving static files
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -154,3 +169,18 @@ LOGOUT_REDIRECT_URL = '/auth/login/'
 
 # Password reset timeout (in seconds)
 PASSWORD_RESET_TIMEOUT = 3600  # 1 hour
+
+# Security settings for production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = False  # Nginx handles SSL
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # Trust proxy headers
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
