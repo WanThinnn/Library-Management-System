@@ -139,26 +139,37 @@ Add to `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Wind
 
 ## Docker Hub
 
-Pre-built images available at:
+Pre-built images available at Docker Hub: **wanthinnn/library-management-system**
+
+### Deployment Options
+
+**Option 1: Git Clone (Recommended)**
 
 ```bash
-docker pull wanthinnn/library-management-system:latest
+# Clone repository
+git clone https://github.com/WanThinnn/Library-Management-System.git
+cd Library-Management-System
+
+# Setup and run
+make setup
+make build
+make up
+make migrate
+make initdata
 ```
 
-### Quick Deploy with Docker Hub Image
-
-**Option 1: Using production compose file**
+**Option 2: Docker Pull (Production)**
 
 ```bash
 # Clone repository for config files
 git clone https://github.com/WanThinnn/Library-Management-System.git
 cd Library-Management-System
 
-# Setup environment
+# Copy environment file
 cp .env.example .env
 # Edit .env with your configuration
 
-# Pull and run
+# Pull and run with production compose
 docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 
@@ -167,41 +178,8 @@ docker compose -f docker-compose.prod.yml exec web python manage.py migrate
 docker compose -f docker-compose.prod.yml exec web python init_data.py
 ```
 
-**Option 2: Standalone without git clone**
-
-```bash
-# Create project directory
-mkdir library-system && cd library-system
-
-# Download production compose file
-curl -o docker-compose.yml https://raw.githubusercontent.com/WanThinnn/Library-Management-System/main/docker-compose.prod.yml
-
-# Create required directories
-mkdir -p certs nginx/conf.d
-
-# Download nginx config
-curl -o nginx/Dockerfile https://raw.githubusercontent.com/WanThinnn/Library-Management-System/main/nginx/Dockerfile
-curl -o nginx/nginx.conf https://raw.githubusercontent.com/WanThinnn/Library-Management-System/main/nginx/nginx.conf
-curl -o nginx/conf.d/django.conf https://raw.githubusercontent.com/WanThinnn/Library-Management-System/main/nginx/conf.d/django.conf
-
-# Download gunicorn config
-curl -o gunicorn.conf.py https://raw.githubusercontent.com/WanThinnn/Library-Management-System/main/gunicorn.conf.py
-
-# Create .env file
-cat > .env << EOF
-DEBUG=False
-SECRET_KEY=$(openssl rand -base64 32)
-ALLOWED_HOSTS=library.cyberfortress.local,localhost,127.0.0.1
-DATABASE_URL=sqlite:///data/db.sqlite3
-EOF
-
-# Add your SSL certificates to certs/ directory
-# Then start services
-docker compose pull
-docker compose up -d
-docker compose exec web python manage.py migrate
-docker compose exec web python init_data.py
-```
+Access at: `https://library.cyberfortress.local`  
+Default credentials: `admin` / `admin123`
 
 ## Sample Data
 
