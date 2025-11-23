@@ -4,9 +4,12 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: django_app
-    command: gunicorn LibraryManagementSystem.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             gunicorn LibraryManagementSystem.wsgi:application -c gunicorn.conf.py"
     volumes:
       - ./src:/app
+      - ./gunicorn.conf.py:/app/gunicorn.conf.py:ro
       - static_volume:/app/staticfiles
       - sqlite_volume:/app/data
     expose:
@@ -15,6 +18,7 @@ services:
       - .env
     environment:
       - DATABASE_URL=sqlite:////app/data/db.sqlite3
+      - PYTHONUNBUFFERED=1
     depends_on:
       - nginx
     networks:

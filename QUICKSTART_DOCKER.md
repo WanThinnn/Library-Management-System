@@ -42,26 +42,26 @@ Mở `C:\Windows\System32\drivers\etc\hosts` với quyền Administrator và th�
 
 ```bash
 # Build Docker images
-docker-compose build
+docker compose build
 
 # Start services
-docker-compose up -d
+docker compose up -d
 
 # Check status
-docker-compose ps
+docker compose ps
 ```
 
 ## Bước 4: Chạy Migrations & Create Admin
 
 ```bash
 # Run migrations
-docker-compose exec web python manage.py migrate
+sudo docker compose exec web python manage.py migrate
 
 # Create superuser
-docker-compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py createsuperuser
 
 # Collect static files (nếu cần)
-docker-compose exec web python manage.py collectstatic --noinput
+docker compose exec web python manage.py collectstatic --noinput
 ```
 
 ## Bước 5: Truy cập Application
@@ -79,19 +79,19 @@ docker-compose exec web python manage.py collectstatic --noinput
 
 ```bash
 # Xem logs
-docker-compose logs -f
+docker compose logs -f
 
 # Restart services
-docker-compose restart
+docker compose restart
 
 # Stop services
-docker-compose down
+docker compose down
 
 # Remove everything (bao gồm volumes)
-docker-compose down -v
+docker compose down -v
 
 # Django shell
-docker-compose exec web python manage.py shell
+docker compose exec web python manage.py shell
 
 # Backup database
 docker cp django_app:/app/data/db.sqlite3 ./backup_$(date +%Y%m%d).sqlite3
@@ -99,17 +99,39 @@ docker cp django_app:/app/data/db.sqlite3 ./backup_$(date +%Y%m%d).sqlite3
 
 ## Troubleshooting
 
+### HTTP 500 Internal Server Error
+```bash
+# Xem Django logs để biết lỗi chi tiết
+sudo docker compose logs web
+
+# Hoặc follow logs real-time
+sudo docker compose logs -f web
+
+# Thường gặp:
+# - Missing migrations: sudo docker compose exec web python manage.py migrate
+# - Missing .env config: Check .env file có đầy đủ variables
+# - Static files: sudo docker compose exec web python manage.py collectstatic --noinput
+# - Permission error: sudo docker compose exec web chmod -R 777 /app/data
+```
+
+### HTTP 400 Bad Request
+```bash
+# Check ALLOWED_HOSTS trong .env
+# Phải có domain bạn đang truy cập
+ALLOWED_HOSTS=localhost,library.cyberfortress.local,*.cyberfortress.local
+```
+
 ### Lỗi SSL Certificate
 ```bash
 # Tạo lại certificates
 bash scripts/generate-certs.sh
-docker-compose restart nginx
+docker compose restart nginx
 ```
 
 ### Lỗi Permission với SQLite
 ```bash
-docker-compose exec web chmod -R 777 /app/data
-docker-compose restart web
+docker compose exec web chmod -R 777 /app/data
+docker compose restart web
 ```
 
 ### Port 80/443 đã được sử dụng
@@ -118,7 +140,7 @@ docker-compose restart web
 netstat -ano | findstr :80
 netstat -ano | findstr :443
 
-# Stop process hoặc đổi port trong docker-compose.yml
+# Stop process hoặc đổi port trong docker compose.yml
 ```
 
 ## Production Checklist
