@@ -1,0 +1,85 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.pyc
+
+# Virtual environment
+env/
+venv/
+ENV/
+.venv/
+
+# Django stuff
+*.log
+*.pot
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/src/staticfiles/
+/src/static/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Backup files
+*.backup
+*.bak
+backup_*.sqlite3
+
+# Media files (if applicable)
+/media/
+
+# Node modules (if using frontend tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# SSL Certificates (uncomment if you want to ignore certs)
+# certs/*.key
+# certs/*.crt
+# certs/*.pem
+
+# Migration files (uncomment if you want to ignore migrations)
+# */migrations/*.py
+# !*/migrations/__init__.py
