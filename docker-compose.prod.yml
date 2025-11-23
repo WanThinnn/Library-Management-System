@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  web:
+    image: wanthinnn/library-management-system:latest
+    container_name: library-web
+    env_file:
+      - .env
+    volumes:
+      - sqlite_volume:/app/data
+      - static_volume:/app/staticfiles
+      - ./gunicorn.conf.py:/app/gunicorn.conf.py:ro
+    expose:
+      - "8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nginx:
+    build: ./nginx
+    container_name: library-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - static_volume:/app/staticfiles:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+
+volumes:
+  sqlite_volume:
+    name: sqlite_volume
+  static_volume:
+    name: static_volume
