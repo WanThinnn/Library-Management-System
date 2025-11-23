@@ -94,6 +94,7 @@ docker compose -f docker-compose.prod.yml up -d
 **Step 4: Initialize Database**
 
 ```bash
+docker compose -f docker-compose.prod.yml exec web python manage.py makemigrations
 docker compose -f docker-compose.prod.yml exec web python manage.py migrate
 docker compose -f docker-compose.prod.yml exec web python init_data.py
 ```
