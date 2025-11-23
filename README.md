@@ -31,16 +31,18 @@ A comprehensive library management system built with Django, featuring book cata
 - Docker Compose v2.0+
 - Git
 
-## Quick Start
+## Deployment
 
-### 1. Clone Repository
+### Option 1: Build from Source (Development)
+
+**Step 1: Clone Repository**
 
 ```bash
 git clone https://github.com/WanThinnn/Library-Management-System.git
 cd Library-Management-System
 ```
 
-### 2. Setup Environment
+**Step 2: Setup Environment**
 
 ```bash
 make setup
@@ -48,11 +50,11 @@ make setup
 
 This will:
 - Check Docker and Docker Compose installation
-- Verify SSL certificates
+- Verify SSL certificates exist
 - Auto-detect OS and install root CA certificate
 - Copy `.env.example` to `.env`
 
-### 3. Build and Run
+**Step 3: Build and Run**
 
 ```bash
 make build
@@ -61,10 +63,53 @@ make migrate
 make initdata
 ```
 
-### 4. Access Application
+**Step 4: Access Application**
 
 - URL: `https://library.cyberfortress.local`
 - Default Admin: `admin` / `admin123`
+
+### Option 2: Use Pre-built Image (Production)
+
+**Step 1: Clone Repository for Configuration**
+
+```bash
+git clone https://github.com/WanThinnn/Library-Management-System.git
+cd Library-Management-System
+```
+
+**Step 2: Configure Environment**
+
+```bash
+cp .env.example .env
+nano .env  # Edit configuration
+```
+
+**Step 3: Pull and Run**
+
+```bash
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
+
+**Step 4: Initialize Database**
+
+```bash
+docker compose -f docker-compose.prod.yml exec web python manage.py migrate
+docker compose -f docker-compose.prod.yml exec web python init_data.py
+```
+
+**Step 5: Access Application**
+
+- URL: `https://library.cyberfortress.local`
+- Default Admin: `admin` / `admin123`
+
+### Docker Hub
+
+Pre-built image: `wanthinnn/library-management-system:latest`
+
+```bash
+docker pull wanthinnn/library-management-system:latest
+```
 
 ## Make Commands
 
@@ -113,7 +158,7 @@ Library-Management-System/
 
 ### Environment Variables
 
-Copy `.env.example` to `.env` and configure:
+Edit `.env` file:
 
 ```env
 DEBUG=False
@@ -137,51 +182,7 @@ Add to `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Wind
 127.0.0.1 library.cyberfortress.local
 ```
 
-## Docker Hub
-
-Pre-built images available at Docker Hub: **wanthinnn/library-management-system**
-
-### Deployment Options
-
-**Option 1: Git Clone (Recommended)**
-
-```bash
-# Clone repository
-git clone https://github.com/WanThinnn/Library-Management-System.git
-cd Library-Management-System
-
-# Setup and run
-make setup
-make build
-make up
-make migrate
-make initdata
-```
-
-**Option 2: Docker Pull (Production)**
-
-```bash
-# Clone repository for config files
-git clone https://github.com/WanThinnn/Library-Management-System.git
-cd Library-Management-System
-
-# Copy environment file
-cp .env.example .env
-# Edit .env with your configuration
-
-# Pull and run with production compose
-docker compose -f docker-compose.prod.yml pull
-docker compose -f docker-compose.prod.yml up -d
-
-# Initialize database
-docker compose -f docker-compose.prod.yml exec web python manage.py migrate
-docker compose -f docker-compose.prod.yml exec web python init_data.py
-```
-
-Access at: `https://library.cyberfortress.local`  
-Default credentials: `admin` / `admin123`
-
-## Sample Data
+## Make Commands
 
 The `make initdata` command creates:
 - 1 Admin user (admin/admin123)
@@ -214,35 +215,24 @@ docker compose exec web python manage.py test
 
 ## Production Deployment
 
-### Server Deployment
+For production deployment on a server, use **Option 2** (Pre-built Image) from the Deployment section above.
+
+Additional production considerations:
 
 ```bash
-# On server
+# On production server
 git clone https://github.com/WanThinnn/Library-Management-System.git
 cd Library-Management-System
-sudo make setup
-sudo make build
-sudo make up
-sudo make migrate
-sudo make initdata
-```
 
-### Using Docker Hub Image
+# Configure environment
+cp .env.example .env
+nano .env  # Set DEBUG=False, strong SECRET_KEY, proper ALLOWED_HOSTS
 
-Update `docker-compose.yml`:
-
-```yaml
-services:
-  web:
-    image: wanthinnn/library-management-system:latest
-    # Remove build section
-```
-
-Then:
-
-```bash
-docker compose pull
-docker compose up -d
+# Deploy
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml exec web python manage.py migrate
+docker compose -f docker-compose.prod.yml exec web python init_data.py
 ```
 
 ## CI/CD
