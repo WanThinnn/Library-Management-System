@@ -11,8 +11,8 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null; then
+# Check if Docker Compose is installed (support both v1 and v2)
+if ! (command -v docker-compose &> /dev/null || docker compose version &> /dev/null); then
     echo "Error: Docker Compose is not installed. Please install Docker Compose first."
     exit 1
 fi
@@ -39,8 +39,8 @@ echo "=== Setup completed! ==="
 echo ""
 echo "Next steps:"
 echo "1. Review and update .env file with your settings"
-echo "2. Run: docker-compose build"
-echo "3. Run: docker-compose up -d"
-echo "4. Access the application at https://localhost"
+echo "2. Run: docker compose build"
+echo "3. Run: docker compose up -d"
+echo "4. Access the application at https://library.cyberfortress.local"
 echo ""
 echo "For production, replace self-signed certificates with trusted ones."
