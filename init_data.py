@@ -353,42 +353,42 @@ def init_sample_readers():
     """Khởi tạo độc giả mẫu"""
     readers_data = [
         {
-            'full_name': 'Nguyễn Văn An',
+            'reader_name': 'Nguyễn Văn An',
             'date_of_birth': datetime(2000, 5, 15).date(),
             'email': 'nvan@example.com',
-            'phone': '0901234567',
+            'phone_number': '0901234567',
             'address': '123 Lê Lợi, Q.1, TP.HCM',
             'reader_type': 'Sinh viên'
         },
         {
-            'full_name': 'Trần Thị Bình',
+            'reader_name': 'Trần Thị Bình',
             'date_of_birth': datetime(1999, 8, 20).date(),
             'email': 'ttbinh@example.com',
-            'phone': '0912345678',
+            'phone_number': '0912345678',
             'address': '456 Nguyễn Huệ, Q.1, TP.HCM',
             'reader_type': 'Sinh viên'
         },
         {
-            'full_name': 'Lê Văn Cường',
+            'reader_name': 'Lê Văn Cường',
             'date_of_birth': datetime(1985, 3, 10).date(),
             'email': 'lvcuong@example.com',
-            'phone': '0923456789',
+            'phone_number': '0923456789',
             'address': '789 Trần Hưng Đạo, Q.5, TP.HCM',
             'reader_type': 'Giảng viên'
         },
         {
-            'full_name': 'Phạm Thị Dung',
+            'reader_name': 'Phạm Thị Dung',
             'date_of_birth': datetime(1990, 12, 25).date(),
             'email': 'ptdung@example.com',
-            'phone': '0934567890',
+            'phone_number': '0934567890',
             'address': '321 Võ Văn Tần, Q.3, TP.HCM',
             'reader_type': 'Cán bộ'
         },
         {
-            'full_name': 'Hoàng Văn Em',
+            'reader_name': 'Hoàng Văn Em',
             'date_of_birth': datetime(2001, 7, 5).date(),
             'email': 'hvem@example.com',
-            'phone': '0945678901',
+            'phone_number': '0945678901',
             'address': '654 Điện Biên Phủ, Q.Bình Thạnh, TP.HCM',
             'reader_type': 'Sinh viên'
         },
@@ -396,7 +396,7 @@ def init_sample_readers():
     
     print("\n[*] Khoi tao doc gia mau:")
     created_count = 0
-    card_expiry = datetime.now().date() + timedelta(days=180)  # 6 tháng
+    card_expiry = datetime.now() + timedelta(days=180)  # 6 tháng
     
     for reader_data in readers_data:
         reader_type = ReaderType.objects.filter(
@@ -409,25 +409,25 @@ def init_sample_readers():
         reader, created = Reader.objects.get_or_create(
             email=reader_data['email'],
             defaults={
-                'full_name': reader_data['full_name'],
+                'reader_name': reader_data['reader_name'],
                 'date_of_birth': reader_data['date_of_birth'],
-                'phone': reader_data['phone'],
+                'phone_number': reader_data['phone_number'],
                 'address': reader_data['address'],
                 'reader_type': reader_type,
-                'card_number': f"DG{datetime.now().year}{Reader.objects.count() + 1:05d}",
-                'card_issue_date': datetime.now().date(),
-                'card_expiry_date': card_expiry,
-                'status': 'active'
+                'card_creation_date': datetime.now(),
+                'expiration_date': card_expiry,
+                'total_debt': 0,
+                'is_active': True
             }
         )
         
         if created:
             created_count += 1
-            print(f"   ✅ {reader.full_name} - {reader.card_number}")
+            print(f"   [OK] {reader.reader_name} - {reader.email}")
         else:
-            print(f"   ℹ️  {reader.full_name} (đã tồn tại)")
+            print(f"   [INFO] {reader.reader_name} (da ton tai)")
     
-    print(f"\n   📊 Tổng: {created_count} độc giả mới / {Reader.objects.count()} tổng")
+    print(f"\n   [INFO] Tong: {created_count} doc gia moi / {Reader.objects.count()} tong")
 
 
 def create_superuser():
