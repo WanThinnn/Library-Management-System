@@ -153,36 +153,6 @@ sudo ./start --prod up
 ./start rebuild [--prod]    # Clean rebuild
 ```
 
-## Make Commands (Alternative)
-
-All commands work with optional `--prod` flag for production mode:
-
-```bash
-# Development (default)
-make build              # Build development images
-make up                 # Start development services
-make logs               # View development logs
-make migrate            # Run migrations
-make initdata           # Initialize sample data
-
-# Production (add --prod flag)
-make --prod build       # Pull and build production
-make --prod up          # Start production services
-make --prod logs        # View production logs
-make --prod migrate     # Run migrations (production)
-make --prod initdata    # Initialize sample data (production)
-
-# Common commands (works with --prod flag)
-make help               # Show all commands
-make setup              # Initial setup (certificates, .env)
-make down [--prod]      # Stop services
-make restart [--prod]   # Restart services
-make makemigrations [--prod] # Create migrations
-make shell [--prod]     # Open Django shell
-make clean [--prod]     # Remove containers and volumes
-make rebuild [--prod]   # Clean rebuild
-```
-
 ## Project Structure
 
 ```
