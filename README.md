@@ -330,8 +330,8 @@ sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keyc
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributors
-
-- WanThinnn - Initial work
+- **Lại Quan Thiên** - [WanThinnn](https://github.com/WanThinnn)
+- **Hồ Diệp Huy** - [hohuyy](https://github.com/hohuyy)
 
 ## Acknowledgments
 
