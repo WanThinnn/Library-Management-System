@@ -31,6 +31,39 @@ A comprehensive library management system built with Django, featuring book cata
 - Docker Compose v2.0+
 - Git
 
+
+## Configuration
+
+### Environment Variables
+
+Edit `.env` file:
+```bash
+cp .env.example .env
+```
+
+```env
+DEBUG=False
+SECRET_KEY=your-secret-key
+ALLOWED_HOSTS=library.cyberfortress.local,127.0.0.1
+DATABASE_URL=sqlite:///data/db.sqlite3
+```
+
+### SSL Certificates
+
+Place your SSL certificates in the `certs/` directory:
+- `_.cyberfortress.local.crt` - SSL certificate
+- `_.cyberfortress.local.key` - Private key
+- `CyberFortressRootCA.crt` - Root CA certificate
+
+### Hosts File
+
+Add to `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Windows):
+
+```
+127.0.0.1 library.cyberfortress.local
+```
+
+
 ## Deployment
 
 ### Option 1: Build from Source (Development)
@@ -53,7 +86,6 @@ This will:
 - Check Docker and Docker Compose installation
 - Verify SSL certificates exist
 - Auto-detect OS and install root CA certificate
-- Copy `.env.example` to `.env`
 
 **Step 3: Build and Run**
 
@@ -83,8 +115,6 @@ cd Library-Management-System
 
 ```bash
 chmod +x start  # Make start script executable
-cp .env.example .env
-nano .env  # Edit configuration
 ./start --prod setup
 ```
 
@@ -176,34 +206,6 @@ Library-Management-System/
 ├── Dockerfile
 ├── Makefile
 └── .env.example
-```
-
-## Configuration
-
-### Environment Variables
-
-Edit `.env` file:
-
-```env
-DEBUG=False
-SECRET_KEY=your-secret-key
-ALLOWED_HOSTS=library.cyberfortress.local,127.0.0.1
-DATABASE_URL=sqlite:///data/db.sqlite3
-```
-
-### SSL Certificates
-
-Place your SSL certificates in the `certs/` directory:
-- `_.cyberfortress.local.crt` - SSL certificate
-- `_.cyberfortress.local.key` - Private key
-- `CyberFortressRootCA.crt` - Root CA certificate
-
-### Hosts File
-
-Add to `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Windows):
-
-```
-127.0.0.1 library.cyberfortress.local
 ```
 
 ## Sample Data
