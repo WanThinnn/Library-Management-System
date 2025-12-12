@@ -3,185 +3,138 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2>🎫 {{ page_title }}</h2>
-    
-    <!-- Thông tin thẻ độc giả -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 8px; margin-bottom: 20px;">
-        <h3 style="margin: 0 0 15px 0; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 10px;">
-            📇 THÔNG TIN THẺ ĐỘC GIẢ
-        </h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div>
-                <strong>Mã độc giả:</strong><br>
-                <span style="font-size: 1.2em;">{{ reader.id }}</span>
-            </div>
-            <div>
-                <strong>Loại độc giả:</strong><br>
-                <span style="font-size: 1.2em;">{{ reader.reader_type.reader_type_name }}</span>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Thông tin cá nhân -->
-    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-        <h3 style="color: #2c3e50; margin-top: 0;">👤 Thông tin cá nhân</h3>
-        <table style="width: 100%; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid #dee2e6;">
-                <td style="padding: 12px; font-weight: bold; width: 200px;">Họ và tên:</td>
-                <td style="padding: 12px;">{{ reader.reader_name }}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #dee2e6;">
-                <td style="padding: 12px; font-weight: bold;">Ngày sinh:</td>
-                <td style="padding: 12px;">{{ reader.date_of_birth|date:"d/m/Y" }} 
-                    <span style="color: #666;">({{ reader.age }} tuổi)</span>
-                </td>
-            </tr>
-            <tr style="border-bottom: 1px solid #dee2e6;">
-                <td style="padding: 12px; font-weight: bold;">Email:</td>
-                <td style="padding: 12px;">{{ reader.email }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 12px; font-weight: bold;">Địa chỉ:</td>
-                <td style="padding: 12px;">{{ reader.address|default:"Chưa cập nhật" }}</td>
-            </tr>
-        </table>
-    </div>
-    
-    <!-- Thông tin thẻ -->
-    <div style="background: #e8f4f8; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-        <h3 style="color: #2980b9; margin-top: 0;">📅 Thông tin thẻ thư viện</h3>
-        <table style="width: 100%; border-collapse: collapse;">
-            <tr style="border-bottom: 1px solid #b3d9e6;">
-                <td style="padding: 12px; font-weight: bold; width: 200px;">Ngày lập thẻ:</td>
-                <td style="padding: 12px;">{{ reader.card_creation_date|date:"d/m/Y" }}</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #b3d9e6;">
-                <td style="padding: 12px; font-weight: bold;">Ngày hết hạn:</td>
-                <td style="padding: 12px;">
-                    {{ reader.expiration_date|date:"d/m/Y" }}
-                    {% if reader.is_card_expired %}
-                        <span style="color: #c62828; font-weight: bold;">⚠️ ĐÃ HẾT HẠN</span>
-                    {% else %}
-                        <span style="color: #27ae60; font-weight: bold;">✅ CÒN HẠN</span>
-                    {% endif %}
-                </td>
-            </tr>
-            <tr style="border-bottom: 1px solid #b3d9e6;">
-                <td style="padding: 12px; font-weight: bold;">Trạng thái:</td>
-                <td style="padding: 12px;">
-                    {% if reader.is_active %}
-                        <span style="background: #27ae60; color: white; padding: 5px 15px; border-radius: 20px;">
-                            ✅ Đang hoạt động
-                        </span>
-                    {% else %}
-                        <span style="background: #e74c3c; color: white; padding: 5px 15px; border-radius: 20px;">
-                            ❌ Đã khóa
-                        </span>
-                    {% endif %}
-                </td>
-            </tr>
-            <tr>
-                <td style="padding: 12px; font-weight: bold;">Tổng nợ:</td>
-                <td style="padding: 12px;">
-                    <span style="font-size: 1.2em; font-weight: bold; color: {% if reader.total_debt > 0 %}#c62828{% else %}#27ae60{% endif %};">
-                        {{ reader.total_debt|floatformat:0|default:"0" }}đ
-                    </span>
-                </td>
-            </tr>
-        </table>
-    </div>
-    
-    <!-- Thông tin mượn sách -->
-    <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-        <h3 style="color: #856404; margin-top: 0;">
-            <i class="fas fa-book"></i> Sách đang mượn
-        </h3>
-        <div id="readerBorrowingList" style="min-height: 200px;">
-            <div style="text-align: center; color: #999;">
-                <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách...
-            </div>
-        </div>
-    </div>
-    
-    <!-- Action buttons -->
-    <div style="display: flex; gap: 10px; margin-top: 20px;">
-        <a href="{% url 'reader_create' %}" class="btn" style="flex: 1; text-align: center;">
-            ➕ Lập thẻ độc giả khác
-        </a>
-        <a href="{% url 'reader_list' %}" class="btn btn-secondary" style="flex: 1; text-align: center;">
-            📋 Danh sách độc giả
-        </a>
-        <a href="{% url 'home' %}" class="btn btn-secondary" style="flex: 1; text-align: center;">
-            🏠 Trang chủ
-        </a>
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+    <div class="p-6">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">
+            🎫 {{ page_title }}
+        </h1>
+        <p class="text-gray-500">Chi tiết thông tin thẻ độc giả</p>
     </div>
 </div>
 
-<style>
-    .reader-borrow-item {
-        padding: 12px;
-        border-left: 4px solid #ffc107;
-        background-color: #fffbf0;
-        margin-bottom: 10px;
-        border-radius: 4px;
-    }
-    
-    .reader-borrow-item.overdue {
-        border-left-color: #dc3545;
-        background-color: #ffe5e5;
-    }
-    
-    .reader-borrow-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-    }
-    
-    .reader-borrow-table th {
-        background-color: #f8f9fa;
-        padding: 10px;
-        text-align: left;
-        border-bottom: 2px solid #dee2e6;
-        font-weight: 600;
-    }
-    
-    .reader-borrow-table td {
-        padding: 10px;
-        border-bottom: 1px solid #dee2e6;
-    }
-    
-    .reader-borrow-table tr:hover {
-        background-color: #f8f9fa;
-    }
-    
-    .reader-borrow-table tr.overdue {
-        background-color: #ffe5e5;
-    }
-    
-    .badge {
-        display: inline-block;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.85em;
-        font-weight: 600;
-    }
-    
-    .badge-success {
-        background-color: #d4edda;
-        color: #155724;
-    }
-    
-    .badge-danger {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
-    
-    .badge-warning {
-        background-color: #fff3cd;
-        color: #856404;
-    }
-</style>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column - Main Info -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Thông tin thẻ độc giả -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-bold mb-4 border-b border-white/30 pb-2">
+                📇 THÔNG TIN THẺ ĐỘC GIẢ
+            </h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-white/80 text-sm">Mã độc giả:</p>
+                    <p class="text-2xl font-bold">{{ reader.id }}</p>
+                </div>
+                <div>
+                    <p class="text-white/80 text-sm">Loại độc giả:</p>
+                    <p class="text-xl font-semibold">{{ reader.reader_type.reader_type_name }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin cá nhân -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div class="bg-blue-600 text-white px-4 py-3">
+                <h5 class="font-semibold">👤 Thông tin cá nhân</h5>
+            </div>
+            <div class="p-4">
+                <table class="w-full">
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="py-3 font-semibold text-gray-700" style="width: 150px;">Họ và tên:</td>
+                            <td class="py-3 text-gray-900">{{ reader.reader_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 font-semibold text-gray-700">Ngày sinh:</td>
+                            <td class="py-3 text-gray-900">
+                                {{ reader.date_of_birth|date:"d/m/Y" }}
+                                <span class="text-gray-500">({{ reader.age }} tuổi)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 font-semibold text-gray-700">Email:</td>
+                            <td class="py-3 text-gray-900">{{ reader.email }}</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 font-semibold text-gray-700">Địa chỉ:</td>
+                            <td class="py-3 text-gray-900">{{ reader.address|default:"Chưa cập nhật" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sách đang mượn -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div class="bg-amber-500 text-white px-4 py-3">
+                <h5 class="font-semibold">📚 Sách đang mượn</h5>
+            </div>
+            <div class="p-4" id="readerBorrowingList">
+                <div class="text-center text-gray-500 py-8">
+                    <div class="animate-spin inline-block w-6 h-6 border-2 border-current border-t-transparent rounded-full mb-2"></div>
+                    <p>Đang tải danh sách...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column - Card Info & Actions -->
+    <div class="space-y-6">
+        <!-- Thông tin thẻ -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div class="bg-blue-600 text-white px-4 py-3">
+                <h5 class="font-semibold">📅 Thông tin thẻ thư viện</h5>
+            </div>
+            <div class="p-4 space-y-4">
+                <div>
+                    <p class="text-gray-500 text-sm">Ngày lập thẻ:</p>
+                    <p class="text-lg font-semibold text-gray-900">{{ reader.card_creation_date|date:"d/m/Y" }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">Ngày hết hạn:</p>
+                    <p class="text-lg font-semibold text-gray-900">
+                        {{ reader.expiration_date|date:"d/m/Y" }}
+                        {% if reader.is_card_expired %}
+                            <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full ml-2">HẾT HẠN</span>
+                        {% else %}
+                            <span class="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full ml-2">CÒN HẠN</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">Trạng thái:</p>
+                    {% if reader.is_active %}
+                        <span class="bg-green-500 text-white text-sm px-3 py-1 rounded-full">✅ Đang hoạt động</span>
+                    {% else %}
+                        <span class="bg-red-500 text-white text-sm px-3 py-1 rounded-full">❌ Đã khóa</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm">Tổng nợ:</p>
+                    <p class="text-2xl font-bold {% if reader.total_debt > 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                        {{ reader.total_debt|floatformat:0|default:"0" }}đ
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div class="bg-blue-600 text-white px-4 py-3">
+                <h5 class="font-semibold">⚙️ Thao tác</h5>
+            </div>
+            <div class="p-4 space-y-2">
+                <a href="{% url 'reader_create' %}" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    ➕ Lập thẻ độc giả khác
+                </a>
+                <a href="{% url 'reader_list' %}" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    📋 Danh sách độc giả
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 function loadReaderBorrowingInfo() {
@@ -196,7 +149,7 @@ function loadReaderBorrowingInfo() {
             const readerData = data.data?.find(r => r.reader_id == readerId);
             
             if (!readerData) {
-                container.innerHTML = '<div style="text-align: center; color: #27ae60;"><em>✓ Độc giả không có sách mượn</em></div>';
+                container.innerHTML = '<div class="text-center text-green-600 py-4"><em>✓ Độc giả không có sách mượn</em></div>';
             } else {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
@@ -207,14 +160,14 @@ function loadReaderBorrowingInfo() {
                     const isOverdue = dueDate < today;
                     
                     return `
-                        <tr ${isOverdue ? 'class="overdue"' : ''}>
-                            <td><strong>${book.title}</strong></td>
-                            <td>${book.borrow_date}</td>
-                            <td>${book.due_date}</td>
-                            <td>
+                        <tr class="${isOverdue ? 'bg-red-50' : ''} hover:bg-gray-50">
+                            <td class="px-3 py-2 text-sm"><strong>${book.title}</strong></td>
+                            <td class="px-3 py-2 text-sm text-gray-600">${book.borrow_date}</td>
+                            <td class="px-3 py-2 text-sm text-gray-600">${book.due_date}</td>
+                            <td class="px-3 py-2 text-sm">
                                 ${isOverdue ? 
-                                    '<span class="badge badge-danger">⚠️ Quá hạn</span>' : 
-                                    '<span class="badge badge-success">✓ Còn hạn</span>'
+                                    '<span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">Quá hạn</span>' : 
+                                    '<span class="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">Còn hạn</span>'
                                 }
                             </td>
                         </tr>
@@ -222,39 +175,41 @@ function loadReaderBorrowingInfo() {
                 }).join('');
                 
                 container.innerHTML = `
-                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div class="grid grid-cols-2 gap-4 mb-4 p-3 bg-amber-50 rounded-lg">
                         <div>
-                            <strong style="color: #856404;">Tổng sách đang mượn:</strong><br>
-                            <span style="font-size: 1.5em; color: #007bff; font-weight: bold;">${readerData.borrowed_count} quyển</span>
+                            <p class="text-amber-700 text-sm font-medium">Tổng sách đang mượn:</p>
+                            <p class="text-2xl font-bold text-blue-600">${readerData.borrowed_count} quyển</p>
                         </div>
                         <div>
-                            <strong style="color: #856404;">Phải trả trước:</strong><br>
-                            <span style="font-size: 1.2em; font-weight: bold; color: ${readerData.is_overdue ? '#dc3545' : '#27ae60'};">
+                            <p class="text-amber-700 text-sm font-medium">Phải trả trước:</p>
+                            <p class="text-lg font-bold ${readerData.is_overdue ? 'text-red-600' : 'text-green-600'}">
                                 ${readerData.latest_due_date}
                                 ${readerData.is_overdue ? ' ⚠️' : ''}
-                            </span>
+                            </p>
                         </div>
                     </div>
                     
-                    <table class="reader-borrow-table">
-                        <thead>
-                            <tr>
-                                <th>Tên sách</th>
-                                <th>Ngày mượn</th>
-                                <th>Phải trả</th>
-                                <th>Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${booksHtml}
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-amber-100">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-amber-800 uppercase">Tên sách</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-amber-800 uppercase">Ngày mượn</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-amber-800 uppercase">Phải trả</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-amber-800 uppercase">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                ${booksHtml}
+                            </tbody>
+                        </table>
+                    </div>
                 `;
             }
         })
         .catch(error => {
             console.error('Error loading borrowing info:', error);
-            document.getElementById('readerBorrowingList').innerHTML = '<div style="color: #c62828;"><em>Lỗi tải thông tin mượn sách</em></div>';
+            document.getElementById('readerBorrowingList').innerHTML = '<div class="text-center text-red-600 py-4"><em>Lỗi tải thông tin mượn sách</em></div>';
         });
 }
 
