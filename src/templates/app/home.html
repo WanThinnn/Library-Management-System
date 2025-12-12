@@ -203,25 +203,29 @@ document.querySelectorAll('.card-carousel').forEach(carousel => {
   </div>
 </div>
 {% endif %} {% else %}
-<!-- Unauthenticated View -->
-<div class="text-center py-20 px-4">
+<!-- Unauthenticated View with Background -->
+{% load static %}
+<div class="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat" style="background-image: url('{% static 'image/background.jpg' %}');"></div>
+<div class="fixed inset-0 -z-10 bg-black/50"></div>
+
+<div class="text-center py-20 px-4 min-h-[70vh] flex flex-col justify-center items-center">
   <h1
-    class="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 tracking-tight"
+    class="text-4xl md:text-5xl font-extrabold mb-4 text-white tracking-tight drop-shadow-lg"
   >
     Hệ thống Quản lý Thư viện
   </h1>
-  <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+  <p class="text-xl text-gray-100 mb-10 max-w-2xl mx-auto drop-shadow-md">
     Vui lòng đăng nhập để sử dụng các chức năng quản lý, tra cứu và báo cáo.
   </p>
   <div class="flex gap-4 justify-center flex-wrap">
     <a
       href="{% url 'login' %}"
-      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-lg px-8 py-3 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+      class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-lg px-8 py-3 shadow-lg transition-all"
       >Đăng nhập</a
     >
     <a
       href="/admin/"
-      class="text-blue-700 bg-white border border-blue-700 hover:bg-blue-50 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-lg px-8 py-3 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+      class="text-white bg-white/20 backdrop-blur-sm border border-white/50 hover:bg-white/30 focus:ring-4 focus:ring-white/30 font-medium rounded-lg text-lg px-8 py-3 shadow-lg transition-all"
       >Admin Panel</a
     >
   </div>
