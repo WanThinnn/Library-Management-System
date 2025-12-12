@@ -3,11 +3,16 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2">
-        📜 {{ page_title }}
-    </h1>
-    <p class="text-gray-500">Danh sách tất cả phiếu trả sách</p>
+
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+    <div class="p-6">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">
+            {{ page_title }}
+        </h1>
+
+        <p class="text-gray-500">Dưới đây là danh sách phiếu trả sách</p>
+    </div>
 </div>
 
 <!-- Bộ lọc -->
@@ -48,15 +53,17 @@
                     ➕ Nhận trả sách
                 </a>
             </div>
+
         </form>
+                    <!-- Kết quả tìm kiếm -->
+            {% if total_results > 0 %}
+            <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded mb-6 mt-4">
+                Tìm thấy <strong>{{ total_results }}</strong> kết quả
+            </div>
     </div>
 </div>
 
-<!-- Kết quả tìm kiếm -->
-{% if total_results > 0 %}
-<div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded mb-6">
-    <strong>Tìm thấy {{ total_results }} kết quả</strong>
-</div>
+
 
 <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
     <div class="overflow-x-auto">

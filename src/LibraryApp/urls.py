@@ -14,6 +14,7 @@ urlpatterns = [
     path('user/create/', views.user_create_view, name='user_create'),
     path('user/<int:user_id>/edit/', views.user_edit_view, name='user_edit'),
     path('user/<int:user_id>/delete/', views.user_delete_view, name='user_delete'),
+    path('profile/', views.user_profile_view, name='user_profile'),
     
     # YC1: Lập thẻ độc giả
     path('reader/create/', views.reader_create_view, name='reader_create'),

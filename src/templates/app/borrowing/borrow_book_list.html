@@ -3,15 +3,20 @@
 {% block title %}Danh sách phiếu mượn{% endblock %}
 
 {% block content %}
-<div class="mb-6">
-    <h1 class="text-4xl font-bold text-gray-900 mb-2">
-        📋 Danh sách phiếu mượn sách
-    </h1>
-</div>
 
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+    <div class="p-6">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">
+            {{ page_title }}
+        </h1>
+
+        <p class="text-gray-500">Dưới đây là danh sách phiếu mượn sách</p>
+    </div>
+</div>
 <!-- Filter -->
 <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
-    <div class="bg-gray-500 text-white px-4 py-3">
+    <div class="bg-blue-600 text-white px-4 py-3">
         <h5 class="font-semibold">Lọc phiếu mượn</h5>
     </div>
     <div class="p-4">

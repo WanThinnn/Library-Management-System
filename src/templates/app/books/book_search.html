@@ -20,9 +20,11 @@
 
 
 <!-- Search Card -->
-<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-8">
-    <div class="p-6">
-        <h3 class="text-xl font-semibold text-gray-900 mb-6">Tiêu chí tìm kiếm</h3>
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-8 overflow-hidden">
+    <div class="bg-blue-600 text-white px-4 py-3">
+        <h5 class="font-semibold">Tiêu chí tìm kiếm</h5>
+    </div>
+    <div class="p-4">
         <form method="get">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                 <div>
@@ -38,12 +40,12 @@
                     {{ form.status }}
                 </div>
             </div>
-            <div class="flex gap-3">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    Tìm kiếm
+            <div class="flex flex-wrap gap-2">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
+                    🔍 Tìm kiếm
                 </button>
-                <a href="{% url 'book_search' %}" class="border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
-                    Xóa lọc
+                <a href="{% url 'book_search' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
+                    🔄 Xóa lọc
                 </a>
             </div>
             <!-- Results -->
@@ -61,15 +63,15 @@
 <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="bg-blue-600 text-white">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">STT</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Mã Sách</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tên Sách</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Thể Loại</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tác Giả</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Số Lượng Còn</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tình Trạng</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">STT</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Mã Sách</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Tên Sách</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Thể Loại</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Tác Giả</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Số Lượng Còn</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Tình Trạng</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">

@@ -90,7 +90,62 @@ def logout_view(request):
         username = request.user.username
         logout(request)
         messages.success(request, f'Đã đăng xuất tài khoản {username}.')
-    return redirect('login')
+    return redirect('/')
+
+
+@login_required
+def user_profile_view(request):
+    """
+    Trang cá nhân của người dùng
+    Cho phép xem và cập nhật thông tin cá nhân
+    """
+    user = request.user
+    
+    if request.method == 'POST':
+        # Cập nhật thông tin cơ bản
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        
+        # Validate email
+        if email and User.objects.filter(email=email).exclude(id=user.id).exists():
+            messages.error(request, 'Email đã được sử dụng bởi người dùng khác.')
+        else:
+            user.first_name = first_name
+            user.last_name = last_name
+            if email:
+                user.email = email
+            user.save()
+            messages.success(request, 'Cập nhật thông tin thành công!')
+        
+        # Đổi mật khẩu nếu có
+        old_password = request.POST.get('old_password', '')
+        new_password = request.POST.get('new_password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+        
+        if old_password and new_password:
+            if not user.check_password(old_password):
+                messages.error(request, 'Mật khẩu cũ không đúng.')
+            elif new_password != confirm_password:
+                messages.error(request, 'Mật khẩu mới và xác nhận không khớp.')
+            elif len(new_password) < 6:
+                messages.error(request, 'Mật khẩu mới phải có ít nhất 6 ký tự.')
+            else:
+                user.set_password(new_password)
+                user.save()
+                # Re-login để giữ session
+                from django.contrib.auth import update_session_auth_hash
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Đổi mật khẩu thành công!')
+        
+        return redirect('user_profile')
+    
+    context = {
+        'page_title': 'Trang cá nhân',
+        'profile_user': user,
+    }
+    
+    return render(request, 'accounts/profile.html', context)
 
 
 # ==================== YC1: LẬP THẺ ĐỘC GIẢ ====================
