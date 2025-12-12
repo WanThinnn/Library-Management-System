@@ -38,7 +38,7 @@ def home_view(request):
             due_date__lt=date.today()
         ).count()
     
-    return render(request, 'LibraryApp/home.html', context)
+    return render(request, 'app/home.html', context)
 
 
 # ==================== AUTHENTICATION ====================
@@ -81,7 +81,7 @@ def login_view(request):
         'page_title': 'Đăng nhập'
     }
     
-    return render(request, 'Accounts/login.html', context)
+    return render(request, 'accounts/login.html', context)
 
 
 def logout_view(request):
@@ -141,7 +141,7 @@ def reader_create_view(request):
         'page_title': 'Lập thẻ độc giả mới'
     }
     
-    return render(request, 'LibraryApp/readers/reader_create.html', context)
+    return render(request, 'app/readers/reader_create.html', context)
 
 
 @staff_required
@@ -156,7 +156,7 @@ def reader_detail_view(request, reader_id):
         'page_title': f'Thẻ độc giả - {reader.reader_name}'
     }
     
-    return render(request, 'LibraryApp/readers/reader_detail.html', context)
+    return render(request, 'app/readers/reader_detail.html', context)
 
 
 @staff_required
@@ -186,7 +186,7 @@ def reader_list_view(request):
         'page_title': 'Danh sách độc giả'
     }
     
-    return render(request, 'LibraryApp/readers/reader_list.html', context)
+    return render(request, 'app/readers/reader_list.html', context)
 
 
 # ==================== YC2: TIẾP NHẬN SÁCH MỚI ====================
@@ -316,7 +316,7 @@ def book_import_view(request):
         'page_title': 'Tiếp nhận sách mới'
     }
     
-    return render(request, 'LibraryApp/books/book_import.html', context)
+    return render(request, 'app/books/book_import.html', context)
 
 
 @staff_required
@@ -333,7 +333,7 @@ def book_import_detail_view(request, import_id):
         'page_title': f'Phiếu nhập sách #{receipt.id}'
     }
     
-    return render(request, 'LibraryApp/books/book_import_detail.html', context)
+    return render(request, 'app/books/book_import_detail.html', context)
 
 
 @staff_required
@@ -360,7 +360,7 @@ def book_import_list_view(request):
         'page_title': 'Danh sách phiếu nhập sách'
     }
     
-    return render(request, 'LibraryApp/books/book_import_list.html', context)
+    return render(request, 'app/books/book_import_list.html', context)
 
 
 # ==================== BOOK SEARCH (YC3) ====================
@@ -418,7 +418,7 @@ def book_search_view(request):
         'page_title': 'Tra cứu sách'
     }
     
-    return render(request, 'LibraryApp/books/book_search.html', context)
+    return render(request, 'app/books/book_search.html', context)
 
 
 # ==================== BORROW BOOK (YC4) ====================
@@ -513,7 +513,7 @@ def borrow_book_view(request):
         'page_title': 'Cho mượn sách'
     }
     
-    return render(request, 'LibraryApp/borrowing/borrow_book.html', context)
+    return render(request, 'app/borrowing/borrow_book.html', context)
 
 
 @staff_required
@@ -528,7 +528,7 @@ def borrow_book_detail_view(request, receipt_id):
         'page_title': f'Phiếu mượn #{receipt.id}'
     }
     
-    return render(request, 'LibraryApp/borrowing/borrow_book_detail.html', context)
+    return render(request, 'app/borrowing/borrow_book_detail.html', context)
 
 
 @staff_required
@@ -560,7 +560,7 @@ def borrow_book_list_view(request):
         'page_title': 'Danh sách phiếu mượn sách'
     }
     
-    return render(request, 'LibraryApp/borrowing/borrow_book_list.html', context)
+    return render(request, 'app/borrowing/borrow_book_list.html', context)
 
 
 # ==================== API ENDPOINTS FOR BORROW BOOK ====================
@@ -740,7 +740,7 @@ def return_book_view(request):
     context['params_json'] = params_json
     context['readers'] = list(readers)
     context['readers_json'] = json.dumps(list(readers))
-    return render(request, 'LibraryApp/borrowing/return_book.html', context)
+    return render(request, 'app/borrowing/return_book.html', context)
 
 
 @staff_required
@@ -765,7 +765,7 @@ def return_book_detail_view(request, receipt_id):
         'fine_rate': fine_rate,
     }
     
-    return render(request, 'LibraryApp/borrowing/return_book_detail.html', context)
+    return render(request, 'app/borrowing/return_book_detail.html', context)
 
 
 @staff_required
@@ -829,7 +829,7 @@ def return_book_list_view(request):
         'total_results': paginator.count,
     }
     
-    return render(request, 'LibraryApp/borrowing/return_book_list.html', context)
+    return render(request, 'app/borrowing/return_book_list.html', context)
 
 
 @login_required
@@ -981,7 +981,7 @@ def receipt_form_view(request):
         'params': params,
     }
     
-    return render(request, 'LibraryApp/receipts/receipt_form.html', context)
+    return render(request, 'app/receipts/receipt_form.html', context)
 
 
 @staff_required
@@ -1029,7 +1029,7 @@ def receipt_list_view(request):
         'total_results': paginator.count,
     }
     
-    return render(request, 'LibraryApp/receipts/receipt_list.html', context)
+    return render(request, 'app/receipts/receipt_list.html', context)
 
 
 @staff_required
@@ -1044,7 +1044,7 @@ def receipt_detail_view(request, receipt_id):
         'page_title': f'Chi tiết phiếu thu #{receipt.id}'
     }
     
-    return render(request, 'LibraryApp/receipts/receipt_detail.html', context)
+    return render(request, 'app/receipts/receipt_detail.html', context)
 
 
 @login_required
@@ -1137,7 +1137,7 @@ def report_borrow_by_category_view(request):
         'page_title': f'Báo cáo mượn sách theo thể loại - Tháng {month}/{year}'
     }
     
-    return render(request, 'LibraryApp/reports/report_borrow_by_category.html', context)
+    return render(request, 'app/reports/report_borrow_by_category.html', context)
 
 
 @staff_required
@@ -1185,7 +1185,7 @@ def report_overdue_books_view(request):
         'page_title': f'Báo cáo sách trả trễ - Ngày {report_date.strftime("%d/%m/%Y")}'
     }
     
-    return render(request, 'LibraryApp/reports/report_overdue_books.html', context)
+    return render(request, 'app/reports/report_overdue_books.html', context)
 
 
 # ==================== SYSTEM PARAMETERS - YC8 ====================
@@ -1239,7 +1239,7 @@ def parameter_update_view(request):
         'page_title': 'Thay đổi quy định hệ thống'
     }
     
-    return render(request, 'LibraryApp/settings/parameter_update.html', context)
+    return render(request, 'app/settings/parameter_update.html', context)
 
 
 # ==================== QUẢN LÝ NGƯỜI DÙNG ====================
@@ -1267,7 +1267,7 @@ def user_list_view(request):
         'page_title': 'Quản lý người dùng'
     }
     
-    return render(request, 'LibraryApp/users/user_list.html', context)
+    return render(request, 'app/users/user_list.html', context)
 
 
 @manager_required
@@ -1334,7 +1334,7 @@ def user_create_view(request):
         'page_title': 'Tạo người dùng mới'
     }
     
-    return render(request, 'LibraryApp/users/user_form.html', context)
+    return render(request, 'app/users/user_form.html', context)
 
 
 @manager_required
@@ -1413,7 +1413,7 @@ def user_edit_view(request, user_id):
         'page_title': f'Chỉnh sửa người dùng: {user.username}'
     }
     
-    return render(request, 'LibraryApp/users/user_form.html', context)
+    return render(request, 'app/users/user_form.html', context)
 
 
 @manager_required
@@ -1447,7 +1447,7 @@ def user_delete_view(request, user_id):
         'page_title': 'Xác nhận xóa người dùng'
     }
     
-    return render(request, 'LibraryApp/users/user_delete_confirm.html', context)
+    return render(request, 'app/users/user_delete_confirm.html', context)
 
 
 # ==================== ĐĂNG KÝ TÀI KHOẢN ====================
@@ -1512,4 +1512,4 @@ def register_view(request):
         'page_title': 'Đăng ký tài khoản'
     }
     
-    return render(request, 'Accounts/register.html', context)
+    return render(request, 'accounts/register.html', context)

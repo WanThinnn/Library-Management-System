@@ -1,20 +1,350 @@
-{% load static tailwind_tags %}
+{% load tailwind_tags %} {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Django Tailwind</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    {% tailwind_css %}
-</head>
-
-<body class="bg-gray-50 text-black font-serif leading-normal tracking-normal">
-
-<div class="container mx-auto">
-    <section class="flex items-center justify-center h-screen">
-        <h1 class="text-5xl">Django + Tailwind = ❤️</h1>
-    </section>
-</div>
-</body>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Hệ thống Quản lý Thư viện{% endblock %}</title>
+    {% tailwind_css %} {% block extra_css %}{% endblock %}
+  </head>
+  <body
+    class="bg-gray-50 min-h-screen flex flex-col font-sans text-gray-900 antialiased"
+  >
+    <nav
+      class="bg-white border-b border-gray-200 fixed w-full z-40 top-0 start-0 shadow-sm"
+    >
+      <div
+        class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"
+      >
+        <a
+          href="{% url 'home' %}"
+          class="flex items-center space-x-3 rtl:space-x-reverse"
+          ><span class="text-3xl">📚</span>
+          <div class="flex flex-col leading-tight">
+            <span
+              class="self-center text-xl font-bold whitespace-nowrap text-blue-700"
+              >Quản lý Thư viện</span
+            ><span
+              class="text-xs text-gray-500 tracking-wider uppercase font-medium"
+              >Library System</span
+            >
+          </div></a
+        >
+        <button
+          id="navbar-toggle-btn"
+          type="button"
+          class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
+          aria-controls="navbar-default"
+          aria-expanded="false"
+        >
+          <span class="sr-only">Open main menu</span
+          ><svg
+            class="w-5 h-5"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 17 14"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M1 1h15M1 7h15M1 13h15"
+            />
+          </svg>
+        </button>
+        <div class="hidden w-full md:block md:w-auto" id="navbar-default">
+          <ul
+            class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white text-sm"
+          >
+            <li>
+              <a
+                href="{% url 'home' %}"
+                class="block py-2 px-3 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 {% if request.path == '/' %}text-blue-700{% else %}text-gray-900{% endif %}"
+                aria-current="page"
+                >Trang chủ</a
+              >
+            </li>
+            {% if user.is_authenticated %}
+            <li class="relative group">
+              <button
+                class="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer"
+              >
+                Quản lý<svg
+                  class="w-2.5 h-2.5 ms-2.5"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 10 6"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 4 4 4-4"
+                  />
+                </svg>
+              </button>
+              <div
+                class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full left-0 mt-1 border border-gray-100"
+              >
+                <ul
+                  class="py-2 text-gray-700"
+                  aria-labelledby="dropdownLargeButton"
+                >
+                  <li>
+                    <div
+                      class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                    >
+                      Độc giả
+                    </div>
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'reader_create' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Lập thẻ độc giả (YC1)</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'reader_list' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Danh sách độc giả</a
+                    >
+                  </li>
+                  <div class="my-1 border-t border-gray-100"></div>
+                  <li>
+                    <div
+                      class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                    >
+                      Sách
+                    </div>
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'book_import' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Tiếp nhận sách (YC2)</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'book_search' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Tra cứu sách (YC3)</a
+                    >
+                  </li>
+                  <div class="my-1 border-t border-gray-100"></div>
+                  <li>
+                    <div
+                      class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                    >
+                      Mượn/Trả
+                    </div>
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'borrow_book' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Lập phiếu mượn (YC4)</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'return_book' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Lập phiếu trả (YC5)</a
+                    >
+                  </li>
+                </ul>
+              </div>
+            </li>
+            <li class="relative group">
+              <button
+                class="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer"
+              >
+                Thu tiền & BC<svg
+                  class="w-2.5 h-2.5 ms-2.5"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 10 6"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 4 4 4-4"
+                  />
+                </svg>
+              </button>
+              <div
+                class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full left-0 mt-1 border border-gray-100"
+              >
+                <ul class="py-2 text-gray-700">
+                  <li>
+                    <div
+                      class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                    >
+                      Thu tiền phạt
+                    </div>
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'receipt_form' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Lập phiếu thu (YC6)</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'receipt_list' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Danh sách phiếu thu</a
+                    >
+                  </li>
+                  <div class="my-1 border-t border-gray-100"></div>
+                  <li>
+                    <div
+                      class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                    >
+                      Báo cáo
+                    </div>
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'report_borrow_by_category' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Mượn theo thể loại</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'report_overdue_books' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Sách trả trễ</a
+                    >
+                  </li>
+                </ul>
+              </div>
+            </li>
+            {% if user.is_superuser %}
+            <li class="relative group">
+              <button
+                class="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer"
+              >
+                Hệ thống<svg
+                  class="w-2.5 h-2.5 ms-2.5"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 10 6"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 4 4 4-4"
+                  />
+                </svg>
+              </button>
+              <div
+                class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full md:right-0 md:left-auto mt-1 border border-gray-100"
+              >
+                <ul class="py-2 text-gray-700">
+                  <li>
+                    <a
+                      href="{% url 'parameter_update' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Thay đổi quy định</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'user_list' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Quản lý người dùng</a
+                    >
+                  </li>
+                  <div class="my-1 border-t border-gray-100"></div>
+                  <li>
+                    <a
+                      href="/admin/"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Admin Panel</a
+                    >
+                  </li>
+                </ul>
+              </div>
+            </li>
+            {% endif %}
+            <li
+              class="relative group border-t md:border-t-0 pt-2 md:pt-0 mt-2 md:mt-0"
+            >
+              <button
+                class="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer font-semibold"
+              >
+                {{ user.username }} {% if user.is_superuser %}<span
+                  class="ms-2 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                  >Admin</span
+                >{% elif user.is_staff %}<span
+                  class="ms-2 bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                  >Staff</span
+                >{% endif %}
+              </button>
+              <div
+                class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-44 group-hover:block peer-focus:block hover:block absolute top-full md:right-0 md:left-auto mt-1 border border-gray-100"
+              >
+                <ul class="py-2 text-gray-700">
+                  <li>
+                    <a
+                      href="{% url 'logout' %}"
+                      class="block px-4 py-2 text-red-600 hover:bg-red-50"
+                      >Đăng xuất</a
+                    >
+                  </li>
+                </ul>
+              </div>
+            </li>
+            {% else %}
+            <li>
+              <a
+                href="{% url 'book_search' %}"
+                class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0"
+                >Tra cứu sách</a
+              >
+            </li>
+            <li>
+              <a
+                href="{% url 'login' %}"
+                class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-blue-700 md:text-white md:px-4 md:py-2 md:rounded-lg hover:bg-blue-800 transition-colors"
+                >Đăng nhập</a
+              >
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="pt-24 pb-12 flex-grow">
+      <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+    <script>
+      document
+        .getElementById("navbar-toggle-btn")
+        .addEventListener("click", function () {
+          var target = document.getElementById("navbar-default");
+          target.classList.toggle("hidden");
+        });
+    </script>
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+  </body>
 </html>

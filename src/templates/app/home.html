@@ -1,0 +1,212 @@
+{% extends 'base.html' %} {% block content %} {% if user.is_authenticated %}
+<!-- Welcome Header -->
+<div class="mb-8">
+  <h1 class="text-3xl font-bold mb-2 flex items-center flex-wrap gap-2">
+    Chào mừng, {{ user.username }} {% if user.is_superuser %}
+    <span
+      class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full"
+      >Quản trị viên</span
+    >
+    {% elif user.is_staff %}
+    <span
+      class="bg-purple-100 text-purple-800 text-sm font-medium px-3 py-1 rounded-full"
+      >Nhân viên</span
+    >
+    {% endif %}
+  </h1>
+  <p class="text-gray-600">Tổng quan hệ thống quản lý thư viện</p>
+</div>
+
+<!-- Dashboard Stats -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <!-- Stat Card 1 - Độc giả -->
+  <div
+    class="p-6 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-lg text-white"
+  >
+    <div class="text-center">
+      <div class="text-5xl font-bold mb-2">{{ total_readers|default:"0" }}</div>
+      <div class="text-lg opacity-90 font-medium">Độc giả</div>
+    </div>
+  </div>
+
+  <!-- Stat Card 2 - Sách -->
+  <div
+    class="p-6 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl shadow-lg text-white"
+  >
+    <div class="text-center">
+      <div class="text-5xl font-bold mb-2">{{ total_books|default:"0" }}</div>
+      <div class="text-lg opacity-90 font-medium">Đầu sách</div>
+    </div>
+  </div>
+
+  <!-- Stat Card 3 - Đang mượn -->
+  <div
+    class="p-6 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg text-white"
+  >
+    <div class="text-center">
+      <div class="text-5xl font-bold mb-2">
+        {{ active_borrows|default:"0" }}
+      </div>
+      <div class="text-lg opacity-90 font-medium">Đang mượn</div>
+    </div>
+  </div>
+
+  <!-- Stat Card 4 - Quá hạn -->
+  <div
+    class="p-6 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl shadow-lg text-white"
+  >
+    <div class="text-center">
+      <div class="text-5xl font-bold mb-2">{{ overdue_books|default:"0" }}</div>
+      <div class="text-lg opacity-90 font-medium">Quá hạn</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="mb-12">
+  <h2 class="text-2xl font-bold mb-6 text-gray-800">Tính năng chính</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Độc giả -->
+    <div
+      class="bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
+    >
+      <div class="p-6">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">
+          Quản lý Độc giả
+        </h3>
+        <div class="flex flex-col space-y-3">
+          <a
+            href="{% url 'reader_create' %}"
+            class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors"
+            >Lập thẻ độc giả (YC1)</a
+          >
+          <a
+            href="{% url 'reader_list' %}"
+            class="text-blue-700 bg-white border border-blue-600 hover:bg-blue-50 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors"
+            >Danh sách độc giả</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Sách -->
+    <div
+      class="bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
+    >
+      <div class="p-6">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">
+          Quản lý Sách
+        </h3>
+        <div class="flex flex-col space-y-3">
+          <a
+            href="{% url 'book_import' %}"
+            class="text-white bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors"
+            >Tiếp nhận sách (YC2)</a
+          >
+          <a
+            href="{% url 'book_search' %}"
+            class="text-emerald-700 bg-white border border-emerald-600 hover:bg-emerald-50 focus:ring-4 focus:ring-emerald-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors"
+            >Tra cứu sách (YC3)</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Mượn/Trả -->
+    <div
+      class="bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
+    >
+      <div class="p-6">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">
+          Mượn / Trả Sách
+        </h3>
+        <div class="flex flex-col space-y-3">
+          <a
+            href="{% url 'borrow_book' %}"
+            class="text-white bg-purple-600 hover:bg-purple-700 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors"
+            >Lập phiếu mượn (YC4)</a
+          >
+          <a
+            href="{% url 'return_book' %}"
+            class="text-purple-700 bg-white border border-purple-600 hover:bg-purple-50 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors"
+            >Lập phiếu trả (YC5)</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Thu tiền -->
+    <div
+      class="bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
+    >
+      <div class="p-6">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">
+          Thu Tiền & Báo cáo
+        </h3>
+        <div class="flex flex-col space-y-3">
+          <a
+            href="{% url 'receipt_form' %}"
+            class="text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors"
+            >Lập phiếu thu (YC6)</a
+          >
+          <a
+            href="{% url 'report_borrow_by_category' %}"
+            class="text-orange-600 bg-white border border-orange-500 hover:bg-orange-50 focus:ring-4 focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors"
+            >Báo cáo thống kê</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Section -->
+{% if user.is_superuser %}
+<div class="bg-gray-800 text-white rounded-xl shadow-lg overflow-hidden">
+  <div class="p-8">
+    <h2 class="text-2xl font-bold mb-6">Quản trị Hệ thống</h2>
+    <div class="flex flex-wrap gap-4">
+      <a
+        href="{% url 'parameter_update' %}"
+        class="text-gray-900 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+        >Thay đổi quy định</a
+      >
+      <a
+        href="{% url 'user_list' %}"
+        class="text-gray-900 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+        >Quản lý người dùng</a
+      >
+      <a
+        href="/admin/"
+        class="text-white border border-white hover:bg-white hover:text-gray-900 focus:ring-4 focus:ring-gray-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors"
+        >Admin Panel</a
+      >
+    </div>
+  </div>
+</div>
+{% endif %} {% else %}
+<!-- Unauthenticated View -->
+<div class="text-center py-20 px-4">
+  <h1
+    class="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 tracking-tight"
+  >
+    Hệ thống Quản lý Thư viện
+  </h1>
+  <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+    Vui lòng đăng nhập để sử dụng các chức năng quản lý, tra cứu và báo cáo.
+  </p>
+  <div class="flex gap-4 justify-center flex-wrap">
+    <a
+      href="{% url 'login' %}"
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-lg px-8 py-3 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+      >Đăng nhập</a
+    >
+    <a
+      href="/admin/"
+      class="text-blue-700 bg-white border border-blue-700 hover:bg-blue-50 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-lg px-8 py-3 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+      >Admin Panel</a
+    >
+  </div>
+</div>
+{% endif %} {% endblock %}
