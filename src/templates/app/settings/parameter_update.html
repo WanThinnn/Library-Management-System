@@ -4,240 +4,189 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-cogs"></i> {{ page_title }}</h2>
-        <a href="{% url 'home' %}" class="btn btn-secondary">
-            <i class="fas fa-home"></i> Trang chủ
-        </a>
-    </div>
-
-    <!-- Thông tin hiện tại -->
-    <div class="card mb-4 border-info">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0"><i class="fas fa-info-circle"></i> Thông tin quy định hiện tại</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <table class="table table-sm">
-                        <tr>
-                            <th width="60%">QĐ1: Tuổi tối thiểu</th>
-                            <td><strong>{{ parameter.min_age }} tuổi</strong></td>
-                        </tr>
-                        <tr>
-                            <th>QĐ1: Tuổi tối đa</th>
-                            <td><strong>{{ parameter.max_age }} tuổi</strong></td>
-                        </tr>
-                        <tr>
-                            <th>QĐ1: Thời hạn thẻ độc giả</th>
-                            <td><strong>{{ parameter.card_validity_period }} tháng</strong></td>
-                        </tr>
-                        <tr>
-                            <th>QĐ2: Khoảng cách năm xuất bản</th>
-                            <td><strong>{{ parameter.book_return_period }} năm</strong></td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="col-md-6">
-                    <table class="table table-sm">
-                        <tr>
-                            <th width="60%">QĐ4: Số sách mượn tối đa</th>
-                            <td><strong>{{ parameter.max_borrowed_books }} cuốn</strong></td>
-                        </tr>
-                        <tr>
-                            <th>QĐ4: Số ngày mượn tối đa</th>
-                            <td><strong>{{ parameter.max_borrow_days }} ngày</strong></td>
-                        </tr>
-                        <tr>
-                            <th>QĐ5: Đơn giá phạt</th>
-                            <td><strong>{{ parameter.fine_rate|floatformat:0 }} VNĐ/ngày</strong></td>
-                        </tr>
-                        <tr>
-                            <th>QĐ6: Kiểm tra số tiền thu</th>
-                            <td>
-                                {% if parameter.enable_receipt_amount_validation %}
-                                    <span class="badge bg-success">Bật</span>
-                                {% else %}
-                                    <span class="badge bg-danger">Tắt</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-            <p class="text-muted mb-0 mt-2">
-                <i class="fas fa-clock"></i> Cập nhật lần cuối: {{ parameter.updated_at|date:"d/m/Y H:i" }}
-            </p>
-        </div>
-    </div>
-
-    <!-- Form cập nhật -->
-    <div class="card border-primary">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="fas fa-edit"></i> Thay đổi quy định</h5>
-        </div>
-        <div class="card-body">
-            <form method="POST" id="parameterForm">
-                {% csrf_token %}
-                
-                <!-- QĐ1: Quy định về độc giả -->
-                <div class="card mb-3">
-                    <div class="card-header bg-light">
-                        <h6 class="mb-0 text-primary"><i class="fas fa-users"></i> QĐ1: Quy định về độc giả</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.min_age.id_for_label }}" class="form-label">
-                                        Tuổi tối thiểu <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.min_age }}
-                                    <small class="form-text text-muted">Độ tuổi thấp nhất được lập thẻ</small>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.max_age.id_for_label }}" class="form-label">
-                                        Tuổi tối đa <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.max_age }}
-                                    <small class="form-text text-muted">Độ tuổi cao nhất được lập thẻ</small>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="{{ form.card_validity_period.id_for_label }}" class="form-label">
-                                        Thời hạn thẻ (tháng) <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.card_validity_period }}
-                                    <small class="form-text text-muted">Số tháng thẻ có hiệu lực</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- QĐ2: Quy định về sách -->
-                <div class="card mb-3">
-                    <div class="card-header bg-light">
-                        <h6 class="mb-0 text-primary"><i class="fas fa-book"></i> QĐ2: Quy định về sách</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="mb-3">
-                                    <label for="{{ form.book_return_period.id_for_label }}" class="form-label">
-                                        Khoảng cách năm xuất bản (năm) <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.book_return_period }}
-                                    <small class="form-text text-muted">Chỉ nhận sách xuất bản trong vòng X năm gần nhất</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- QĐ4: Quy định mượn sách -->
-                <div class="card mb-3">
-                    <div class="card-header bg-light">
-                        <h6 class="mb-0 text-primary"><i class="fas fa-exchange-alt"></i> QĐ4: Quy định mượn sách</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.max_borrowed_books.id_for_label }}" class="form-label">
-                                        Số sách mượn tối đa <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.max_borrowed_books }}
-                                    <small class="form-text text-muted">Số cuốn sách tối đa một độc giả được mượn</small>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.max_borrow_days.id_for_label }}" class="form-label">
-                                        Số ngày mượn tối đa <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.max_borrow_days }}
-                                    <small class="form-text text-muted">Số ngày tối đa được mượn sách</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- QĐ5: Quy định tiền phạt -->
-                <div class="card mb-3">
-                    <div class="card-header bg-light">
-                        <h6 class="mb-0 text-primary"><i class="fas fa-money-bill-wave"></i> QĐ5: Quy định tiền phạt</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="mb-3">
-                                    <label for="{{ form.fine_rate.id_for_label }}" class="form-label">
-                                        Đơn giá phạt (VNĐ/ngày) <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.fine_rate }}
-                                    <small class="form-text text-muted">Số tiền phạt cho mỗi ngày trả trễ</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- QĐ6: Quy định kiểm tra thu tiền -->
-                <div class="card mb-3">
-                    <div class="card-header bg-light">
-                        <h6 class="mb-0 text-primary"><i class="fas fa-receipt"></i> QĐ6: Quy định thu tiền</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-check form-switch">
-                                    {{ form.enable_receipt_amount_validation }}
-                                    <label class="form-check-label" for="{{ form.enable_receipt_amount_validation.id_for_label }}">
-                                        Kiểm tra số tiền thu không vượt quá nợ
-                                    </label>
-                                    <small class="form-text text-muted d-block">
-                                        Nếu bật, hệ thống sẽ không cho phép thu tiền nhiều hơn số tiền nợ của độc giả
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Buttons -->
-                <div class="d-flex gap-2 justify-content-end">
-                    <button type="reset" class="btn btn-secondary">
-                        <i class="fas fa-undo"></i> Đặt lại
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Lưu thay đổi
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Lưu ý -->
-    <div class="alert alert-warning mt-4">
-        <h6><i class="fas fa-exclamation-triangle"></i> Lưu ý quan trọng:</h6>
-        <ul class="mb-0">
-            <li>Thay đổi quy định sẽ ảnh hưởng đến tất cả các giao dịch mới</li>
-            <li>Các giao dịch cũ vẫn giữ nguyên quy định tại thời điểm tạo</li>
-            <li>Tuổi tối thiểu phải nhỏ hơn tuổi tối đa</li>
-            <li>Các giá trị số phải lớn hơn 0</li>
-        </ul>
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+    <div class="p-6">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">
+            {{ page_title }}
+        </h1>
+        <p class="text-gray-500">Cấu hình các quy định hoạt động của thư viện</p>
     </div>
 </div>
 
+<!-- Thông tin hiện tại -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
+    <div class="bg-cyan-500 text-white px-4 py-3">
+        <h5 class="font-semibold">Thông tin quy định hiện tại</h5>
+    </div>
+    <div class="p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">QĐ1: Tuổi tối thiểu</span>
+                    <strong class="text-gray-900">{{ parameter.min_age }} tuổi</strong>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">QĐ1: Tuổi tối đa</span>
+                    <strong class="text-gray-900">{{ parameter.max_age }} tuổi</strong>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">QĐ1: Thời hạn thẻ độc giả</span>
+                    <strong class="text-gray-900">{{ parameter.card_validity_period }} tháng</strong>
+                </div>
+                <div class="flex justify-between py-2">
+                    <span class="text-gray-600">QĐ2: Khoảng cách năm xuất bản</span>
+                    <strong class="text-gray-900">{{ parameter.book_return_period }} năm</strong>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">QĐ4: Số sách mượn tối đa</span>
+                    <strong class="text-gray-900">{{ parameter.max_borrowed_books }} cuốn</strong>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">QĐ4: Số ngày mượn tối đa</span>
+                    <strong class="text-gray-900">{{ parameter.max_borrow_days }} ngày</strong>
+                </div>
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600">QĐ5: Đơn giá phạt</span>
+                    <strong class="text-gray-900">{{ parameter.fine_rate|floatformat:0 }} VNĐ/ngày</strong>
+                </div>
+                <div class="flex justify-between py-2">
+                    <span class="text-gray-600">QĐ6: Kiểm tra số tiền thu</span>
+                    {% if parameter.enable_receipt_amount_validation %}
+                        <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Bật</span>
+                    {% else %}
+                        <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Tắt</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <p class="text-gray-500 text-sm mt-4">
+            Cập nhật lần cuối: {{ parameter.updated_at|date:"d/m/Y H:i" }}
+        </p>
+    </div>
+</div>
+
+<!-- Form cập nhật -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
+    <div class="bg-blue-600 text-white px-4 py-3">
+        <h5 class="font-semibold">Thay đổi quy định</h5>
+    </div>
+    <div class="p-6">
+        <form method="POST" id="parameterForm">
+            {% csrf_token %}
+            
+            <!-- QĐ1: Quy định về độc giả -->
+            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <h6 class="font-semibold text-blue-600 mb-4">QĐ1: Quy định về độc giả</h6>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="{{ form.min_age.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Tuổi tối thiểu <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.min_age }}
+                        <p class="text-gray-500 text-xs mt-1">Độ tuổi thấp nhất được lập thẻ</p>
+                    </div>
+                    <div>
+                        <label for="{{ form.max_age.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Tuổi tối đa <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.max_age }}
+                        <p class="text-gray-500 text-xs mt-1">Độ tuổi cao nhất được lập thẻ</p>
+                    </div>
+                    <div>
+                        <label for="{{ form.card_validity_period.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Thời hạn thẻ (tháng) <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.card_validity_period }}
+                        <p class="text-gray-500 text-xs mt-1">Số tháng thẻ có hiệu lực</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QĐ2: Quy định về sách -->
+            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <h6 class="font-semibold text-blue-600 mb-4">QĐ2: Quy định về sách</h6>
+                <div>
+                    <label for="{{ form.book_return_period.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        Khoảng cách năm xuất bản (năm) <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.book_return_period }}
+                    <p class="text-gray-500 text-xs mt-1">Chỉ nhận sách xuất bản trong vòng X năm gần nhất</p>
+                </div>
+            </div>
+
+            <!-- QĐ4: Quy định mượn sách -->
+            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <h6 class="font-semibold text-blue-600 mb-4">QĐ4: Quy định mượn sách</h6>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="{{ form.max_borrowed_books.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Số sách mượn tối đa <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.max_borrowed_books }}
+                        <p class="text-gray-500 text-xs mt-1">Số cuốn sách tối đa một độc giả được mượn</p>
+                    </div>
+                    <div>
+                        <label for="{{ form.max_borrow_days.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            Số ngày mượn tối đa <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.max_borrow_days }}
+                        <p class="text-gray-500 text-xs mt-1">Số ngày tối đa được mượn sách</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QĐ5: Quy định tiền phạt -->
+            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <h6 class="font-semibold text-blue-600 mb-4">QĐ5: Quy định tiền phạt</h6>
+                <div>
+                    <label for="{{ form.fine_rate.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        Đơn giá phạt (VNĐ/ngày) <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.fine_rate }}
+                    <p class="text-gray-500 text-xs mt-1">Số tiền phạt cho mỗi ngày trả trễ</p>
+                </div>
+            </div>
+
+            <!-- QĐ6: Quy định thu tiền -->
+            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                <h6 class="font-semibold text-blue-600 mb-4">QĐ6: Quy định thu tiền</h6>
+                <div class="flex items-center gap-3">
+                    {{ form.enable_receipt_amount_validation }}
+                    <label for="{{ form.enable_receipt_amount_validation.id_for_label }}" class="text-sm text-gray-700">
+                        Kiểm tra số tiền thu không vượt quá nợ
+                    </label>
+                </div>
+                <p class="text-gray-500 text-xs mt-2">Nếu bật, hệ thống sẽ không cho phép thu tiền nhiều hơn số tiền nợ của độc giả</p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex justify-end gap-3 mt-6">
+                <button type="reset" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Đặt lại
+                </button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lưu ý -->
+<div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+    <h6 class="font-semibold text-yellow-700 mb-2">Lưu ý quan trọng:</h6>
+    <ul class="text-yellow-700 text-sm list-disc list-inside space-y-1">
+        <li>Thay đổi quy định sẽ ảnh hưởng đến tất cả các giao dịch mới</li>
+        <li>Các giao dịch cũ vẫn giữ nguyên quy định tại thời điểm tạo</li>
+        <li>Tuổi tối thiểu phải nhỏ hơn tuổi tối đa</li>
+        <li>Các giá trị số phải lớn hơn 0</li>
+    </ul>
+</div>
+
 <script>
-// Confirm before submit
 document.getElementById('parameterForm').addEventListener('submit', function(e) {
     if (!confirm('⚠️ Bạn có chắc chắn muốn thay đổi quy định hệ thống?')) {
         e.preventDefault();

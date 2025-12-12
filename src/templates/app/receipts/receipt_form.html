@@ -3,192 +3,144 @@
 {% block title %}Lập phiếu thu tiền phạt{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-5">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="mb-3">
-                <i class="fas fa-receipt"></i> Lập phiếu thu tiền phạt
-            </h1>
-            <p class="text-muted">BM6 - Phiếu Thu Tiền Phạt</p>
-        </div>
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+    <div class="p-6">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">
+            Lập phiếu thu tiền phạt
+        </h1>
+        <p class="text-gray-500"><strong>BM6:</strong> Phiếu Thu Tiền Phạt</p>
     </div>
+</div>
 
-    <!-- Quy định 6 -->
-    <div class="alert alert-warning mb-4" role="alert">
-        <h5><i class="fas fa-info-circle"></i> QĐ6 - Quy tắc thu tiền phạt</h5>
-        <ul class="mb-0">
-            <li>✓ Số tiền thu <strong>không được vượt quá</strong> tổng nợ hiện tại của độc giả</li>
-            <li>✓ Sau khi thu tiền, tổng nợ sẽ được tự động cập nhật</li>
-            <li>✓ Phiếu thu sẽ được lưu vào hệ thống</li>
-        </ul>
-    </div>
+<!-- Quy định 6 -->
+<div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded mb-6">
+    <h5 class="font-semibold text-yellow-700 mb-2">QĐ6 - Quy tắc thu tiền phạt</h5>
+    <ul class="text-yellow-700 text-sm list-disc list-inside space-y-1">
+        <li>Số tiền thu <strong>không được vượt quá</strong> tổng nợ hiện tại của độc giả</li>
+        <li>Sau khi thu tiền, tổng nợ sẽ được tự động cập nhật</li>
+        <li>Phiếu thu sẽ được lưu vào hệ thống</li>
+    </ul>
+</div>
 
-    <div class="row">
-        <!-- Form -->
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Nhập thông tin thu tiền</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post" id="receiptForm">
-                        {% csrf_token %}
-                        
-                        <!-- Step 1: Chọn độc giả -->
-                        <div class="mb-4">
-                            <label class="form-label"><strong>Bước 1: Chọn độc giả có nợ</strong></label>
-                            <div class="mb-2">
-                                <input type="text" id="readerSearch" class="form-control" placeholder="🔍 Tìm kiếm độc giả...">
-                            </div>
-                            <div id="readerList" style="border: 1px solid #ddd; border-radius: 4px; max-height: 250px; overflow-y: auto; background-color: #f8f9fa;">
-                                <div class="text-center text-muted p-3">
-                                    <small><em>Đang tải danh sách...</em></small>
-                                </div>
-                            </div>
-                            <div class="mt-2 p-2 bg-light rounded" id="selectedReaderDisplay" style="display: none;">
-                                <small><strong>Chọn:</strong> <span id="selectedReaderName"></span></small>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Form -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div class="bg-blue-600 text-white px-4 py-3">
+                <h5 class="font-semibold">Nhập thông tin thu tiền</h5>
+            </div>
+            <div class="p-6">
+                <form method="post" id="receiptForm">
+                    {% csrf_token %}
+                    
+                    <!-- Step 1: Chọn độc giả -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <strong>Bước 1: Chọn độc giả có nợ</strong>
+                        </label>
+                        <input type="text" id="readerSearch" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-2" 
+                               placeholder="🔍 Tìm kiếm độc giả...">
+                        <div id="readerList" class="border border-gray-300 rounded-lg max-h-60 overflow-y-auto bg-gray-50">
+                            <div class="text-center text-gray-500 p-3 text-sm">
+                                <em>Đang tải danh sách...</em>
                             </div>
                         </div>
-                        
-                        <!-- Hidden field for reader_id -->
-                        {{ form.reader_id }}
-                        
-                        <!-- Step 2: Tổng nợ hiển thị -->
-                        <div class="mb-4" id="debtSection" style="display: none;">
-                            <div class="alert alert-danger">
-                                <h6><i class="fas fa-exclamation-circle"></i> Tổng nợ hiện tại</h6>
-                                <h2 id="totalDebtDisplay" style="color: #c62828; margin-bottom: 0;">0đ</h2>
-                            </div>
+                        <div class="mt-2 p-2 bg-blue-50 rounded" id="selectedReaderDisplay" style="display: none;">
+                            <small class="text-blue-700"><strong>Đã chọn:</strong> <span id="selectedReaderName"></span></small>
                         </div>
-                        
-                        <!-- Step 3: Số tiền thu -->
-                        <div class="mb-4">
-                            <label class="form-label"><strong>Bước 2: Số tiền thu</strong></label>
-                            {{ form.collected_amount }}
-                            {% if form.collected_amount.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.collected_amount.errors.0 }}
-                            </div>
-                            {% endif %}
-                            <small class="text-muted d-block mt-2">Nhập số tiền độc giả thanh toán (không vượt quá tổng nợ)</small>
+                    </div>
+                    
+                    <!-- Hidden field for reader_id -->
+                    {{ form.reader_id }}
+                    
+                    <!-- Step 2: Tổng nợ hiển thị -->
+                    <div class="mb-6" id="debtSection" style="display: none;">
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                            <h6 class="font-semibold text-red-700 mb-1">Tổng nợ hiện tại</h6>
+                            <p id="totalDebtDisplay" class="text-2xl font-bold text-red-700">0đ</p>
                         </div>
-                        
-                        <!-- Step 4: Phương thức thanh toán -->
-                        <div class="mb-4">
-                            <label class="form-label"><strong>Bước 3: Phương thức thanh toán</strong></label>
-                            {{ form.payment_method }}
-                        </div>
-                        
-                        <!-- Step 5: Ghi chú -->
-                        <div class="mb-4">
-                            <label class="form-label"><strong>Ghi chú (tùy chọn)</strong></label>
-                            {{ form.notes }}
-                        </div>
-                        
-                        <!-- Lỗi -->
-                        {% if form.non_field_errors %}
-                        <div class="alert alert-danger" role="alert">
-                            {{ form.non_field_errors.0 }}
-                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Số tiền thu -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <strong>Bước 2: Số tiền thu</strong>
+                        </label>
+                        {{ form.collected_amount }}
+                        {% if form.collected_amount.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.collected_amount.errors.0 }}</p>
                         {% endif %}
-                        
-                        <div class="mb-3">
-                            <button type="submit" class="btn btn-success w-100" id="submitBtn" disabled>
-                                <i class="fas fa-check-circle"></i> Lập phiếu thu tiền
-                            </button>
-                        </div>
-                    </form>
-
-                    <!-- Link quay lại -->
-                    <div class="mt-3">
-                        <a href="{% url 'home' %}" class="btn btn-secondary w-100">
-                            <i class="fas fa-arrow-left"></i> Quay lại
-                        </a>
+                        <p class="text-gray-500 text-xs mt-2">Nhập số tiền độc giả thanh toán (không vượt quá tổng nợ)</p>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Summary -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-calculator"></i> Tóm tắt
-                    </h5>
-                </div>
-                <div class="card-body" id="summaryPanel" style="min-height: 400px;">
-                    <div class="text-center text-muted">
-                        <em>Chọn độc giả để xem tóm tắt</em>
+                    
+                    <!-- Step 4: Phương thức thanh toán -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <strong>Bước 3: Phương thức thanh toán</strong>
+                        </label>
+                        {{ form.payment_method }}
                     </div>
+                    
+                    <!-- Step 5: Ghi chú -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <strong>Ghi chú (tùy chọn)</strong>
+                        </label>
+                        {{ form.notes }}
+                    </div>
+                    
+                    <!-- Lỗi -->
+                    {% if form.non_field_errors %}
+                    <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4">
+                        {{ form.non_field_errors.0 }}
+                    </div>
+                    {% endif %}
+                    
+                    <button type="submit" id="submitBtn" disabled
+                            class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                        Lập phiếu thu tiền
+                    </button>
+                </form>
+
+                <!-- Link quay lại -->
+                <div class="mt-4">
+                    <a href="{% url 'receipt_list' %}" class="block w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-center">
+                        Quay lại danh sách
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Summary -->
+    <div>
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div class="bg-cyan-500 text-white px-4 py-3">
+                <h5 class="font-semibold">Tóm tắt</h5>
+            </div>
+            <div class="p-4" id="summaryPanel" style="min-height: 300px;">
+                <div class="text-center text-gray-500">
+                    <em>Chọn độc giả để xem tóm tắt</em>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
     .reader-item {
         padding: 12px;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid #e5e7eb;
         cursor: pointer;
         transition: all 0.2s;
     }
-
     .reader-item:hover {
-        background-color: #e9ecef;
+        background-color: #f3f4f6;
     }
-
     .reader-item:last-child {
         border-bottom: none;
-    }
-
-    .reader-name {
-        font-weight: 500;
-        color: #333;
-    }
-
-    .reader-email {
-        font-size: 0.9em;
-        color: #666;
-    }
-
-    .reader-debt {
-        font-size: 0.9em;
-        color: #c62828;
-        font-weight: 600;
-    }
-
-    .summary-section {
-        margin-bottom: 15px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .summary-section:last-child {
-        border-bottom: none;
-    }
-
-    .summary-label {
-        color: #666;
-        font-size: 0.9em;
-    }
-
-    .summary-value {
-        font-weight: 600;
-        color: #333;
-        font-size: 1.1em;
-    }
-
-    .summary-amount {
-        color: #27ae60;
-        font-weight: 600;
-        font-size: 1.3em;
-    }
-
-    .alert-danger h2 {
-        color: #c62828;
     }
 </style>
 
@@ -197,17 +149,13 @@ let readersData = {{ readers_json|safe }};
 let selectedReader = null;
 let selectedAmount = 0;
 
-// Initialize
 document.addEventListener('DOMContentLoaded', function() {
-    // Load readers list
     loadReaders();
     
-    // Search readers
     document.getElementById('readerSearch').addEventListener('input', function() {
         filterReaders(this.value.toLowerCase());
     });
     
-    // Amount input change
     document.getElementById('id_collected_amount').addEventListener('input', function() {
         selectedAmount = parseInt(this.value) || 0;
         updateSummary();
@@ -218,29 +166,27 @@ document.addEventListener('DOMContentLoaded', function() {
 function loadReaders() {
     const readerList = document.getElementById('readerList');
     if (!readersData.length) {
-        readerList.innerHTML = '<div class="text-center text-muted p-3"><small>Không có độc giả có nợ</small></div>';
+        readerList.innerHTML = '<div class="text-center text-gray-500 p-3 text-sm">Không có độc giả có nợ</div>';
         return;
     }
-    
     renderReadersList(readersData.slice(0, 5));
 }
 
 function renderReadersList(readers) {
     const readerList = document.getElementById('readerList');
     if (!readers.length) {
-        readerList.innerHTML = '<div class="text-center text-muted p-3"><small>Không tìm thấy độc giả</small></div>';
+        readerList.innerHTML = '<div class="text-center text-gray-500 p-3 text-sm">Không tìm thấy độc giả</div>';
         return;
     }
     
     readerList.innerHTML = readers.map(reader => `
         <div class="reader-item" data-reader-id="${reader.id}">
-            <div class="reader-name">${reader.reader_name}</div>
-            <div class="reader-email">${reader.email}</div>
-            <div class="reader-debt">Nợ: ${reader.total_debt.toLocaleString('vi-VN')}đ</div>
+            <div class="font-medium text-gray-900">${reader.reader_name}</div>
+            <div class="text-sm text-gray-500">${reader.email}</div>
+            <div class="text-sm font-semibold text-red-600">Nợ: ${reader.total_debt.toLocaleString('vi-VN')}đ</div>
         </div>
     `).join('');
     
-    // Add click handlers
     document.querySelectorAll('.reader-item').forEach(item => {
         item.addEventListener('click', function() {
             selectReader(parseInt(this.dataset.readerId));
@@ -268,27 +214,22 @@ function selectReader(readerId) {
     
     const reader = readersData.find(r => r.id === readerId);
     
-    // Update display
     document.getElementById('readerSearch').value = '';
     document.getElementById('selectedReaderDisplay').style.display = 'block';
     document.getElementById('selectedReaderName').textContent = reader.reader_name + ' (' + reader.email + ')';
     
-    // Show debt section
     document.getElementById('debtSection').style.display = 'block';
     document.getElementById('totalDebtDisplay').textContent = reader.total_debt.toLocaleString('vi-VN') + 'đ';
     
-    // Set max value for input
     document.getElementById('id_collected_amount').max = reader.total_debt;
     document.getElementById('id_collected_amount').value = '';
     
-    // Collapse reader list
     document.getElementById('readerList').innerHTML = `
-        <div class="text-center text-muted p-2">
-            <small>Độc giả đã chọn: <strong>${reader.reader_name}</strong></small>
+        <div class="text-center text-green-600 p-2 text-sm">
+            <strong>Đã chọn: ${reader.reader_name}</strong>
         </div>
     `;
     
-    // Set hidden field
     document.getElementById('id_reader_id').value = readerId;
     
     updateSummary();
@@ -297,56 +238,43 @@ function selectReader(readerId) {
 
 function updateSummary() {
     if (!selectedReader) {
-        document.getElementById('summaryPanel').innerHTML = '<div class="text-center text-muted"><em>Chọn độc giả để xem tóm tắt</em></div>';
+        document.getElementById('summaryPanel').innerHTML = '<div class="text-center text-gray-500"><em>Chọn độc giả để xem tóm tắt</em></div>';
         return;
     }
     
     const reader = readersData.find(r => r.id === selectedReader);
     const remainingDebt = reader.total_debt - selectedAmount;
     
-    let html = `<div class="summary-section">
-        <div class="summary-label">Độc giả:</div>
-        <div class="summary-value">${reader.reader_name}</div>
-        <small class="text-muted">${reader.email}</small>
-    </div>`;
-    
-    html += `<div class="summary-section">
-        <div class="summary-label">Tổng nợ:</div>
-        <div class="summary-amount">${reader.total_debt.toLocaleString('vi-VN')}đ</div>
-    </div>`;
+    let html = `<div class="space-y-4">
+        <div class="pb-3 border-b">
+            <p class="text-gray-500 text-sm">Độc giả:</p>
+            <p class="font-semibold text-gray-900">${reader.reader_name}</p>
+            <p class="text-gray-500 text-sm">${reader.email}</p>
+        </div>
+        <div class="pb-3 border-b">
+            <p class="text-gray-500 text-sm">Tổng nợ:</p>
+            <p class="text-xl font-bold text-red-600">${reader.total_debt.toLocaleString('vi-VN')}đ</p>
+        </div>`;
     
     if (selectedAmount > 0) {
-        html += `<div class="summary-section">
-            <div class="summary-label">Số tiền thu:</div>
-            <div style="color: #27ae60; font-size: 1.2em; font-weight: 600;">
-                + ${selectedAmount.toLocaleString('vi-VN')}đ
-            </div>
-        </div>`;
-        
-        html += `<div class="summary-section">
-            <div class="summary-label">Còn nợ:</div>
-            <div style="color: #c62828; font-size: 1.2em; font-weight: 600;">
-                ${remainingDebt.toLocaleString('vi-VN')}đ
-            </div>
-            ${remainingDebt === 0 ? '<small style="color: #27ae60;"><i class="fas fa-check-circle"></i> Hết nợ!</small>' : ''}
+        html += `<div class="pb-3 border-b">
+            <p class="text-gray-500 text-sm">Số tiền thu:</p>
+            <p class="text-xl font-bold text-green-600">+${selectedAmount.toLocaleString('vi-VN')}đ</p>
+        </div>
+        <div>
+            <p class="text-gray-500 text-sm">Còn nợ:</p>
+            <p class="text-xl font-bold text-red-600">${remainingDebt.toLocaleString('vi-VN')}đ</p>
+            ${remainingDebt === 0 ? '<p class="text-green-600 text-sm">✓ Hết nợ!</p>' : ''}
         </div>`;
     }
     
-    const paymentMethod = document.getElementById('id_payment_method').value;
-    html += `<div class="summary-section">
-        <div class="summary-label">Phương thức:</div>
-        <div class="summary-value">${paymentMethod}</div>
-    </div>`;
-    
+    html += '</div>';
     document.getElementById('summaryPanel').innerHTML = html;
 }
 
 function updateSubmitButton() {
     const submitBtn = document.getElementById('submitBtn');
-    const hasReader = selectedReader !== null;
-    const hasAmount = selectedAmount > 0;
-    
-    submitBtn.disabled = !(hasReader && hasAmount);
+    submitBtn.disabled = !(selectedReader !== null && selectedAmount > 0);
 }
 </script>
 {% endblock %}

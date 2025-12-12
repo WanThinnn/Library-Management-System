@@ -1,71 +1,75 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ page_title }} - {{ block.super }}{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-exclamation-triangle"></i> {{ page_title }}
-                    </h4>
+<div class="max-w-xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+        <div class="p-6">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">
+                {{ page_title }}
+            </h1>
+            <p class="text-gray-500">Xác nhận xóa tài khoản người dùng</p>
+        </div>
+    </div>
+
+    <!-- Confirm Card -->
+    <div class="bg-white rounded-lg shadow-md border border-red-200 overflow-hidden">
+        <div class="bg-red-600 text-white px-4 py-3">
+            <h5 class="font-semibold">Cảnh báo!</h5>
+        </div>
+        <div class="p-6">
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4">
+                <p class="font-semibold mb-1">Hành động này không thể hoàn tác!</p>
+                <p class="text-sm">Tất cả dữ liệu liên quan đến người dùng này sẽ bị xóa vĩnh viễn.</p>
+            </div>
+            
+            <h6 class="font-semibold text-gray-900 mb-3">Thông tin người dùng sẽ bị xóa:</h6>
+            <div class="bg-gray-50 rounded-lg p-4 mb-4 space-y-2">
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-gray-600">Tên đăng nhập:</span>
+                    <strong class="text-gray-900">{{ delete_user.username }}</strong>
                 </div>
-                <div class="card-body">
-                    <div class="alert alert-danger">
-                        <h5><i class="fas fa-exclamation-circle"></i> Cảnh báo!</h5>
-                        <p class="mb-0">Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan đến người dùng này sẽ bị xóa vĩnh viễn.</p>
-                    </div>
-                    
-                    <h5>Thông tin người dùng sẽ bị xóa:</h5>
-                    <table class="table table-bordered">
-                        <tr>
-                            <th>Tên đăng nhập:</th>
-                            <td><strong>{{ delete_user.username }}</strong></td>
-                        </tr>
-                        <tr>
-                            <th>Họ tên:</th>
-                            <td>{{ delete_user.get_full_name|default:"-" }}</td>
-                        </tr>
-                        <tr>
-                            <th>Email:</th>
-                            <td>{{ delete_user.email|default:"-" }}</td>
-                        </tr>
-                        <tr>
-                            <th>Vai trò:</th>
-                            <td>
-                                {% if delete_user.is_superuser %}
-                                    <span class="badge bg-danger">👑 Quản lý</span>
-                                {% elif delete_user.is_staff %}
-                                    <span class="badge bg-info">📚 Thủ thư</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Người dùng</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Ngày tạo:</th>
-                            <td>{{ delete_user.date_joined|date:"d/m/Y H:i" }}</td>
-                        </tr>
-                    </table>
-                    
-                    <p class="text-danger">
-                        <i class="fas fa-question-circle"></i> 
-                        Bạn có chắc chắn muốn xóa người dùng <strong>{{ delete_user.username }}</strong> không?
-                    </p>
-                    
-                    <form method="post" class="d-grid gap-2">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash"></i> Xác nhận xóa
-                        </button>
-                        <a href="{% url 'user_list' %}" class="btn btn-secondary">
-                            <i class="fas fa-times"></i> Hủy bỏ
-                        </a>
-                    </form>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-gray-600">Họ tên:</span>
+                    <span class="text-gray-900">{{ delete_user.get_full_name|default:"-" }}</span>
+                </div>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-gray-600">Email:</span>
+                    <span class="text-gray-900">{{ delete_user.email|default:"-" }}</span>
+                </div>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-gray-600">Vai trò:</span>
+                    <span>
+                        {% if delete_user.is_superuser %}
+                            <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">👑 Quản lý</span>
+                        {% elif delete_user.is_staff %}
+                            <span class="bg-cyan-500 text-white text-xs px-2 py-1 rounded-full">📚 Thủ thư</span>
+                        {% else %}
+                            <span class="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">Người dùng</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Ngày tạo:</span>
+                    <span class="text-gray-900">{{ delete_user.date_joined|date:"d/m/Y H:i" }}</span>
                 </div>
             </div>
+            
+            <p class="text-red-600 text-sm mb-4">
+                Bạn có chắc chắn muốn xóa người dùng <strong>{{ delete_user.username }}</strong> không?
+            </p>
+            
+            <form method="post" class="space-y-3">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Xác nhận xóa
+                </button>
+                <a href="{% url 'user_list' %}" class="block w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-center">
+                    Hủy bỏ
+                </a>
+            </form>
         </div>
     </div>
 </div>
