@@ -132,6 +132,13 @@
                   </li>
                   <li>
                     <a
+                      href="{% url 'book_import_list' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Danh sách phiếu nhập</a
+                    >
+                  </li>
+                  <li>
+                    <a
                       href="{% url 'book_search' %}"
                       class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
                       >Tra cứu sách (YC3)</a
@@ -154,9 +161,23 @@
                   </li>
                   <li>
                     <a
+                      href="{% url 'borrow_book_list' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Danh sách phiếu mượn</a
+                    >
+                  </li>
+                  <li>
+                    <a
                       href="{% url 'return_book' %}"
                       class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
                       >Lập phiếu trả (YC5)</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'return_book_list' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Danh sách phiếu trả</a
                     >
                   </li>
                 </ul>
@@ -166,7 +187,7 @@
               <button
                 class="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer"
               >
-                Thu tiền & BC<svg
+                Thu tiền & Báo cáo<svg
                   class="w-2.5 h-2.5 ms-2.5"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"

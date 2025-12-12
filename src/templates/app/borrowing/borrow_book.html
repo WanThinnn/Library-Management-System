@@ -3,383 +3,258 @@
 {% block title %}Quản lý Cho mượn sách{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-5">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="mb-3">
-                <i class="fas fa-book-reader"></i> Quản lý Cho mượn sách
-            </h1>
-            <p class="text-muted">BM4 - Phiếu Mượn Sách</p>
-        </div>
-    </div>
-
-    <!-- Tab Navigation -->
-    <ul class="nav nav-tabs mb-4" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="tab-borrow" data-bs-toggle="tab" data-bs-target="#content-borrow" type="button" role="tab">
-                <i class="fas fa-plus-circle"></i> Cho mượn
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-borrowing" data-bs-toggle="tab" data-bs-target="#content-borrowing" type="button" role="tab">
-                <i class="fas fa-clipboard-list"></i> Độc giả đang mượn
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-history" data-bs-toggle="tab" data-bs-target="#content-history" type="button" role="tab">
-                <i class="fas fa-history"></i> Lịch sử mượn
-            </button>
-        </li>
-    </ul>
-
-    <!-- Tab Content -->
-    <div class="tab-content">
-        <!-- Tab 1: Cho mượn -->
-        <div class="tab-pane fade show active" id="content-borrow" role="tabpanel">
-            <!-- Quy định 4 -->
-            <div class="alert alert-info mb-4" role="alert">
-                <h5><i class="fas fa-info-circle"></i> QĐ4 - Điều kiện cho mượn sách</h5>
-                <ul class="mb-0">
-                    <li>✓ Thẻ độc giả phải còn hạn sử dụng</li>
-                    <li>✓ Độc giả không có sách mượn quá hạn</li>
-                    <li>✓ Sách phải còn sẵn (không đang bị mượn)</li>
-                    <li>✓ Mỗi độc giả được mượn tối đa <strong>{{ params.max_borrowed_books }}</strong> quyển</li>
-                    <li>✓ Thời hạn mượn: <strong>{{ params.max_borrow_days }}</strong> ngày</li>
-                </ul>
-            </div>
-
-            <!-- Form cho mượn -->
-            <div class="row">
-                <div class="col-md-5">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Nhập thông tin mượn sách</h5>
-                        </div>
-                        <div class="card-body">
-                            <form method="post" id="borrowForm">
-                                {% csrf_token %}
-                                
-                                <!-- Hidden fields -->
-                                <input type="hidden" name="reader_id" id="readerId" value="">
-                                <input type="hidden" name="book_id" id="bookId" value="">
-                                
-                                <!-- Ngày mượn -->
-                                <div class="mb-3">
-                                    <label class="form-label"><strong>{{ form.borrow_date.label }}</strong></label>
-                                    {{ form.borrow_date }}
-                                    {% if form.borrow_date.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {{ form.borrow_date.errors.0 }}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                
-                                <!-- Thông tin độc giả và sách đã chọn -->
-                                <div class="mb-3 p-3 bg-light rounded">
-                                    <div class="mb-2">
-                                        <strong>Độc giả đã chọn:</strong>
-                                        <div id="selectedReader" class="text-info">
-                                            <em>Chưa chọn</em>
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div>
-                                        <strong>Sách đã chọn (có thể chọn nhiều):</strong>
-                                        <div id="selectedBook" class="text-info">
-                                            <em>Chưa chọn</em>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Lỗi -->
-                                {% if form.non_field_errors %}
-                                <div class="alert alert-danger" role="alert">
-                                    {{ form.non_field_errors.0 }}
-                                </div>
-                                {% endif %}
-                                
-                                <div class="mb-3">
-                                    <button type="submit" class="btn btn-primary w-100" id="submitBtn" disabled>
-                                        <i class="fas fa-plus-circle"></i> Cho mượn
-                                    </button>
-                                </div>
-                            </form>
-
-                            <!-- Link quay lại -->
-                            <div class="mt-3">
-                                <a href="{% url 'home' %}" class="btn btn-secondary w-100">
-                                    <i class="fas fa-arrow-left"></i> Quay lại
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Danh sách độc giả -->
-                <div class="col-md-7">
-                    <div class="card mb-4">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-users"></i> Chọn độc giả
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <!-- Ô tìm kiếm độc giả -->
-                            <div class="mb-3">
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    id="readerSearch" 
-                                    placeholder="🔍 Tìm kiếm theo tên, email..."
-                                >
-                            </div>
-                            
-                            <!-- Danh sách độc giả -->
-                            <div id="readerList" style="max-height: 400px; overflow-y: auto;">
-                                <div class="text-center text-muted">
-                                    <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách...
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Danh sách sách -->
-                    <div class="card">
-                        <div class="card-header bg-warning text-dark">
-                            <h5 class="mb-0">
-                                <i class="fas fa-book"></i> Chọn sách
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <!-- Ô tìm kiếm sách -->
-                            <div class="mb-3">
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    id="bookSearch" 
-                                    placeholder="🔍 Tìm kiếm theo tên sách, tác giả..."
-                                >
-                            </div>
-                            
-                            <!-- Danh sách sách -->
-                            <div id="bookList" style="max-height: 400px; overflow-y: auto;">
-                                <div class="text-center text-muted">
-                                    <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách...
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab 2: Độc giả đang mượn -->
-        <div class="tab-pane fade" id="content-borrowing" role="tabpanel">
-            <div class="card">
-                <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-clipboard-list"></i> Danh sách độc giả đang mượn sách
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div id="borrowingReadersList" style="min-height: 400px;">
-                        <div class="text-center text-muted">
-                            <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách...
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab 3: Lịch sử mượn -->
-        <div class="tab-pane fade" id="content-history" role="tabpanel">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-history"></i> Danh sách phiếu mượn sách
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Bộ lọc:</strong></label>
-                        <div>
-                            <button class="btn btn-outline-primary btn-sm active" data-filter="all">Tất cả</button>
-                            <button class="btn btn-outline-warning btn-sm" data-filter="unreturned">Đang mượn</button>
-                            <button class="btn btn-outline-danger btn-sm" data-filter="overdue">Quá hạn</button>
-                            <button class="btn btn-outline-success btn-sm" data-filter="returned">Đã trả</button>
-                        </div>
-                    </div>
-                    <div id="historyList" style="overflow-x: auto; min-height: 400px;">
-                        <div class="text-center text-muted">
-                            <i class="fas fa-spinner fa-spin"></i> Đang tải lịch sử...
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        {% comment %} 📖 Quản lý Cho mượn sách {% endcomment %}
+        📖 {{ page_title }}
+    </h1>
+    <p class="text-gray-500">Phiếu Mượn Sách</p>
 </div>
 
-<style>
-    .reader-item, .book-item {
-        padding: 12px;
-        border-left: 3px solid transparent;
-        cursor: pointer;
-        margin-bottom: 8px;
-        border-radius: 4px;
-        transition: all 0.2s;
-    }
-    
-    .reader-item:hover, .book-item:hover {
-        background-color: #f8f9fa;
-        border-left-color: #007bff;
-    }
-    
-    .reader-item.selected, .book-item.selected {
-        background-color: #d4edda;
-        border-left-color: #28a745;
-        font-weight: 500;
-    }
-    
-    .book-item.selected::before {
-        content: '✓ ';
-        color: #28a745;
-        font-weight: bold;
-    }
-    
-    .reader-name, .book-title {
-        font-weight: 500;
-        color: #333;
-    }
-    
-    .reader-email, .book-info {
-        font-size: 0.9em;
-        color: #666;
-    }
-    
-    .book-remaining {
-        font-size: 0.85em;
-        padding: 2px 6px;
-        background-color: #d4edda;
-        border-radius: 3px;
-        color: #155724;
-    }
-    
-    .borrowing-reader-item {
-        padding: 12px;
-        border-left: 4px solid #ffc107;
-        background-color: #fffbf0;
-        margin-bottom: 10px;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    
-    .borrowing-reader-item:hover {
-        background-color: #fff8e1;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .borrowing-reader-item.overdue {
-        border-left-color: #dc3545;
-        background-color: #ffe5e5;
-    }
-    
-    .borrowing-reader-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .borrowing-reader-name {
-        font-weight: 600;
-        color: #333;
-    }
-    
-    .borrowing-reader-badge {
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 0.85em;
-        color: white;
-        background-color: #007bff;
-        margin-left: 8px;
-    }
-    
-    .borrowing-reader-overdue-badge {
-        background-color: #dc3545;
-    }
-    
-    .borrowing-reader-email {
-        font-size: 0.9em;
-        color: #666;
-        margin-top: 4px;
-    }
-    
-    .invalid-feedback {
-        color: #dc3545;
-        font-size: 0.875em;
-        margin-top: 0.25rem;
-    }
-    
-    .form-control {
-        border: 1px solid #ced4da;
-    }
-    
-    .form-control:focus {
-        border-color: #80bdff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
+<!-- Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-700{% else %}bg-blue-50 border-l-4 border-blue-500 text-blue-700{% endif %} p-4 rounded mb-6 flex justify-between items-start animate-fade-in">
+            <div class="flex items-center gap-2">
+                {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% else %}ℹ️{% endif %}
+                <span>{{ message }}</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-current opacity-50 hover:opacity-100 text-lg leading-none">×</button>
+        </div>
+    {% endfor %}
+{% endif %}
 
-    .nav-tabs .nav-link {
-        color: #495057;
-        border: none;
-        border-bottom: 3px solid transparent;
-        margin-right: 10px;
-    }
+<!-- Tab Navigation -->
+<div class="border-b border-gray-200 mb-6">
+    <nav class="flex gap-4" role="tablist">
+        <button class="tab-btn active py-3 px-4 border-b-2 font-medium text-sm transition-colors border-blue-600 text-blue-600" data-target="content-borrow">
+            ➕ Cho mượn
+        </button>
+        <button class="tab-btn py-3 px-4 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="content-borrowing">
+            📋 Độc giả đang mượn
+        </button>
+        <button class="tab-btn py-3 px-4 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="content-history">
+            📜 Lịch sử mượn
+        </button>
+    </nav>
+</div>
 
-    .nav-tabs .nav-link:hover {
-        border-bottom-color: #0d6efd;
-        color: #0d6efd;
-    }
+<!-- Tab Content -->
+<div class="tab-content">
+    <!-- Tab 1: Cho mượn -->
+    <div class="tab-pane active" id="content-borrow">
+        <!-- Quy định 4 -->
+        {% comment %} <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-6">
+            <h5 class="font-semibold text-blue-800 mb-2">ℹ️ QĐ4 - Điều kiện cho mượn sách</h5>
+            <ul class="text-blue-700 space-y-1 text-sm">
+                <li>✓ Thẻ độc giả phải còn hạn sử dụng</li>
+                <li>✓ Độc giả không có sách mượn quá hạn</li>
+                <li>✓ Sách phải còn sẵn (không đang bị mượn)</li>
+                <li>✓ Mỗi độc giả được mượn tối đa <strong>{{ params.max_borrowed_books }}</strong> quyển</li>
+                <li>✓ Thời hạn mượn: <strong>{{ params.max_borrow_days }}</strong> ngày</li>
+            </ul>
+        </div> {% endcomment %}
 
-    .nav-tabs .nav-link.active {
-        color: #0d6efd;
-        border-bottom-color: #0d6efd;
-        background: none;
-    }
+        <!-- Form cho mượn -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <!-- Cột 1: Form nhập thông tin -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden h-full">
+                    <div class="bg-blue-600 text-white px-4 py-3">
+                        <h5 class="font-semibold text-sm">Thông tin mượn</h5>
+                    </div>
+                    <div class="p-4">
+                        <form method="post" id="borrowForm">
+                            {% csrf_token %}
+                            
+                            <!-- Hidden fields -->
+                            <input type="hidden" name="reader_id" id="readerId" value="">
+                            <input type="hidden" name="book_id" id="bookId" value="">
+                            
+                            <!-- Ngày mượn -->
+                            <div class="mb-3">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">
+                                    {{ form.borrow_date.label }}
+                                </label>
+                                {{ form.borrow_date }}
+                                {% if form.borrow_date.errors %}
+                                <div class="text-red-500 text-xs mt-1">{{ form.borrow_date.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Thông tin độc giả và sách đã chọn -->
+                            <div class="mb-3 p-2 bg-gray-50 rounded text-sm">
+                                <div class="mb-2">
+                                    <strong class="text-gray-700 text-xs">Độc giả:</strong>
+                                    <div id="selectedReader" class="text-blue-600 text-sm">
+                                        <em class="text-gray-400">Chưa chọn</em>
+                                    </div>
+                                </div>
+                                <hr class="my-2 border-gray-200">
+                                <div>
+                                    <strong class="text-gray-700 text-xs">Sách đã chọn:</strong>
+                                    <div id="selectedBook" class="text-blue-600 text-sm">
+                                        <em class="text-gray-400">Chưa chọn</em>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Lỗi -->
+                            {% if form.non_field_errors %}
+                            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-2 rounded mb-3 text-sm">
+                                {{ form.non_field_errors.0 }}
+                            </div>
+                            {% endif %}
+                            
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2" id="submitBtn" disabled>
+                                <span id="submitBtnText">➕ Cho mượn</span>
+                                <span id="submitBtnLoading" class="hidden">
+                                    <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Đang xử lý...
+                                </span>
+                            </button>
+                        </form>
 
-    .history-table {
-        width: 100%;
-    }
+                        <div class="mt-3">
+                            <a href="{% url 'home' %}" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm">
+                                ← Quay lại
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    .history-table thead {
-        background-color: #f8f9fa;
-    }
+            <!-- Cột 2: Danh sách độc giả -->
+            <div class="lg:col-span-4">
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden h-full">
+                    <div class="bg-green-600 text-white px-4 py-3">
+                        <h5 class="font-semibold text-sm">👥 Chọn độc giả</h5>
+                    </div>
+                    <div class="p-3">
+                        <div class="mb-2">
+                            <input 
+                                type="text" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" 
+                                id="readerSearch" 
+                                placeholder="🔍 Tìm kiếm..."
+                            >
+                        </div>
+                        <div id="readerList" class="max-h-80 overflow-y-auto">
+                            <div class="text-center text-gray-500 py-4">
+                                <span class="animate-spin inline-block mr-2">⏳</span> Đang tải...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    .history-row {
-        border-bottom: 1px solid #dee2e6;
-    }
+            <!-- Cột 3: Danh sách sách -->
+            <div class="lg:col-span-5">
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden h-full">
+                    <div class="bg-yellow-500 text-gray-900 px-4 py-3">
+                        <h5 class="font-semibold text-sm">📚 Chọn sách</h5>
+                    </div>
+                    <div class="p-3">
+                        <div class="mb-2">
+                            <input 
+                                type="text" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" 
+                                id="bookSearch" 
+                                placeholder="🔍 Tìm kiếm sách..."
+                            >
+                        </div>
+                        <div id="bookList" class="max-h-80 overflow-y-auto">
+                            <div class="text-center text-gray-500 py-4">
+                                <span class="animate-spin inline-block mr-2">⏳</span> Đang tải...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    .history-row:hover {
-        background-color: #f8f9fa;
-    }
+    <!-- Tab 2: Độc giả đang mượn -->
+    <div class="tab-pane hidden" id="content-borrowing">
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div class="bg-red-600 text-white px-4 py-3">
+                <h5 class="font-semibold">
+                    📋 Danh sách độc giả đang mượn sách
+                </h5>
+            </div>
+            <div class="p-4">
+                <div id="borrowingReadersList" class="min-h-96">
+                    <div class="text-center text-gray-500 py-4">
+                        <span class="animate-spin inline-block mr-2">⏳</span> Đang tải danh sách...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    .receipt-id-link {
-        color: #0d6efd;
-        text-decoration: none;
-        font-weight: 600;
-    }
-
-    .receipt-id-link:hover {
-        text-decoration: underline;
-    }
-</style>
+    <!-- Tab 3: Lịch sử mượn -->
+    <div class="tab-pane hidden" id="content-history">
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div class="bg-cyan-500 text-white px-4 py-3">
+                <h5 class="font-semibold">
+                    📜 Danh sách phiếu mượn sách
+                </h5>
+            </div>
+            <div class="p-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2"><strong>Bộ lọc:</strong></label>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="filter-btn px-3 py-1 text-sm rounded-lg border transition-colors bg-blue-600 text-white border-blue-600" data-filter="all">Tất cả</button>
+                        <button class="filter-btn px-3 py-1 text-sm rounded-lg border transition-colors border-yellow-500 text-yellow-700 hover:bg-yellow-50" data-filter="unreturned">Đang mượn</button>
+                        <button class="filter-btn px-3 py-1 text-sm rounded-lg border transition-colors border-red-500 text-red-700 hover:bg-red-50" data-filter="overdue">Quá hạn</button>
+                        <button class="filter-btn px-3 py-1 text-sm rounded-lg border transition-colors border-green-500 text-green-700 hover:bg-green-50" data-filter="returned">Đã trả</button>
+                    </div>
+                </div>
+                <div id="historyList" class="overflow-x-auto min-h-96">
+                    <div class="text-center text-gray-500 py-4">
+                        <span class="animate-spin inline-block mr-2">⏳</span> Đang tải lịch sử...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 let selectedReaderId = null;
 let selectedBooks = [];
 let currentFilter = 'all';
+
+// ============ TAB FUNCTIONALITY ============
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Remove active from all tabs
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.remove('active', 'border-blue-600', 'text-blue-600');
+            b.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // Add active to clicked tab
+        this.classList.add('active', 'border-blue-600', 'text-blue-600');
+        this.classList.remove('border-transparent', 'text-gray-500');
+        
+        // Hide all panes
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+        
+        // Show target pane
+        const target = this.dataset.target;
+        document.getElementById(target).classList.remove('hidden');
+        
+        // Load data if needed
+        if (target === 'content-history') {
+            loadBorrowHistory(currentFilter);
+        }
+    });
+});
 
 // ============ TAB 1: CHO MƯỢN ============
 
@@ -392,26 +267,26 @@ function loadReaders(search = '') {
         .then(data => {
             const readerList = document.getElementById('readerList');
             if (!data.data?.length) {
-                readerList.innerHTML = '<div class="text-center text-muted"><em>Không tìm thấy độc giả</em></div>';
+                readerList.innerHTML = '<div class="text-center text-gray-500 py-4"><em>Không tìm thấy độc giả</em></div>';
             } else {
                 readerList.innerHTML = data.data.map(reader => `
-                    <div class="reader-item ${reader.id === selectedReaderId ? 'selected' : ''}" data-id="${reader.id}">
-                        <div class="reader-name">${reader.name}</div>
-                        <div class="reader-email">${reader.email}</div>
+                    <div class="reader-item p-3 border-l-4 border-transparent cursor-pointer mb-2 rounded hover:bg-gray-50 hover:border-blue-500 transition-all ${reader.id === selectedReaderId ? 'bg-green-50 border-green-500 font-medium' : ''}" data-id="${reader.id}">
+                        <div class="font-medium text-gray-900">${reader.name}</div>
+                        <div class="text-sm text-gray-500">${reader.email}</div>
                     </div>
                 `).join('');
                 
                 document.querySelectorAll('.reader-item').forEach(item => {
                     item.addEventListener('click', function() {
                         selectReader(this.dataset.id, 
-                            this.querySelector('.reader-name').textContent, 
-                            this.querySelector('.reader-email').textContent);
+                            this.querySelector('.font-medium').textContent, 
+                            this.querySelector('.text-sm').textContent);
                     });
                 });
             }
         })
         .catch(error => {
-            document.getElementById('readerList').innerHTML = '<div class="text-danger"><em>Lỗi tải danh sách</em></div>';
+            document.getElementById('readerList').innerHTML = '<div class="text-red-500 py-4"><em>Lỗi tải danh sách</em></div>';
         });
 }
 
@@ -424,37 +299,43 @@ function loadBooks(search = '') {
         .then(data => {
             const bookList = document.getElementById('bookList');
             if (!data.data?.length) {
-                bookList.innerHTML = '<div class="text-center text-muted"><em>Không tìm thấy sách</em></div>';
+                bookList.innerHTML = '<div class="text-center text-gray-500 py-4"><em>Không tìm thấy sách</em></div>';
             } else {
                 bookList.innerHTML = data.data.map(book => `
-                    <div class="book-item ${selectedBooks.includes(book.id) ? 'selected' : ''}" data-id="${book.id}">
-                        <div class="book-title">${book.title}</div>
-                        <div class="book-info">
+                    <div class="book-item p-3 border-l-4 border-transparent cursor-pointer mb-2 rounded hover:bg-gray-50 hover:border-blue-500 transition-all ${selectedBooks.includes(book.id) ? 'bg-green-50 border-green-500 font-medium' : ''}" data-id="${book.id}">
+                        <div class="font-medium text-gray-900">${selectedBooks.includes(book.id) ? '✓ ' : ''}${book.title}</div>
+                        <div class="text-sm text-gray-500">
                             ${book.year} • ${book.category}
-                            <span class="book-remaining">Còn ${book.remaining}</span>
+                            <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full ml-2">Còn ${book.remaining}</span>
                         </div>
                     </div>
                 `).join('');
                 
                 document.querySelectorAll('.book-item').forEach(item => {
                     item.addEventListener('click', function() {
-                        selectBook(this.dataset.id, this.querySelector('.book-title').textContent);
+                        selectBook(this.dataset.id, this.querySelector('.font-medium').textContent);
                     });
                 });
             }
         })
         .catch(error => {
-            document.getElementById('bookList').innerHTML = '<div class="text-danger"><em>Lỗi tải danh sách</em></div>';
+            document.getElementById('bookList').innerHTML = '<div class="text-red-500 py-4"><em>Lỗi tải danh sách</em></div>';
         });
 }
 
 function selectReader(id, name, email) {
     selectedReaderId = id;
     document.getElementById('readerId').value = id;
-    document.getElementById('selectedReader').innerHTML = `<strong>${name}</strong><br><small>${email}</small>`;
+    document.getElementById('selectedReader').innerHTML = `<strong>${name}</strong><br><small class="text-gray-500">${email}</small>`;
     
     document.querySelectorAll('.reader-item').forEach(item => {
-        item.classList.toggle('selected', item.dataset.id == id);
+        if (item.dataset.id == id) {
+            item.classList.add('bg-green-50', 'border-green-500', 'font-medium');
+            item.classList.remove('border-transparent');
+        } else {
+            item.classList.remove('bg-green-50', 'border-green-500', 'font-medium');
+            item.classList.add('border-transparent');
+        }
     });
     
     checkFormValid();
@@ -472,7 +353,16 @@ function selectBook(id, title) {
     document.getElementById('bookId').value = selectedBooks.join(',');
     
     document.querySelectorAll('.book-item').forEach(item => {
-        item.classList.toggle('selected', selectedBooks.includes(parseInt(item.dataset.id)));
+        const itemId = parseInt(item.dataset.id);
+        if (selectedBooks.includes(itemId)) {
+            item.classList.add('bg-green-50', 'border-green-500', 'font-medium');
+            item.classList.remove('border-transparent');
+            item.querySelector('.font-medium').textContent = '✓ ' + item.querySelector('.font-medium').textContent.replace('✓ ', '');
+        } else {
+            item.classList.remove('bg-green-50', 'border-green-500', 'font-medium');
+            item.classList.add('border-transparent');
+            item.querySelector('.font-medium').textContent = item.querySelector('.font-medium').textContent.replace('✓ ', '');
+        }
     });
     
     updateBookDisplay();
@@ -482,16 +372,16 @@ function selectBook(id, title) {
 function updateBookDisplay() {
     const selectedBookDiv = document.getElementById('selectedBook');
     if (selectedBooks.length === 0) {
-        selectedBookDiv.innerHTML = '<em>Chưa chọn</em>';
+        selectedBookDiv.innerHTML = '<em class="text-gray-400">Chưa chọn</em>';
     } else {
         const bookNames = [];
         selectedBooks.forEach(id => {
             const item = document.querySelector(`.book-item[data-id="${id}"]`);
             if (item) {
-                bookNames.push(item.querySelector('.book-title').textContent);
+                bookNames.push(item.querySelector('.font-medium').textContent.replace('✓ ', ''));
             }
         });
-        selectedBookDiv.innerHTML = `<strong>${bookNames.join(', ')}</strong><br><small class="text-muted">(${selectedBooks.length} quyển)</small>`;
+        selectedBookDiv.innerHTML = `<strong>${bookNames.join(', ')}</strong><br><small class="text-gray-500">(${selectedBooks.length} quyển)</small>`;
     }
 }
 
@@ -503,7 +393,7 @@ function checkFormValid() {
     submitBtn.disabled = !isValid;
 }
 
-// ============ TAB 2: ĐỘCGIẢ ĐANG MƯỢN ============
+// ============ TAB 2: ĐỘC GIẢ ĐANG MƯỢN ============
 
 function loadBorrowingReaders() {
     fetch("{% url 'api_borrowing_readers' %}")
@@ -511,24 +401,24 @@ function loadBorrowingReaders() {
         .then(data => {
             const container = document.getElementById('borrowingReadersList');
             if (!data.data?.length) {
-                container.innerHTML = '<div class="text-center text-muted"><em>Không có độc giả đang mượn sách</em></div>';
+                container.innerHTML = '<div class="text-center text-gray-500 py-4"><em>Không có độc giả đang mượn sách</em></div>';
             } else {
                 container.innerHTML = data.data.map(reader => `
-                    <div class="borrowing-reader-item ${reader.is_overdue ? 'overdue' : ''}" 
+                    <div class="borrowing-reader-item p-4 border-l-4 ${reader.is_overdue ? 'border-red-500 bg-red-50' : 'border-yellow-500 bg-yellow-50'} mb-3 rounded cursor-pointer hover:shadow-md transition-all" 
                          data-reader-id="${reader.reader_id}"
                          data-reader-name="${reader.reader_name}"
                          data-reader-email="${reader.reader_email}"
                          data-books='${JSON.stringify(reader.books)}'>
-                        <div class="borrowing-reader-header">
+                        <div class="flex justify-between items-center">
                             <div>
-                                <div class="borrowing-reader-name">${reader.reader_name}</div>
-                                <div class="borrowing-reader-email">${reader.reader_email}</div>
+                                <div class="font-semibold text-gray-900">${reader.reader_name}</div>
+                                <div class="text-sm text-gray-500">${reader.reader_email}</div>
                             </div>
-                            <div>
-                                <span class="borrowing-reader-badge ${reader.is_overdue ? 'borrowing-reader-overdue-badge' : ''}">
+                            <div class="text-right">
+                                <span class="inline-block px-2 py-1 text-xs rounded-full ${reader.is_overdue ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}">
                                     ${reader.is_overdue ? '⚠️ Quá hạn' : '📚 ' + reader.borrowed_count + ' quyển'}
                                 </span>
-                                <div style="font-size: 0.85em; color: #666; margin-top: 4px;">
+                                <div class="text-xs text-gray-500 mt-1">
                                     Phải trả: ${reader.latest_due_date}
                                 </div>
                             </div>
@@ -548,7 +438,7 @@ function loadBorrowingReaders() {
             }
         })
         .catch(error => {
-            document.getElementById('borrowingReadersList').innerHTML = '<div class="text-danger"><em>Lỗi tải danh sách</em></div>';
+            document.getElementById('borrowingReadersList').innerHTML = '<div class="text-red-500 py-4"><em>Lỗi tải danh sách</em></div>';
         });
 }
 
@@ -562,49 +452,49 @@ function showBorrowingDetail(readerId, readerName, readerEmail, books) {
         const isOverdue = dueDate < today;
         
         return `
-            <tr ${isOverdue ? 'class="table-danger"' : ''}>
-                <td><strong>${book.title}</strong></td>
-                <td>${book.borrow_date}</td>
-                <td>${book.due_date}</td>
-                <td>
-                    ${isOverdue ? '<span class="badge bg-danger">⚠️ Quá hạn</span>' : '<span class="badge bg-success">✓ Còn hạn</span>'}
+            <tr class="${isOverdue ? 'bg-red-50' : ''}">
+                <td class="px-4 py-2 text-sm"><strong>${book.title}</strong></td>
+                <td class="px-4 py-2 text-sm">${book.borrow_date}</td>
+                <td class="px-4 py-2 text-sm">${book.due_date}</td>
+                <td class="px-4 py-2 text-sm">
+                    ${isOverdue ? '<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">⚠️ Quá hạn</span>' : '<span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">✓ Còn hạn</span>'}
                 </td>
             </tr>
         `;
     }).join('');
     
     const modalHtml = `
-        <div class="modal fade" id="borrowingDetailModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header bg-info text-white">
-                        <h5 class="modal-title"><i class="fas fa-info-circle"></i> Chi tiết sách mượn</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <h6>Thông tin độc giả</h6>
-                                <p class="mb-1"><strong>Tên:</strong> ${readerName}</p>
-                                <p class="mb-0"><strong>Email:</strong> <a href="mailto:${readerEmail}">${readerEmail}</a></p>
-                            </div>
-                            <div class="col-md-6">
-                                <h6>Thống kê</h6>
-                                <p class="mb-0"><strong>Tổng sách đang mượn:</strong> <span class="badge bg-primary">${books.length} quyển</span></p>
-                            </div>
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="borrowingDetailModal">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden">
+                <div class="bg-cyan-500 text-white px-4 py-3 flex justify-between items-center">
+                    <h5 class="font-semibold">ℹ️ Chi tiết sách mượn</h5>
+                    <button onclick="document.getElementById('borrowingDetailModal').remove()" class="text-white hover:text-gray-200">✕</button>
+                </div>
+                <div class="p-4 overflow-y-auto max-h-[70vh]">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <h6 class="font-semibold text-gray-900 mb-2">Thông tin độc giả</h6>
+                            <p class="text-sm text-gray-700"><strong>Tên:</strong> ${readerName}</p>
+                            <p class="text-sm text-gray-700"><strong>Email:</strong> <a href="mailto:${readerEmail}" class="text-blue-600">${readerEmail}</a></p>
                         </div>
-                        <hr>
-                        <h6>Danh sách sách mượn</h6>
-                        <table class="table table-sm table-striped">
-                            <thead class="table-light">
-                                <tr><th>Tên sách</th><th>Ngày mượn</th><th>Phải trả</th><th>Trạng thái</th></tr>
+                        <div>
+                            <h6 class="font-semibold text-gray-900 mb-2">Thống kê</h6>
+                            <p class="text-sm text-gray-700"><strong>Tổng sách đang mượn:</strong> <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">${books.length} quyển</span></p>
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <h6 class="font-semibold text-gray-900 mb-2">Danh sách sách mượn</h6>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr><th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Tên sách</th><th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Ngày mượn</th><th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Phải trả</th><th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Trạng thái</th></tr>
                             </thead>
-                            <tbody>${booksHtml}</tbody>
+                            <tbody class="divide-y divide-gray-200">${booksHtml}</tbody>
                         </table>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 flex justify-end">
+                    <button onclick="document.getElementById('borrowingDetailModal').remove()" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">Đóng</button>
                 </div>
             </div>
         </div>
@@ -613,12 +503,6 @@ function showBorrowingDetail(readerId, readerName, readerEmail, books) {
     const oldModal = document.getElementById('borrowingDetailModal');
     if (oldModal) oldModal.remove();
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-    
-    try {
-        new bootstrap.Modal(document.getElementById('borrowingDetailModal')).show();
-    } catch (e) {
-        console.error('Modal error:', e);
-    }
 }
 
 // ============ TAB 3: LỊCH SỬ MƯỢN ============
@@ -635,19 +519,19 @@ function loadBorrowHistory(filter = 'all') {
             
             if (tableBody && tableBody.innerHTML.trim()) {
                 historyList.innerHTML = `
-                    <div style="overflow-x: auto;">
-                        <table class="table table-hover">
-                            <thead class="table-light">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th>Phiếu #</th>
-                                    <th>Độc giả</th>
-                                    <th>Ngày mượn</th>
-                                    <th>Phải trả</th>
-                                    <th>Ngày trả</th>
-                                    <th>Trạng thái</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Phiếu #</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Độc giả</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Ngày mượn</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Phải trả</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Ngày trả</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Trạng thái</th>
                                 </tr>
                             </thead>
-                            <tbody id="historyBody"></tbody>
+                            <tbody id="historyBody" class="divide-y divide-gray-200"></tbody>
                         </table>
                     </div>
                 `;
@@ -656,15 +540,15 @@ function loadBorrowHistory(filter = 'all') {
                 let historyBody = document.getElementById('historyBody');
                 rows.forEach(row => {
                     const clonedRow = row.cloneNode(true);
-                    clonedRow.classList.add('history-row');
+                    clonedRow.classList.add('hover:bg-gray-50');
                     historyBody.appendChild(clonedRow);
                 });
             } else {
-                historyList.innerHTML = '<div class="alert alert-info">Không có dữ liệu</div>';
+                historyList.innerHTML = '<div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded">Không có dữ liệu</div>';
             }
         })
         .catch(error => {
-            historyList.innerHTML = '<div class="alert alert-danger">Lỗi tải dữ liệu</div>';
+            historyList.innerHTML = '<div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded">Lỗi tải dữ liệu</div>';
         });
 }
 
@@ -677,13 +561,30 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('{{ form.borrow_date.id_for_label }}')?.addEventListener('change', checkFormValid);
 
     // Tab 3: Filter
-    document.querySelectorAll('[data-filter]').forEach(btn => {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                b.classList.add('border-gray-300', 'text-gray-700');
+            });
+            this.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+            this.classList.remove('border-gray-300', 'text-gray-700');
             currentFilter = this.dataset.filter;
             loadBorrowHistory(currentFilter);
         });
+    });
+
+    // Form submit loading
+    document.getElementById('borrowForm')?.addEventListener('submit', function() {
+        const btn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('submitBtnText');
+        const btnLoading = document.getElementById('submitBtnLoading');
+        
+        if (btn && btnText && btnLoading) {
+            btn.disabled = true;
+            btnText.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
+        }
     });
 
     // Initial

@@ -1,299 +1,242 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} {% load static %} {% block title %}{{ page_title }}{%endblock %} {% block content %}
+<!-- Page Header -->
+{% comment %}
+<div class="mb-8">
+  <h1 class="text-3xl font-bold text-gray-900 mb-2">Tiếp nhận sách mới</h1>
+  <p class="text-gray-500">YC2 - Nhập sách vào thư viện</p>
+</div>
+{% endcomment %}
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+  <div class="p-6">
+    <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ page_title }}</h1>
 
-{% block title %}{{ page_title }}{% endblock %}
+    <p class="text-gray-500"><strong>YC2:</strong> Nhập sách vào thư viện</p>
 
-{% block content %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-lg-8 offset-lg-2">
-            <!-- Header -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h2 class="card-title mb-2">
-                        <i class="fas fa-book-plus"></i> {{ page_title }}
-                    </h2>
-                    <p class="text-muted mb-0">
-                        <strong>YC2:</strong> Tiếp nhận sách mới vào thư viện
-                    </p>
-                </div>
-            </div>
-
-            <!-- Business Rules Info -->
-            <div class="alert alert-info border-0" role="alert">
-                <h5 class="alert-heading">
-                    <i class="fas fa-info-circle"></i> Quy định 2 (QĐ2)
-                </h5>
-                <ul class="mb-0">
-                    <li>Chỉ nhận sách xuất bản từ năm <strong>{{ min_year }}</strong> trở đi (vòng 8 năm)</li>
-                    <li>Thể loại phải được xác định trước</li>
-                    <li>Phải có ít nhất 1 tác giả hợp lệ</li>
-                    <li>Nhà xuất bản phải được khai báo</li>
-                </ul>
-            </div>
-
-            <!-- Form -->
-            <form method="post" class="card border-0 shadow-sm p-4">
-                {% csrf_token %}
-
-                <!-- Messages -->
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-
-                <!-- Errors -->
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <h5 class="alert-heading">Lỗi validation</h5>
-                        {% for error in form.non_field_errors %}
-                            <div>{{ error }}</div>
-                        {% endfor %}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endif %}
-
-                <!-- Book Information Section -->
-                <h5 class="mb-3 mt-4">
-                    <i class="fas fa-book"></i> Thông tin sách
-                </h5>
-
-                <div class="mb-3">
-                    <label for="{{ form.book_title.id_for_label }}" class="form-label">
-                        {{ form.book_title.label }}
-                        <span class="text-danger">*</span>
-                    </label>
-                    {{ form.book_title }}
-                    {% if form.book_title.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in form.book_title.errors %}{{ error }}{% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.category.id_for_label }}" class="form-label">
-                            {{ form.category.label }}
-                            <span class="text-danger">*</span>
-                        </label>
-                        {{ form.category }}
-                        {% if form.category.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.category.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.publish_year.id_for_label }}" class="form-label">
-                            {{ form.publish_year.label }}
-                            <span class="text-danger">*</span>
-                        </label>
-                        {{ form.publish_year }}
-                        <small class="form-text text-muted">Năm xuất bản tối thiểu: {{ min_year }}</small>
-                        {% if form.publish_year.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.publish_year.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.publisher.id_for_label }}" class="form-label">
-                            {{ form.publisher.label }}
-                            <span class="text-danger">*</span>
-                        </label>
-                        {{ form.publisher }}
-                        {% if form.publisher.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.publisher.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.language.id_for_label }}" class="form-label">
-                            {{ form.language.label }}
-                        </label>
-                        {{ form.language }}
-                        {% if form.language.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.language.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.isbn.id_for_label }}" class="form-label">
-                            {{ form.isbn.label }}
-                        </label>
-                        {{ form.isbn }}
-                        {% if form.isbn.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.isbn.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.edition.id_for_label }}" class="form-label">
-                            {{ form.edition.label }}
-                        </label>
-                        {{ form.edition }}
-                        {% if form.edition.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.edition.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="{{ form.description.id_for_label }}" class="form-label">
-                        {{ form.description.label }}
-                    </label>
-                    {{ form.description }}
-                    {% if form.description.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in form.description.errors %}{{ error }}{% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- Authors Section -->
-                <div class="mb-4">
-                    <label class="form-label">
-                        {{ form.authors.label }}
-                        <span class="text-danger">*</span>
-                    </label>
-                    <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
-                        {% if form.authors %}
-                            {% for widget in form.authors %}
-                                <div class="form-check">
-                                    {{ widget }}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-                    {% if form.authors.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in form.authors.errors %}{{ error }}{% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- Import Information Section -->
-                <h5 class="mb-3 mt-5 border-top pt-4">
-                    <i class="fas fa-inbox"></i> Thông tin nhập kho
-                </h5>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.quantity.id_for_label }}" class="form-label">
-                            {{ form.quantity.label }}
-                            <span class="text-danger">*</span>
-                        </label>
-                        {{ form.quantity }}
-                        {% if form.quantity.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.quantity.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ form.unit_price.id_for_label }}" class="form-label">
-                            {{ form.unit_price.label }}
-                            <span class="text-danger">*</span>
-                        </label>
-                        {{ form.unit_price }}
-                        {% if form.unit_price.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.unit_price.errors %}{{ error }}{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="{{ form.import_date.id_for_label }}" class="form-label">
-                        {{ form.import_date.label }}
-                        <span class="text-danger">*</span>
-                    </label>
-                    {{ form.import_date }}
-                    {% if form.import_date.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in form.import_date.errors %}{{ error }}{% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="mb-3">
-                    <label for="{{ form.notes.id_for_label }}" class="form-label">
-                        {{ form.notes.label }}
-                    </label>
-                    {{ form.notes }}
-                    {% if form.notes.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in form.notes.errors %}{{ error }}{% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- Buttons -->
-                <div class="d-grid gap-2 d-sm-flex gap-2 mt-5 border-top pt-4">
-                    <button type="submit" class="btn btn-primary btn-lg" onclick="ensureValues()">
-                        <i class="fas fa-check"></i> Lưu phiếu nhập
-                    </button>
-                    <a href="{% url 'book_import_list' %}" class="btn btn-secondary btn-lg">
-                        <i class="fas fa-list"></i> Xem danh sách
-                    </a>
-                    <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg">
-                        <i class="fas fa-home"></i> Về trang chủ
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
+    {% comment %} <div
+      class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded mb-6 mt-4"
+    >
+      <p>
+        <strong>Quy định (QĐ2):</strong> Chỉ nhận sách xuất bản từ năm
+        <strong>{{ min_year }}</strong> trở đi. Phải có thể loại, ít nhất 1 tác
+        giả, và nhà xuất bản.
+      </p>
+    </div> {% endcomment %}
+  </div>
 </div>
 
-<style>
-    .form-check {
-        padding: 0.5rem 0;
-    }
+<!-- Form Card -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+  <div class="p-6">
+    <h3 class="text-xl font-semibold text-gray-900 mb-6">Thông tin sách</h3>
 
-    .form-check input[type="checkbox"] {
-        margin-right: 0.5rem;
-    }
-</style>
+    <form method="post">
+      {% csrf_token %}
+
+      <!-- Messages -->
+      {% if messages %} {% for message in messages %}
+      <div
+        class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-700{% else %}bg-blue-50 border-l-4 border-blue-500 text-blue-700{% endif %} p-4 rounded mb-4"
+      >
+        {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% if form.non_field_errors %}
+      <div
+        class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4"
+      >
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Book Title -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >{{ form.book_title.label }}
+          <span class="text-red-500">*</span></label
+        >
+        {{ form.book_title }} {% if form.book_title.errors %}
+        <p class="text-red-500 text-sm mt-1">
+          {% for e in form.book_title.errors %}{{ e }}{% endfor %}
+        </p>
+        {% endif %}
+      </div>
+
+      <!-- Row: Category, Publisher -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >{{ form.category.label }}
+            <span class="text-red-500">*</span></label
+          >
+          {{ form.category }} {% if form.category.errors %}
+          <p class="text-red-500 text-sm mt-1">
+            {% for e in form.category.errors %}{{ e }}{% endfor %}
+          </p>
+          {% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >{{ form.publisher.label }}
+            <span class="text-red-500">*</span></label
+          >
+          {{ form.publisher }} {% if form.publisher.errors %}
+          <p class="text-red-500 text-sm mt-1">
+            {% for e in form.publisher.errors %}{{ e }}{% endfor %}
+          </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Row: Year, Language, ISBN, Edition -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >{{ form.publish_year.label }}
+            <span class="text-red-500">*</span></label
+          >
+          {{ form.publish_year }} {% if form.publish_year.errors %}
+          <p class="text-red-500 text-sm mt-1">
+            {% for e in form.publish_year.errors %}{{ e }}{% endfor %}
+          </p>
+          {% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >{{ form.language.label }}</label
+          >
+          {{ form.language }}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >{{ form.isbn.label }}</label
+          >
+          {{ form.isbn }}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >{{ form.edition.label }}</label
+          >
+          {{ form.edition }}
+        </div>
+      </div>
+
+      <!-- Authors -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >{{ form.authors.label }} <span class="text-red-500">*</span></label
+        >
+        <div
+          class="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto bg-gray-50"
+        >
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {% for widget in form.authors %}
+            <div class="flex items-center text-sm">{{ widget }}</div>
+            {% endfor %}
+          </div>
+        </div>
+        {% if form.authors.errors %}
+        <p class="text-red-500 text-sm mt-1">
+          {% for e in form.authors.errors %}{{ e }}{% endfor %}
+        </p>
+        {% endif %}
+      </div>
+
+      <!-- Description -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >{{ form.description.label }}</label
+        >
+        {{ form.description }}
+      </div>
+
+      <!-- Divider -->
+      <hr class="my-6" />
+      <h3 class="text-xl font-semibold text-gray-900 mb-6">
+        Thông tin nhập kho
+      </h3>
+
+      <!-- Row: Quantity, Price, Date -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >{{ form.quantity.label }}
+            <span class="text-red-500">*</span></label
+          >
+          {{ form.quantity }} {% if form.quantity.errors %}
+          <p class="text-red-500 text-sm mt-1">
+            {% for e in form.quantity.errors %}{{ e }}{% endfor %}
+          </p>
+          {% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >{{ form.unit_price.label }}
+            <span class="text-red-500">*</span></label
+          >
+          {{ form.unit_price }} {% if form.unit_price.errors %}
+          <p class="text-red-500 text-sm mt-1">
+            {% for e in form.unit_price.errors %}{{ e }}{% endfor %}
+          </p>
+          {% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >{{ form.import_date.label }}
+            <span class="text-red-500">*</span></label
+          >
+          {{ form.import_date }} {% if form.import_date.errors %}
+          <p class="text-red-500 text-sm mt-1">
+            {% for e in form.import_date.errors %}{{ e }}{% endfor %}
+          </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >{{ form.notes.label }}</label
+        >
+        {{ form.notes }}
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3">
+        <button
+          type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          onclick="ensureValues()"
+        >
+          Lưu phiếu nhập
+        </button>
+        <a
+          href="{% url 'book_import_list' %}"
+          class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+        >
+          Xem danh sách
+        </a>
+        {% comment %}
+        <a
+          href="{% url 'home' %}"
+          class="border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors"
+        >
+          Về trang chủ
+        </a>
+        {% endcomment %}
+      </div>
+    </form>
+  </div>
+</div>
 
 <script>
-function ensureValues() {
-    // Ensure quantity has a valid value
+  function ensureValues() {
     const quantityField = document.querySelector('input[name="quantity"]');
     if (!quantityField.value || parseInt(quantityField.value) < 1) {
-        quantityField.value = 1;
+      quantityField.value = 1;
     }
-    
-    // Ensure unit_price has a valid value
     const unitPriceField = document.querySelector('input[name="unit_price"]');
     if (!unitPriceField.value || parseInt(unitPriceField.value) < 0) {
-        unitPriceField.value = 0;
+      unitPriceField.value = 0;
     }
-    
-    console.log('Ensured values:', {
-        quantity: quantityField.value,
-        unit_price: unitPriceField.value
-    });
-}
+  }
 </script>
 {% endblock %}

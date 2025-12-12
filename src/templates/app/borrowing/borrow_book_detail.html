@@ -3,154 +3,145 @@
 {% block title %}Chi tiết phiếu mượn{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="mb-3">
-                <i class="fas fa-receipt"></i> Chi tiết phiếu mượn
-            </h1>
-            <a href="{% url 'borrow_book_list' %}" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Quay lại
-            </a>
-        </div>
+<div class="mb-6">
+    <div class="flex items-center gap-4">
+        <h1 class="text-4xl font-bold text-gray-900">
+            🧾 Chi tiết phiếu mượn
+        </h1>
+        <a href="{% url 'borrow_book_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium py-1 px-3 rounded-lg transition-colors inline-flex items-center gap-1">
+            ← Quay lại
+        </a>
     </div>
+</div>
 
-    <!-- Thông tin phiếu mượn -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Phiếu mượn #{{ receipt.id }}</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Tên độc giả:</strong></label>
-                        <p>{{ receipt.reader.reader_name }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Email:</strong></label>
-                        <p><a href="mailto:{{ receipt.reader.email }}">{{ receipt.reader.email }}</a></p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Ngày mượn:</strong></label>
-                        <p>{{ receipt.borrow_date|date:"d/m/Y H:i" }}</p>
-                    </div>
+<!-- Thông tin phiếu mượn -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
+    <div class="bg-blue-600 text-white px-4 py-3">
+        <h5 class="font-semibold">Phiếu mượn #{{ receipt.id }}</h5>
+    </div>
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Tên độc giả:</label>
+                    <p class="text-gray-900">{{ receipt.reader.reader_name }}</p>
                 </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Ngày phải trả:</strong></label>
-                        <p>
-                            {{ receipt.due_date|date:"d/m/Y" }}
-                            {% if receipt.is_overdue and not receipt.is_returned %}
-                            <span class="badge bg-danger">QUÁHẠN</span>
-                            {% endif %}
-                        </p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Trạng thái:</strong></label>
-                        <p>
-                            {% if receipt.is_returned %}
-                            <span class="badge bg-success">ĐÃ TRẢ</span>
-                            {% elif receipt.is_overdue %}
-                            <span class="badge bg-danger">QUÁ HẠN</span>
-                            {% else %}
-                            <span class="badge bg-warning">ĐANG MƯỢN</span>
-                            {% endif %}
-                        </p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Ngày thực trả:</strong></label>
-                        <p>
-                            {% if receipt.return_date %}
-                            {{ receipt.return_date|date:"d/m/Y H:i" }}
-                            {% else %}
-                            <em class="text-muted">Chưa trả</em>
-                            {% endif %}
-                        </p>
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Email:</label>
+                    <p><a href="mailto:{{ receipt.reader.email }}" class="text-blue-600 hover:underline">{{ receipt.reader.email }}</a></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Ngày mượn:</label>
+                    <p class="text-gray-900">{{ receipt.borrow_date|date:"d/m/Y H:i" }}</p>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Thông tin sách -->
-    <div class="card mb-4">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0">Thông tin sách</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Tên sách:</strong></label>
-                        <p>{{ receipt.book_item.book.book_title.book_title }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Thể loại:</strong></label>
-                        <p>{{ receipt.book_item.book.book_title.category.category_name }}</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Mã sách:</strong></label>
-                        <p><code>{{ receipt.book_item.book.id }}</code></p>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Barcode:</strong></label>
-                        <p><code>{{ receipt.book_item.barcode }}</code></p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    <label class="form-label"><strong>Tác giả:</strong></label>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Ngày phải trả:</label>
                     <p>
-                        {% for author in receipt.book_item.book.book_title.authors.all %}
-                        <span class="badge bg-secondary">{{ author.author_name }}</span>
-                        {% endfor %}
+                        <span class="text-gray-900">{{ receipt.due_date|date:"d/m/Y" }}</span>
+                        {% if receipt.is_overdue and not receipt.is_returned %}
+                        <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-2">QUÁ HẠN</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Trạng thái:</label>
+                    <p>
+                        {% if receipt.is_returned %}
+                        <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">ĐÃ TRẢ</span>
+                        {% elif receipt.is_overdue %}
+                        <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">QUÁ HẠN</span>
+                        {% else %}
+                        <span class="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">ĐANG MƯỢN</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Ngày thực trả:</label>
+                    <p>
+                        {% if receipt.return_date %}
+                        <span class="text-gray-900">{{ receipt.return_date|date:"d/m/Y H:i" }}</span>
+                        {% else %}
+                        <em class="text-gray-400">Chưa trả</em>
+                        {% endif %}
                     </p>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Thông tin tiền phạt -->
-    {% if receipt.is_overdue %}
-    <div class="card mb-4">
-        <div class="card-header bg-danger text-white">
-            <h5 class="mb-0">Thông tin tiền phạt</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Số ngày quá hạn:</strong></label>
-                        <p>{{ receipt.days_overdue }} ngày</p>
-                    </div>
+<!-- Thông tin sách -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
+    <div class="bg-cyan-500 text-white px-4 py-3">
+        <h5 class="font-semibold">📚 Thông tin sách</h5>
+    </div>
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Tên sách:</label>
+                    <p class="text-gray-900">{{ receipt.book_item.book.book_title.book_title }}</p>
                 </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Tiền phạt:</strong></label>
-                        <p><strong>{{ receipt.fine_amount|default:"0" }} VNĐ</strong></p>
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Thể loại:</label>
+                    <p class="text-gray-900">{{ receipt.book_item.book.book_title.category.category_name }}</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Mã sách:</label>
+                    <p><code class="bg-gray-100 px-2 py-1 rounded text-gray-800 font-mono text-sm">{{ receipt.book_item.book.id }}</code></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Barcode:</label>
+                    <p><code class="bg-gray-100 px-2 py-1 rounded text-gray-800 font-mono text-sm">{{ receipt.book_item.barcode }}</code></p>
                 </div>
             </div>
         </div>
-    </div>
-    {% endif %}
-
-    <!-- Ghi chú -->
-    {% if receipt.notes %}
-    <div class="card mb-4">
-        <div class="card-header bg-secondary text-white">
-            <h5 class="mb-0">Ghi chú</h5>
-        </div>
-        <div class="card-body">
-            <p>{{ receipt.notes }}</p>
+        
+        <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-500 mb-2">Tác giả:</label>
+            <div class="flex flex-wrap gap-2">
+                {% for author in receipt.book_item.book.book_title.authors.all %}
+                <span class="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">{{ author.author_name }}</span>
+                {% endfor %}
+            </div>
         </div>
     </div>
-    {% endif %}
-
 </div>
+
+<!-- Thông tin tiền phạt -->
+{% if receipt.is_overdue %}
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
+    <div class="bg-red-600 text-white px-4 py-3">
+        <h5 class="font-semibold">💰 Thông tin tiền phạt</h5>
+    </div>
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-500">Số ngày quá hạn:</label>
+                <p class="text-gray-900 text-xl font-bold text-red-600">{{ receipt.days_overdue }} ngày</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-500">Tiền phạt:</label>
+                <p class="text-xl font-bold text-red-600">{{ receipt.fine_amount|default:"0" }} VNĐ</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Ghi chú -->
+{% if receipt.notes %}
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
+    <div class="bg-gray-500 text-white px-4 py-3">
+        <h5 class="font-semibold">📝 Ghi chú</h5>
+    </div>
+    <div class="p-6">
+        <p class="text-gray-700">{{ receipt.notes }}</p>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

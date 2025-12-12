@@ -3,275 +3,180 @@
 {% block title %}Nhận trả sách{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-5">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="mb-3">
-                <i class="fas fa-undo"></i> Nhận trả sách
-            </h1>
-            <p class="text-muted">BM5 - Phiếu Trả Sách</p>
-        </div>
-    </div>
-
-    <!-- Quy định 5 -->
-    <div class="alert alert-info mb-4" role="alert">
-        <h5><i class="fas fa-info-circle"></i> QĐ5 - Tiền phạt trả trễ</h5>
-        <ul class="mb-0">
-            <li>✓ Mỗi ngày trả trễ phạt <strong>{{ params.fine_rate|default:1000 }} đồng/ngày</strong></li>
-            <li>✓ Tiền phạt được tính từ ngày phải trả đến ngày thực trả</li>
-            <li>✓ Tiền phạt sẽ được cộng vào tổng nợ của độc giả</li>
-        </ul>
-    </div>
-
-    <!-- Tab Navigation -->
-    <ul class="nav nav-tabs mb-4" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="tab-return" data-bs-toggle="tab" data-bs-target="#content-return" type="button" role="tab">
-                <i class="fas fa-undo-alt"></i> Trả sách
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tab-history" data-bs-toggle="tab" data-bs-target="#content-history" type="button" role="tab">
-                <i class="fas fa-history"></i> Lịch sử trả
-            </button>
-        </li>
-    </ul>
-
-    <!-- Tab Content -->
-    <div class="tab-content">
-        <!-- Tab 1: Trả sách -->
-        <div class="tab-pane fade show active" id="content-return" role="tabpanel">
-            <div class="row">
-                <!-- Form -->
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Nhập thông tin trả sách</h5>
-                        </div>
-                        <div class="card-body">
-                            <form method="post" id="returnForm">
-                                {% csrf_token %}
-                                
-                                <!-- Step 1: Chọn độc giả -->
-                                <div class="mb-4">
-                                    <label class="form-label"><strong>Bước 1: Chọn độc giả</strong></label>
-                                    <div class="mb-2">
-                                        <input type="text" id="readerSearch" class="form-control" placeholder="🔍 Tìm kiếm độc giả...">
-                                    </div>
-                                    <div id="readerList" style="border: 1px solid #ddd; border-radius: 4px; max-height: 250px; overflow-y: auto; background-color: #f8f9fa;">
-                                        <div class="text-center text-muted p-3">
-                                            <small><em>Đang tải danh sách...</em></small>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2 p-2 bg-light rounded" id="selectedReaderDisplay" style="display: none;">
-                                        <small><strong>Chọn:</strong> <span id="selectedReaderName"></span></small>
-                                    </div>
-                                </div>
-                                
-                                <!-- Step 2: Chọn sách mượn -->
-                                <div class="mb-4" id="booksSection" style="display: none;">
-                                    <label class="form-label"><strong>Bước 2: Chọn sách mượn (có thể chọn nhiều)</strong></label>
-                                    <div id="booksList" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
-                                        <div class="text-center text-muted">
-                                            <em>Vui lòng chọn độc giả trước</em>
-                                        </div>
-                                    </div>
-                                    <small class="text-muted d-block mt-2">Danh sách sách độc giả đó mượn nhưng chưa trả</small>
-                                </div>
-                                
-                                <!-- Hidden fields -->
-                                {{ form.reader_id }}
-                                {{ form.book_item_ids }}
-                                
-                                <!-- Step 3: Ngày trả -->
-                                <div class="mb-4">
-                                    <label class="form-label"><strong>Bước 3: Ngày trả</strong></label>
-                                    {{ form.return_date }}
-                                    {% if form.return_date.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {{ form.return_date.errors.0 }}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                
-                                <!-- Lỗi -->
-                                {% if form.non_field_errors %}
-                                <div class="alert alert-danger" role="alert">
-                                    {{ form.non_field_errors.0 }}
-                                </div>
-                                {% endif %}
-                                
-                                <div class="mb-3">
-                                    <button type="submit" class="btn btn-primary w-100" id="submitBtn" disabled>
-                                        <i class="fas fa-check-circle"></i> Ghi nhận trả sách
-                                    </button>
-                                </div>
-                            </form>
-
-                            <!-- Link quay lại -->
-                            <div class="mt-3">
-                                <a href="{% url 'home' %}" class="btn btn-secondary w-100">
-                                    <i class="fas fa-arrow-left"></i> Quay lại
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Summary -->
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header bg-warning text-dark">
-                            <h5 class="mb-0">
-                                <i class="fas fa-info-circle"></i> Tóm tắt
-                            </h5>
-                        </div>
-                        <div class="card-body" id="summaryPanel" style="min-height: 400px;">
-                            <div class="text-center text-muted">
-                                <em>Chọn độc giả để xem tóm tắt</em>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab 2: Lịch sử trả -->
-        <div class="tab-pane fade" id="content-history" role="tabpanel">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-history"></i> Danh sách phiếu đã trả
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Bộ lọc:</strong></label>
-                        <div>
-                            <button class="btn btn-outline-primary btn-sm active" data-filter="all">Tất cả</button>
-                            <button class="btn btn-outline-success btn-sm" data-filter="ontime">Trả đúng hạn</button>
-                            <button class="btn btn-outline-danger btn-sm" data-filter="overdue">Trả quá hạn</button>
-                        </div>
-                    </div>
-                    <div id="historyList" style="overflow-x: auto; min-height: 400px;">
-                        <div class="text-center text-muted">
-                            <i class="fas fa-spinner fa-spin"></i> Đang tải lịch sử...
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        ↩️ Nhận trả sách
+    </h1>
+    <p class="text-gray-500">BM5 - Phiếu Trả Sách</p>
 </div>
 
-<style>
-    .book-item {
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background-color: #f8f9fa;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
+<!-- Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-700{% else %}bg-blue-50 border-l-4 border-blue-500 text-blue-700{% endif %} p-4 rounded mb-6 flex justify-between items-start">
+            <div class="flex items-center gap-2">
+                {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% else %}ℹ️{% endif %}
+                <span>{{ message }}</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-current opacity-50 hover:opacity-100 text-lg leading-none">×</button>
+        </div>
+    {% endfor %}
+{% endif %}
 
-    .book-item:hover {
-        background-color: #e9ecef;
-    }
+{% comment %} <!-- Quy định 5 -->
+<div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-6">
+    <h5 class="font-semibold text-blue-800 mb-2">ℹ️ QĐ5 - Tiền phạt trả trễ</h5>
+    <ul class="text-blue-700 space-y-1 text-sm">
+        <li>✓ Mỗi ngày trả trễ phạt <strong>{{ params.fine_rate|default:1000 }} đồng/ngày</strong></li>
+        <li>✓ Tiền phạt được tính từ ngày phải trả đến ngày thực trả</li>
+        <li>✓ Tiền phạt sẽ được cộng vào tổng nợ của độc giả</li>
+    </ul>
+</div> {% endcomment %}
 
-    .book-item.overdue {
-        background-color: #fff3cd;
-        border-color: #ffc107;
-    }
+<!-- Tab Navigation -->
+<div class="border-b border-gray-200 mb-6">
+    <nav class="flex gap-4" role="tablist">
+        <button class="tab-btn active py-3 px-4 border-b-2 font-medium text-sm transition-colors border-blue-600 text-blue-600" data-target="content-return">
+            ↩️ Trả sách
+        </button>
+        <button class="tab-btn py-3 px-4 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="content-history">
+            📜 Lịch sử trả
+        </button>
+    </nav>
+</div>
 
-    .book-item input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-    }
+<!-- Tab Content -->
+<div class="tab-content">
+    <!-- Tab 1: Trả sách -->
+    <div class="tab-pane active" id="content-return">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                    <div class="bg-blue-600 text-white px-4 py-3">
+                        <h5 class="font-semibold">Nhập thông tin trả sách</h5>
+                    </div>
+                    <div class="p-4">
+                        <form method="post" id="returnForm">
+                            {% csrf_token %}
+                            
+                            <!-- Step 1: Chọn độc giả -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Bước 1: Chọn độc giả</label>
+                                <div class="mb-2">
+                                    <input type="text" id="readerSearch" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="🔍 Tìm kiếm độc giả...">
+                                </div>
+                                <div id="readerList" class="border border-gray-200 rounded-lg max-h-60 overflow-y-auto bg-gray-50">
+                                    <div class="text-center text-gray-500 p-3">
+                                        <small><em>Đang tải danh sách...</em></small>
+                                    </div>
+                                </div>
+                                <div class="mt-2 p-2 bg-gray-100 rounded-lg hidden" id="selectedReaderDisplay">
+                                    <small><strong>Chọn:</strong> <span id="selectedReaderName"></span></small>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 2: Chọn sách mượn -->
+                            <div class="mb-6 hidden" id="booksSection">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Bước 2: Chọn sách mượn (có thể chọn nhiều)</label>
+                                <div id="booksList" class="max-h-72 overflow-y-auto border border-gray-200 p-3 rounded-lg">
+                                    <div class="text-center text-gray-500">
+                                        <em>Vui lòng chọn độc giả trước</em>
+                                    </div>
+                                </div>
+                                <small class="text-gray-500 block mt-2">Danh sách sách độc giả đó mượn nhưng chưa trả</small>
+                            </div>
+                            
+                            <!-- Hidden fields -->
+                            {{ form.reader_id }}
+                            {{ form.book_item_ids }}
+                            
+                            <!-- Step 3: Ngày trả -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Bước 3: Ngày trả</label>
+                                {{ form.return_date }}
+                                {% if form.return_date.errors %}
+                                <div class="text-red-500 text-sm mt-1">
+                                    {{ form.return_date.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Lỗi -->
+                            {% if form.non_field_errors %}
+                            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded mb-4">
+                                {{ form.non_field_errors.0 }}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mb-4">
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" id="submitBtn" disabled>
+                                    <span id="submitBtnText">✓ Ghi nhận trả sách</span>
+                                    <span id="submitBtnLoading" class="hidden">
+                                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Đang xử lý...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
 
-    .book-title {
-        font-weight: 500;
-        color: #333;
-    }
+                        <!-- Link quay lại -->
+                        <div class="mt-4">
+                            <a href="{% url 'home' %}" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                ← Quay lại
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    .book-dates {
-        font-size: 0.9em;
-        color: #666;
-    }
+            <!-- Summary -->
+            <div>
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                    <div class="bg-yellow-500 text-gray-900 px-4 py-3">
+                        <h5 class="font-semibold">
+                            ℹ️ Tóm tắt
+                        </h5>
+                    </div>
+                    <div class="p-4 min-h-96" id="summaryPanel">
+                        <div class="text-center text-gray-500">
+                            <em>Chọn độc giả để xem tóm tắt</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    .fine-badge {
-        display: inline-block;
-        padding: 4px 8px;
-        background-color: #ffc107;
-        border-radius: 12px;
-        font-size: 0.8em;
-        font-weight: 600;
-        color: #333;
-    }
-
-    .summary-section {
-        margin-bottom: 15px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .summary-section:last-child {
-        border-bottom: none;
-    }
-
-    .summary-item {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 5px;
-        font-size: 0.95em;
-    }
-
-    .summary-label {
-        color: #666;
-    }
-
-    .summary-value {
-        font-weight: 600;
-        color: #333;
-    }
-
-    .status-ontime {
-        color: #27ae60;
-        font-weight: 600;
-    }
-
-    .status-overdue {
-        color: #c62828;
-        font-weight: 600;
-    }
-
-    .history-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .history-table th {
-        background-color: #f8f9fa;
-        padding: 12px;
-        text-align: left;
-        border-bottom: 2px solid #dee2e6;
-        font-weight: 600;
-    }
-
-    .history-table td {
-        padding: 12px;
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .history-table tr:hover {
-        background-color: #f8f9fa;
-    }
-</style>
+    <!-- Tab 2: Lịch sử trả -->
+    <div class="tab-pane hidden" id="content-history">
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div class="bg-cyan-500 text-white px-4 py-3">
+                <h5 class="font-semibold">
+                    📜 Danh sách phiếu đã trả
+                </h5>
+            </div>
+            <div class="p-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2"><strong>Bộ lọc:</strong></label>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="filter-btn px-3 py-1 text-sm rounded-lg border transition-colors bg-blue-600 text-white border-blue-600" data-filter="all">Tất cả</button>
+                        <button class="filter-btn px-3 py-1 text-sm rounded-lg border transition-colors border-green-500 text-green-700 hover:bg-green-50" data-filter="ontime">Trả đúng hạn</button>
+                        <button class="filter-btn px-3 py-1 text-sm rounded-lg border transition-colors border-red-500 text-red-700 hover:bg-red-50" data-filter="overdue">Trả quá hạn</button>
+                    </div>
+                </div>
+                <div id="historyList" class="overflow-x-auto min-h-96">
+                    <div class="text-center text-gray-500 py-4">
+                        <span class="animate-spin inline-block mr-2">⏳</span> Đang tải lịch sử...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 let readersData = {{ readers_json|safe }};
@@ -280,39 +185,61 @@ let selectedReader = null;
 let selectedBooks = [];
 let currentFilter = 'all';
 
+// ============ TAB FUNCTIONALITY ============
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.remove('active', 'border-blue-600', 'text-blue-600');
+            b.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        this.classList.add('active', 'border-blue-600', 'text-blue-600');
+        this.classList.remove('border-transparent', 'text-gray-500');
+        
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+        
+        const target = this.dataset.target;
+        document.getElementById(target).classList.remove('hidden');
+        
+        if (target === 'content-history') {
+            loadReturnHistory(currentFilter);
+        }
+    });
+});
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
-    // Load readers list
     loadReaders();
     
-    // Search readers
     document.getElementById('readerSearch').addEventListener('input', function() {
         filterReaders(this.value.toLowerCase());
     });
     
-    // Return date change
     document.getElementById('id_return_date').addEventListener('change', function() {
         updateSubmitButton();
     });
     
-    // Filter buttons
-    document.querySelectorAll('[data-filter]').forEach(btn => {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                b.classList.add('border-gray-300', 'text-gray-700');
+            });
+            this.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+            this.classList.remove('border-gray-300', 'text-gray-700');
             currentFilter = this.dataset.filter;
             loadReturnHistory(currentFilter);
         });
     });
     
-    // Initial load
     loadReturnHistory();
 });
 
 function loadReaders() {
     const readerList = document.getElementById('readerList');
     if (!readersData.length) {
-        readerList.innerHTML = '<div class="text-center text-muted p-3"><small>Không có độc giả</small></div>';
+        readerList.innerHTML = '<div class="text-center text-gray-500 p-3"><small>Không có độc giả</small></div>';
         return;
     }
     
@@ -322,19 +249,17 @@ function loadReaders() {
 function renderReadersList(readers) {
     const readerList = document.getElementById('readerList');
     if (!readers.length) {
-        readerList.innerHTML = '<div class="text-center text-muted p-3"><small>Không tìm thấy độc giả</small></div>';
+        readerList.innerHTML = '<div class="text-center text-gray-500 p-3"><small>Không tìm thấy độc giả</small></div>';
         return;
     }
     
     readerList.innerHTML = readers.map(reader => `
-        <div class="reader-item" data-reader-id="${reader.id}" style="padding: 12px; border-bottom: 1px solid #ddd; cursor: pointer; transition: all 0.2s;" 
-             onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='transparent'">
-            <div style="font-weight: 500; color: #333;">${reader.reader_name}</div>
-            <div style="font-size: 0.9em; color: #666;">${reader.email}</div>
+        <div class="reader-item p-3 border-b border-gray-200 cursor-pointer hover:bg-gray-100 transition-all" data-reader-id="${reader.id}">
+            <div class="font-medium text-gray-900">${reader.reader_name}</div>
+            <div class="text-sm text-gray-500">${reader.email}</div>
         </div>
     `).join('');
     
-    // Add click handlers
     document.querySelectorAll('.reader-item').forEach(item => {
         item.addEventListener('click', function() {
             selectReader(parseInt(this.dataset.readerId));
@@ -362,14 +287,12 @@ function selectReader(readerId) {
     
     const reader = readersData.find(r => r.id === readerId);
     
-    // Update display
     document.getElementById('readerSearch').value = '';
-    document.getElementById('selectedReaderDisplay').style.display = 'block';
+    document.getElementById('selectedReaderDisplay').classList.remove('hidden');
     document.getElementById('selectedReaderName').textContent = reader.reader_name + ' (' + reader.email + ')';
     
-    // Collapse reader list
     document.getElementById('readerList').innerHTML = `
-        <div class="text-center text-muted p-2">
+        <div class="text-center text-gray-500 p-2">
             <small>Độc giả đã chọn: <strong>${reader.reader_name}</strong></small>
         </div>
     `;
@@ -390,11 +313,11 @@ function loadReaderBooks(readerId) {
         })
         .then(data => {
             renderBooks(data.data || []);
-            document.getElementById('booksSection').style.display = 'block';
+            document.getElementById('booksSection').classList.remove('hidden');
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('booksList').innerHTML = `<div class="alert alert-danger">Lỗi tải danh sách: ${error.message}</div>`;
+            document.getElementById('booksList').innerHTML = `<div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded">Lỗi tải danh sách: ${error.message}</div>`;
         });
 }
 
@@ -402,18 +325,18 @@ function renderBooks(books) {
     const booksList = document.getElementById('booksList');
     
     if (!books.length) {
-        booksList.innerHTML = '<div class="text-center text-muted"><em>Độc giả này không có sách mượn chưa trả</em></div>';
+        booksList.innerHTML = '<div class="text-center text-gray-500"><em>Độc giả này không có sách mượn chưa trả</em></div>';
         return;
     }
     
     booksList.innerHTML = books.map((book, idx) => `
-        <div class="book-item ${book.is_overdue ? 'overdue' : ''}" data-book-id="${book.book_item_id}">
-            <input type="checkbox" class="book-checkbox" value="${book.book_item_id}" onchange="updateSelectedBooks()">
-            <div style="flex: 1;">
-                <div class="book-title">${book.book_title}</div>
-                <div class="book-dates">
+        <div class="book-item p-3 border border-gray-200 rounded-lg mb-2 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-all ${book.is_overdue ? 'bg-yellow-50 border-yellow-400' : 'bg-gray-50'}" data-book-id="${book.book_item_id}">
+            <input type="checkbox" class="book-checkbox w-5 h-5 cursor-pointer" value="${book.book_item_id}" onchange="updateSelectedBooks()">
+            <div class="flex-1">
+                <div class="font-medium text-gray-900">${book.book_title}</div>
+                <div class="text-sm text-gray-500">
                     Mượn: ${book.borrow_date} | Phải trả: ${book.due_date}
-                    ${book.is_overdue ? `<span class="fine-badge">Quá hạn ${book.days_overdue} ngày</span>` : ''}
+                    ${book.is_overdue ? `<span class="bg-yellow-400 text-gray-900 text-xs px-2 py-0.5 rounded-full ml-2">Quá hạn ${book.days_overdue} ngày</span>` : ''}
                 </div>
             </div>
         </div>
@@ -426,7 +349,6 @@ function updateSelectedBooks() {
         selectedBooks.push(parseInt(checkbox.value));
     });
     
-    // Set hidden field
     document.getElementById('id_reader_id').value = selectedReader || '';
     document.getElementById('id_book_item_ids').value = JSON.stringify(selectedBooks);
     
@@ -436,31 +358,27 @@ function updateSelectedBooks() {
 
 function updateSummary() {
     if (!selectedReader) {
-        document.getElementById('summaryPanel').innerHTML = '<div class="text-center text-muted"><em>Chọn độc giả để xem tóm tắt</em></div>';
+        document.getElementById('summaryPanel').innerHTML = '<div class="text-center text-gray-500"><em>Chọn độc giả để xem tóm tắt</em></div>';
         return;
     }
     
     const reader = readersData.find(r => r.id === selectedReader);
-    let html = `<div class="summary-section">
-        <strong>Độc giả:</strong><br>
-        ${reader.reader_name}<br>
-        <small class="text-muted">${reader.email}</small>
+    let html = `<div class="mb-4 pb-4 border-b border-gray-200">
+        <strong class="text-gray-700">Độc giả:</strong><br>
+        <span class="text-gray-900">${reader.reader_name}</span><br>
+        <small class="text-gray-500">${reader.email}</small>
     </div>`;
     
     if (selectedBooks.length > 0) {
-        // Get books info
         const checkedBoxes = document.querySelectorAll('.book-checkbox:checked');
-        let totalDaysOverdue = 0;
-        let totalFine = 0;
         
-        html += `<div class="summary-section">
-            <strong>Sách trả (${selectedBooks.length} quyển):</strong><br>`;
+        html += `<div class="mb-4 pb-4 border-b border-gray-200">
+            <strong class="text-gray-700">Sách trả (${selectedBooks.length} quyển):</strong><br>`;
         
         checkedBoxes.forEach(checkbox => {
             const bookItem = checkbox.closest('.book-item');
-            const bookTitle = bookItem.querySelector('.book-title').textContent;
-            const bookDatesText = bookItem.querySelector('.book-dates').textContent;
-            html += `<small>• ${bookTitle}</small><br>`;
+            const bookTitle = bookItem.querySelector('.font-medium').textContent;
+            html += `<small class="text-gray-600">• ${bookTitle}</small><br>`;
         });
         
         html += `</div>`;
@@ -468,9 +386,9 @@ function updateSummary() {
     
     const returnDate = document.getElementById('id_return_date').value;
     if (returnDate) {
-        html += `<div class="summary-section">
-            <strong>Ngày trả:</strong><br>
-            ${new Date(returnDate).toLocaleString('vi-VN')}
+        html += `<div class="mb-4">
+            <strong class="text-gray-700">Ngày trả:</strong><br>
+            <span class="text-gray-900">${new Date(returnDate).toLocaleString('vi-VN')}</span>
         </div>`;
     }
     
@@ -503,33 +421,48 @@ function loadReturnHistory(filter = 'all') {
             
             if (tableBody && tableBody.innerHTML.trim()) {
                 historyList.innerHTML = `
-                    <table class="history-table">
-                        <thead>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <th>Phiếu #</th>
-                                <th>Độc giả</th>
-                                <th>Sách</th>
-                                <th>Ngày trả</th>
-                                <th>Tiền phạt</th>
-                                <th>Trạng thái</th>
+                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Phiếu #</th>
+                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Độc giả</th>
+                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Sách</th>
+                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Ngày trả</th>
+                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Tiền phạt</th>
+                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Trạng thái</th>
                             </tr>
                         </thead>
-                        <tbody id="historyBody"></tbody>
+                        <tbody id="historyBody" class="divide-y divide-gray-200"></tbody>
                     </table>
                 `;
                 
                 const rows = doc.querySelectorAll('tbody tr');
                 let historyBody = document.getElementById('historyBody');
                 rows.forEach(row => {
-                    historyBody.appendChild(row.cloneNode(true));
+                    const clonedRow = row.cloneNode(true);
+                    clonedRow.classList.add('hover:bg-gray-50');
+                    historyBody.appendChild(clonedRow);
                 });
             } else {
-                historyList.innerHTML = '<div class="alert alert-info">Không có dữ liệu</div>';
+                historyList.innerHTML = '<div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded">Không có dữ liệu</div>';
             }
         })
         .catch(error => {
-            historyList.innerHTML = `<div class="alert alert-danger">Lỗi tải dữ liệu</div>`;
+            historyList.innerHTML = `<div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded">Lỗi tải dữ liệu</div>`;
         });
 }
+
+// Form submit loading
+document.getElementById('returnForm')?.addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('submitBtnText');
+    const btnLoading = document.getElementById('submitBtnLoading');
+    
+    if (btn && btnText && btnLoading) {
+        btn.disabled = true;
+        btnText.classList.add('hidden');
+        btnLoading.classList.remove('hidden');
+    }
+});
 </script>
 {% endblock %}

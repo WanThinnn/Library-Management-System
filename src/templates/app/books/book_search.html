@@ -4,91 +4,105 @@
 
 {% block content %}
 <!-- Page Header -->
-<div style="margin-bottom: 2rem;">
-    <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">Tra cứu sách</h1>
-    <p style="color: var(--text-secondary);">BM3 - Danh Sách Sách</p>
-</div>
+{% comment %} <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Tra cứu sách</h1>
+    <p class="text-gray-500">BM3 - Danh Sách Sách</p>
+</div> {% endcomment %}
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+    <div class="p-6">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">
+            {{ page_title }}
+        </h1>
 
-<!-- Search Card -->
-<div class="card card-glass" style="margin-bottom: 2rem;">
-    <div class="card-body">
-        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">Tiêu chí tìm kiếm</h3>
-        <form method="get">
-            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                <div class="form-group">
-                    {{ form.search_text }}
-                </div>
-                <div class="form-group">
-                    {{ form.category }}
-                </div>
-                <div class="form-group">
-                    {{ form.author }}
-                </div>
-                <div class="form-group">
-                    {{ form.status }}
-                </div>
-            </div>
-            <div style="display: flex; gap: 1rem;">
-                <button type="submit" class="btn btn-primary">
-                    Tìm kiếm
-                </button>
-                <a href="{% url 'book_search' %}" class="btn btn-outline">
-                    Xóa lọc
-                </a>
-            </div>
-        </form>
+        <p class="text-gray-500"><strong>BM3:</strong> Danh sách sách</p>
     </div>
 </div>
 
-<!-- Results -->
-{% if total_results > 0 %}
-<div class="alert alert-info" style="margin-bottom: 2rem;">
-    Tìm thấy <strong>{{ total_results }}</strong> kết quả
+
+<!-- Search Card -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-8">
+    <div class="p-6">
+        <h3 class="text-xl font-semibold text-gray-900 mb-6">Tiêu chí tìm kiếm</h3>
+        <form method="get">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div>
+                    {{ form.search_text }}
+                </div>
+                <div>
+                    {{ form.category }}
+                </div>
+                <div>
+                    {{ form.author }}
+                </div>
+                <div>
+                    {{ form.status }}
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Tìm kiếm
+                </button>
+                <a href="{% url 'book_search' %}" class="border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
+                    Xóa lọc
+                </a>
+            </div>
+            <!-- Results -->
+            {% if total_results > 0 %}
+            <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded mb-6 mt-4">
+                Tìm thấy <strong>{{ total_results }}</strong> kết quả
+            </div>
+        </form>
+    </div>
+
 </div>
 
-<div class="card">
-    <div class="table-container">
-        <table>
-            <thead>
+
+
+<div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
                 <tr>
-                    <th>STT</th>
-                    <th>Mã Sách</th>
-                    <th>Tên Sách</th>
-                    <th>Thể Loại</th>
-                    <th>Tác Giả</th>
-                    <th>Số Lượng Còn</th>
-                    <th>Tình Trạng</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">STT</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Mã Sách</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tên Sách</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Thể Loại</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tác Giả</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Số Lượng Còn</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tình Trạng</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="bg-white divide-y divide-gray-200">
                 {% for book in books %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td><code style="background: var(--surface-secondary); padding: 0.25rem 0.5rem; border-radius: 4px;">{{ book.id }}</code></td>
-                    <td>
-                        <strong>{{ book.book_title.book_title }}</strong>
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-3 text-sm text-gray-900">{{ forloop.counter }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <code class="bg-gray-100 px-2 py-1 rounded text-gray-800 font-mono text-xs">{{ book.id }}</code>
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                        <strong class="text-gray-900">{{ book.book_title.book_title }}</strong>
                         {% if book.book_title.isbn %}
                         <br>
-                        <small style="color: var(--text-secondary);">ISBN: {{ book.book_title.isbn }}</small>
+                        <small class="text-gray-500">ISBN: {{ book.book_title.isbn }}</small>
                         {% endif %}
                     </td>
-                    <td>
-                        <span class="badge" style="background: var(--gradient-blue); color: white;">{{ book.category.category_name }}</span>
+                    <td class="px-4 py-3 text-sm">
+                        <span class="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs px-2 py-1 rounded-full">{{ book.category.category_name }}</span>
                     </td>
-                    <td>
+                    <td class="px-4 py-3 text-sm">
                         {% for author in book.book_title.authors.all %}
-                            <span class="badge" style="background: var(--surface-secondary); color: var(--text-primary);">{{ author.author_name }}</span>
+                            <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full inline-block mb-1">{{ author.author_name }}</span>
                             {% if not forloop.last %}<br>{% endif %}
                         {% endfor %}
                     </td>
-                    <td>
+                    <td class="px-4 py-3 text-sm text-gray-900">
                         <strong>{{ book.remaining_quantity }}</strong> / {{ book.quantity }}
                     </td>
-                    <td>
+                    <td class="px-4 py-3 text-sm">
                         {% if book.remaining_quantity > 0 %}
-                            <span class="badge" style="background: var(--success); color: white;">Còn sách</span>
+                            <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Còn sách</span>
                         {% else %}
-                            <span class="badge" style="background: var(--error); color: white;">Hết sách</span>
+                            <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Hết sách</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -100,31 +114,36 @@
 
 <!-- Pagination -->
 {% if page_obj.has_other_pages %}
-<div class="pagination" style="margin-top: 2rem;">
+<div class="flex justify-center items-center gap-2 mt-8">
     {% if page_obj.has_previous %}
-    <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">
+    <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+       class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
         Đầu tiên
     </a>
-    <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">
+    <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+       class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
         Trước
     </a>
     {% endif %}
 
     {% for num in page_obj.paginator.page_range %}
         {% if page_obj.number == num %}
-        <span class="pagination-link active">{{ num }}</span>
+        <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg">{{ num }}</span>
         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-        <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">
+        <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+           class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
             {{ num }}
         </a>
         {% endif %}
     {% endfor %}
 
     {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">
+    <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+       class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
         Tiếp
     </a>
-    <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pagination-link">
+    <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+       class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
         Cuối
     </a>
     {% endif %}
@@ -133,13 +152,13 @@
 
 {% elif request.GET %}
 <!-- No results -->
-<div class="alert alert-warning">
+<div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded">
     <strong>Không tìm thấy sách phù hợp với tiêu chí tìm kiếm.</strong>
-    <p style="margin-top: 0.5rem;">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'book_search' %}" style="color: var(--warning); text-decoration: underline;">xóa lọc</a>.</p>
+    <p class="mt-2">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'book_search' %}" class="text-yellow-800 underline hover:text-yellow-900">xóa lọc</a>.</p>
 </div>
 {% else %}
 <!-- Start search -->
-<div class="alert alert-info">
+<div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
     <strong>Nhập tiêu chí tìm kiếm ở trên để bắt đầu.</strong>
 </div>
 {% endif %}
