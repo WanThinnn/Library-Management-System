@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 from datetime import datetime, timedelta
 from .models import Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt, Category
-from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm, ParameterForm
+from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm, ParameterForm, BookEditForm, ReaderTypeForm
 from .decorators import manager_required, staff_required
 
 
@@ -1288,9 +1288,15 @@ def parameter_update_view(request):
         # GET: Hiển thị form với giá trị hiện tại (D3)
         form = ParameterForm(instance=parameter)
     
+    # Lấy danh sách loại độc giả với số lượng
+    reader_types = ReaderType.objects.annotate(
+        reader_count=Count('readers')
+    ).order_by('reader_type_name')
+    
     context = {
         'form': form,
         'parameter': parameter,
+        'reader_types': reader_types,
         'page_title': 'Thay đổi quy định hệ thống'
     }
     
@@ -1568,3 +1574,181 @@ def register_view(request):
     }
     
     return render(request, 'accounts/register.html', context)
+
+
+# ==================== BOOK DETAIL & EDIT ====================
+
+@staff_required
+def book_detail_view(request, book_id):
+    """
+    Xem chi tiết sách
+    Hiển thị thông tin đầy đủ về sách và cho phép chuyển sang chỉnh sửa
+    """
+    book = get_object_or_404(Book, id=book_id)
+    
+    # Lấy thông tin về tình trạng mượn
+    book_items = BookItem.objects.filter(book=book)
+    borrowed_items = book_items.filter(is_borrowed=True)
+    
+    context = {
+        'book': book,
+        'book_items': book_items,
+        'borrowed_count': borrowed_items.count(),
+        'available_count': book_items.filter(is_borrowed=False).count(),
+        'page_title': f'Chi tiết sách - {book.book_title.book_title}'
+    }
+    
+    return render(request, 'app/books/book_detail.html', context)
+
+
+@staff_required
+def book_edit_view(request, book_id):
+    """
+    Chỉnh sửa thông tin sách
+    - Admin (superuser): chỉnh sửa tất cả các trường
+    - Staff: chỉ chỉnh sửa số lượng, ISBN, phiên bản, ngôn ngữ
+    """
+    book = get_object_or_404(Book, id=book_id)
+    is_admin = request.user.is_superuser
+    
+    if request.method == 'POST':
+        form = BookEditForm(request.POST, instance=book, is_admin=is_admin)
+        if form.is_valid():
+            try:
+                # Nếu là staff, chỉ lưu các trường được phép
+                if not is_admin:
+                    # Giữ nguyên các giá trị của trường admin-only
+                    book = form.save(commit=False)
+                    original = Book.objects.get(id=book_id)
+                    book.unit_price = original.unit_price
+                    book.publish_year = original.publish_year
+                    book.publisher = original.publisher
+                    book.save()
+                else:
+                    form.save()
+                
+                messages.success(request, f'Cập nhật sách "{book.book_title.book_title}" thành công!')
+                return redirect('book_detail', book_id=book.id)
+            except Exception as e:
+                messages.error(request, f'Có lỗi xảy ra: {str(e)}')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{error}')
+    else:
+        form = BookEditForm(instance=book, is_admin=is_admin)
+    
+    context = {
+        'form': form,
+        'book': book,
+        'is_admin': is_admin,
+        'page_title': f'Chỉnh sửa sách - {book.book_title.book_title}'
+    }
+    
+    return render(request, 'app/books/book_edit.html', context)
+
+
+# ==================== READER TYPE MANAGEMENT ====================
+
+@manager_required
+def reader_type_list_view(request):
+    """
+    Danh sách loại độc giả
+    """
+    reader_types = ReaderType.objects.annotate(
+        reader_count=Count('readers')
+    ).order_by('reader_type_name')
+    
+    context = {
+        'reader_types': reader_types,
+        'page_title': 'Quản lý loại độc giả'
+    }
+    
+    return render(request, 'app/settings/reader_type_list.html', context)
+
+
+@manager_required
+def reader_type_create_view(request):
+    """
+    Thêm loại độc giả mới
+    """
+    if request.method == 'POST':
+        form = ReaderTypeForm(request.POST)
+        if form.is_valid():
+            reader_type = form.save()
+            messages.success(request, f'Đã thêm loại độc giả "{reader_type.reader_type_name}" thành công!')
+            return redirect('reader_type_list')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{error}')
+    else:
+        form = ReaderTypeForm()
+    
+    context = {
+        'form': form,
+        'page_title': 'Thêm loại độc giả mới'
+    }
+    
+    return render(request, 'app/settings/reader_type_form.html', context)
+
+
+@manager_required
+def reader_type_edit_view(request, reader_type_id):
+    """
+    Chỉnh sửa loại độc giả
+    """
+    reader_type = get_object_or_404(ReaderType, id=reader_type_id)
+    
+    if request.method == 'POST':
+        form = ReaderTypeForm(request.POST, instance=reader_type)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Đã cập nhật loại độc giả "{reader_type.reader_type_name}" thành công!')
+            return redirect('reader_type_list')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{error}')
+    else:
+        form = ReaderTypeForm(instance=reader_type)
+    
+    context = {
+        'form': form,
+        'reader_type': reader_type,
+        'page_title': f'Chỉnh sửa loại độc giả - {reader_type.reader_type_name}'
+    }
+    
+    return render(request, 'app/settings/reader_type_form.html', context)
+
+
+@manager_required
+def reader_type_delete_view(request, reader_type_id):
+    """
+    Xóa loại độc giả
+    Không cho phép xóa nếu còn độc giả thuộc loại này
+    """
+    reader_type = get_object_or_404(ReaderType, id=reader_type_id)
+    
+    # Kiểm tra có độc giả nào thuộc loại này không
+    reader_count = Reader.objects.filter(reader_type=reader_type).count()
+    
+    if request.method == 'POST':
+        if reader_count > 0:
+            messages.error(
+                request, 
+                f'Không thể xóa loại độc giả "{reader_type.reader_type_name}" vì còn {reader_count} độc giả thuộc loại này.'
+            )
+        else:
+            name = reader_type.reader_type_name
+            reader_type.delete()
+            messages.success(request, f'Đã xóa loại độc giả "{name}" thành công!')
+        return redirect('reader_type_list')
+    
+    context = {
+        'reader_type': reader_type,
+        'reader_count': reader_count,
+        'page_title': f'Xóa loại độc giả - {reader_type.reader_type_name}'
+    }
+    
+    return render(request, 'app/settings/reader_type_delete.html', context)

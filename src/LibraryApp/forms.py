@@ -352,6 +352,129 @@ class BookSearchForm(forms.Form):
     )
 
 
+class BookEditForm(forms.ModelForm):
+    """
+    Form chỉnh sửa sách
+    - Staff: chỉ chỉnh sửa quantity, remaining_quantity
+    - Admin: chỉnh sửa tất cả các trường
+    """
+    
+    class Meta:
+        model = Book
+        fields = [
+            'quantity', 'remaining_quantity',
+            'isbn', 'edition', 'language',
+            'unit_price', 'publish_year', 'publisher'
+        ]
+        widgets = {
+            'quantity': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0'
+            }),
+            'remaining_quantity': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0'
+            }),
+            'isbn': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'VD: 978-3-16-148410-0'
+            }),
+            'edition': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'VD: Lần thứ 2'
+            }),
+            'language': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'unit_price': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'step': '1000'
+            }),
+            'publish_year': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1900',
+                'max': '2100'
+            }),
+            'publisher': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+        }
+        labels = {
+            'quantity': 'Số lượng tổng',
+            'remaining_quantity': 'Số lượng còn lại',
+            'isbn': 'ISBN',
+            'edition': 'Phiên bản',
+            'language': 'Ngôn ngữ',
+            'unit_price': 'Đơn giá (VNĐ)',
+            'publish_year': 'Năm xuất bản',
+            'publisher': 'Nhà xuất bản',
+        }
+    
+    def __init__(self, *args, is_admin=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.is_admin = is_admin
+        
+        # Staff chỉ được chỉnh sửa một số trường
+        if not is_admin:
+            # Disable các trường admin-only
+            admin_only_fields = ['unit_price', 'publish_year', 'publisher']
+            for field_name in admin_only_fields:
+                if field_name in self.fields:
+                    self.fields[field_name].widget.attrs['readonly'] = True
+                    self.fields[field_name].widget.attrs['class'] += ' bg-gray-100'
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        quantity = cleaned_data.get('quantity')
+        remaining_quantity = cleaned_data.get('remaining_quantity')
+        
+        if quantity is not None and remaining_quantity is not None:
+            if remaining_quantity > quantity:
+                raise ValidationError({
+                    'remaining_quantity': 'Số lượng còn lại không thể lớn hơn tổng số lượng'
+                })
+        
+        return cleaned_data
+
+
+class ReaderTypeForm(forms.ModelForm):
+    """
+    Form quản lý loại độc giả
+    Dùng cho thêm/sửa ReaderType
+    """
+    
+    class Meta:
+        model = ReaderType
+        fields = ['reader_type_name', 'description']
+        widgets = {
+            'reader_type_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nhập tên loại độc giả'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Nhập mô tả (tùy chọn)'
+            }),
+        }
+        labels = {
+            'reader_type_name': 'Tên loại độc giả',
+            'description': 'Mô tả',
+        }
+    
+    def clean_reader_type_name(self):
+        name = self.cleaned_data.get('reader_type_name')
+        if name:
+            # Check for duplicate (excluding current instance)
+            existing = ReaderType.objects.filter(reader_type_name__iexact=name)
+            if self.instance.pk:
+                existing = existing.exclude(pk=self.instance.pk)
+            if existing.exists():
+                raise ValidationError('Loại độc giả với tên này đã tồn tại')
+        return name
+
+
 class BookImportForm(forms.Form):
     """
     Form tiếp nhận sách mới - YC2
