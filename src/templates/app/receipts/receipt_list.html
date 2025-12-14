@@ -55,9 +55,11 @@
                 <a href="{% url 'receipt_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Xóa lọc
                 </a>
+                {% if can_add_receipt %}
                 <a href="{% url 'receipt_form' %}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Lập phiếu thu
                 </a>
+                {% endif %}
             </div>
         </form>
 

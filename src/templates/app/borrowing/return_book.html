@@ -196,8 +196,8 @@
     data-return-book-list-url="{% url 'return_book_list' %}"
     data-return-date-input-id="id_return_date"
     data-borrowed-books-api-url="/api/reader/{readerId}/borrowed-books/"
-    data-readers-json="{{ readers_json|escapejs }}"
-    data-params-json="{{ params_json|escapejs }}"
+    data-readers-json='{{ readers_json|safe }}'
+    data-params-json='{{ params_json|safe }}'
     class="hidden">
 </div>
 

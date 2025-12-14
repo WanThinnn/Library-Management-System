@@ -987,7 +987,7 @@ def api_reader_borrowed_books(request, reader_id):
 
 # ==================== PAYMENT MANAGEMENT (YC6) ====================
 
-@permission_required('Quản lý độc giả', 'view')
+@permission_required('Thu tiền phạt', 'view')
 def receipt_form_view(request):
     """
     Lập phiếu thu tiền phạt - YC6 (BM6)
@@ -1010,6 +1010,12 @@ def receipt_form_view(request):
         params = None
     
     if request.method == 'POST':
+        # Kiểm tra quyền 'add' cho lập phiếu thu
+        from .decorators import check_permission
+        if not check_permission(request.user, 'Thu tiền phạt', 'add'):
+            messages.error(request, 'Bạn không có quyền thêm phiếu thu tiền.')
+            return redirect('receipt_list')
+        
         form = ReceiptForm(request.POST)
         if form.is_valid():
             receipt = form.save()
@@ -1038,7 +1044,7 @@ def receipt_form_view(request):
     return render(request, 'app/receipts/receipt_form.html', context)
 
 
-@permission_required('Thu tiền phạt', 'add')
+@permission_required('Thu tiền phạt', 'view')
 def receipt_list_view(request):
     """
     Danh sách phiếu thu tiền
@@ -1613,6 +1619,12 @@ def parameter_update_view(request):
     parameter, created = Parameter.objects.get_or_create(id=1)
     
     if request.method == 'POST':
+        # Kiểm tra quyền edit cho POST request
+        from .decorators import check_permission
+        if not check_permission(request.user, 'Cài đặt hệ thống', 'edit'):
+            messages.error(request, 'Bạn không có quyền sửa "Cài đặt hệ thống".')
+            return redirect('parameter_update')
+        
         form = ParameterForm(request.POST, instance=parameter)
         if form.is_valid():
             try:

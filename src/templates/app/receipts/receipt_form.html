@@ -83,6 +83,24 @@
                         {{ form.payment_method }}
                     </div>
                     
+                    <!-- VietQR Code Section (visible when Chuyển Khoản selected) -->
+                    <div id="qrCodeSection" class="mb-6 hidden">
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
+                            <h6 class="font-semibold text-blue-800 mb-4 flex items-center gap-2">
+                                <span>📱</span> Quét mã QR để thanh toán
+                            </h6>
+                            <div class="flex justify-center mb-4">
+                                <img id="qrCodeImage" src="" alt="VietQR Payment" class="rounded-lg shadow-lg max-w-xs"/>
+                            </div>
+                            <div class="text-center text-sm text-gray-600">
+                                <p><strong>Ngân hàng:</strong> Techcombank</p>
+                                <p><strong>Chủ TK:</strong> Lại Quan Thiên</p>
+                                <p><strong>STK:</strong> 19038932993013</p>
+                                <p class="mt-2 text-blue-700"><strong>Số tiền:</strong> <span id="qrAmount">0</span>đ</p>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Step 5: Ghi chú -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -276,5 +294,50 @@ function updateSubmitButton() {
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = !(selectedReader !== null && selectedAmount > 0);
 }
+
+// VietQR Payment Functions
+const BANK_CONFIG = {
+    bankId: '970407',  // Techcombank BIN
+    accountNo: '19038932993013',
+    accountName: 'Lai Quan Thien',
+    template: 'print'
+};
+
+function updateQRCode() {
+    const paymentMethod = document.getElementById('id_payment_method')?.value || '';
+    const qrSection = document.getElementById('qrCodeSection');
+    const qrImage = document.getElementById('qrCodeImage');
+    const qrAmountDisplay = document.getElementById('qrAmount');
+    
+    if (paymentMethod === 'transfer' && selectedAmount > 0 && selectedReader) {
+        const reader = readersData.find(r => r.id === selectedReader);
+        const description = encodeURIComponent(reader.reader_name + ' thanh toan tien phat');
+        const accountName = encodeURIComponent(BANK_CONFIG.accountName);
+        
+        const qrUrl = `https://img.vietqr.io/image/${BANK_CONFIG.bankId}-${BANK_CONFIG.accountNo}-${BANK_CONFIG.template}.png?amount=${selectedAmount}&addInfo=${description}&accountName=${accountName}`;
+        
+        qrImage.src = qrUrl;
+        qrAmountDisplay.textContent = selectedAmount.toLocaleString('vi-VN');
+        qrSection.classList.remove('hidden');
+    } else {
+        qrSection.classList.add('hidden');
+    }
+}
+
+// Add event listener for payment method change
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethodSelect = document.getElementById('id_payment_method');
+    if (paymentMethodSelect) {
+        paymentMethodSelect.addEventListener('change', updateQRCode);
+    }
+    
+    // Update QR when amount changes
+    const amountInput = document.getElementById('id_collected_amount');
+    if (amountInput) {
+        amountInput.addEventListener('input', function() {
+            setTimeout(updateQRCode, 100);
+        });
+    }
+});
 </script>
 {% endblock %}
