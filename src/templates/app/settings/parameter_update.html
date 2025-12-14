@@ -73,7 +73,7 @@
     <div class="bg-purple-600 text-white px-4 py-3 flex justify-between items-center">
         <h5 class="font-semibold">Quản lý loại độc giả</h5>
         <a href="{% url 'reader_type_create' %}" class="bg-white text-purple-600 hover:bg-purple-50 text-xs font-medium py-1 px-3 rounded-lg transition-colors inline-flex items-center gap-1">
-            ➕ Thêm mới
+            Thêm mới
         </a>
     </div>
     <div class="p-4">
@@ -196,7 +196,7 @@
 
 <script>
 document.getElementById('parameterForm').addEventListener('submit', function(e) {
-    if (!confirm('⚠️ Bạn có chắc chắn muốn thay đổi quy định hệ thống?')) {
+    if (!confirm('Bạn có chắc chắn muốn thay đổi quy định hệ thống?')) {
         e.preventDefault();
     }
 });

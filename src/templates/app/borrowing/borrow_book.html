@@ -20,7 +20,7 @@
     {% for message in messages %}
         <div class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-700{% else %}bg-blue-50 border-l-4 border-blue-500 text-blue-700{% endif %} p-4 rounded mb-6 flex justify-between items-start animate-fade-in">
             <div class="flex items-center gap-2">
-                {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% else %}ℹ️{% endif %}
+                {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% else %}{% endif %}
                 <span>{{ message }}</span>
             </div>
             <button type="button" onclick="this.parentElement.remove()" class="text-current opacity-50 hover:opacity-100 text-lg leading-none">×</button>
@@ -32,13 +32,13 @@
 <div class="border-b border-gray-200 mb-6">
     <nav class="flex gap-4" role="tablist">
         <button class="tab-btn active py-3 px-4 border-b-2 font-medium text-sm transition-colors border-blue-600 text-blue-600" data-target="content-borrow">
-            ➕ Cho mượn
+            Cho mượn
         </button>
         <button class="tab-btn py-3 px-4 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="content-borrowing">
-            📋 Độc giả đang mượn
+            Độc giả đang mượn
         </button>
         <button class="tab-btn py-3 px-4 border-b-2 font-medium text-sm transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="content-history">
-            📜 Lịch sử mượn
+            Lịch sử mượn
         </button>
     </nav>
 </div>
@@ -49,13 +49,13 @@
     <div class="tab-pane active" id="content-borrow">
         <!-- Quy định 4 -->
         {% comment %} <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-6">
-            <h5 class="font-semibold text-blue-800 mb-2">ℹ️ QĐ4 - Điều kiện cho mượn sách</h5>
+            <h5 class="font-semibold text-blue-800 mb-2"> QĐ4 - Điều kiện cho mượn sách</h5>
             <ul class="text-blue-700 space-y-1 text-sm">
-                <li>✓ Thẻ độc giả phải còn hạn sử dụng</li>
-                <li>✓ Độc giả không có sách mượn quá hạn</li>
-                <li>✓ Sách phải còn sẵn (không đang bị mượn)</li>
-                <li>✓ Mỗi độc giả được mượn tối đa <strong>{{ params.max_borrowed_books }}</strong> quyển</li>
-                <li>✓ Thời hạn mượn: <strong>{{ params.max_borrow_days }}</strong> ngày</li>
+                <li>Thẻ độc giả phải còn hạn sử dụng</li>
+                <li>Độc giả không có sách mượn quá hạn</li>
+                <li>Sách phải còn sẵn (không đang bị mượn)</li>
+                <li>Mỗi độc giả được mượn tối đa <strong>{{ params.max_borrowed_books }}</strong> quyển</li>
+                <li>Thời hạn mượn: <strong>{{ params.max_borrow_days }}</strong> ngày</li>
             </ul>
         </div> {% endcomment %}
 
@@ -111,7 +111,7 @@
                             {% endif %}
                             
                             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2" id="submitBtn" disabled>
-                                <span id="submitBtnText">➕ Cho mượn</span>
+                                <span id="submitBtnText">Cho mượn</span>
                                 <span id="submitBtnLoading" class="hidden">
                                     <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -135,7 +135,7 @@
             <div class="lg:col-span-4">
                 <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden h-full">
                     <div class="bg-green-600 text-white px-4 py-3">
-                        <h5 class="font-semibold text-sm">👥 Chọn độc giả</h5>
+                        <h5 class="font-semibold text-sm">Chọn độc giả</h5>
                     </div>
                     <div class="p-3">
                         <div class="mb-2">
@@ -143,12 +143,12 @@
                                 type="text" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" 
                                 id="readerSearch" 
-                                placeholder="🔍 Tìm kiếm..."
+                                placeholder="Tìm kiếm..."
                             >
                         </div>
                         <div id="readerList" class="max-h-80 overflow-y-auto">
                             <div class="text-center text-gray-500 py-4">
-                                <span class="animate-spin inline-block mr-2">⏳</span> Đang tải...
+                                <span class="animate-spin inline-block mr-2"></span> Đang tải...
                             </div>
                         </div>
                     </div>
@@ -159,7 +159,7 @@
             <div class="lg:col-span-5">
                 <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden h-full">
                     <div class="bg-yellow-500 text-gray-900 px-4 py-3">
-                        <h5 class="font-semibold text-sm">📚 Chọn sách</h5>
+                        <h5 class="font-semibold text-sm">Chọn sách</h5>
                     </div>
                     <div class="p-3">
                         <div class="mb-2">
@@ -167,12 +167,12 @@
                                 type="text" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" 
                                 id="bookSearch" 
-                                placeholder="🔍 Tìm kiếm sách..."
+                                placeholder="Tìm kiếm sách..."
                             >
                         </div>
                         <div id="bookList" class="max-h-80 overflow-y-auto">
                             <div class="text-center text-gray-500 py-4">
-                                <span class="animate-spin inline-block mr-2">⏳</span> Đang tải...
+                                <span class="animate-spin inline-block mr-2"></span> Đang tải...
                             </div>
                         </div>
                     </div>
@@ -186,13 +186,13 @@
         <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
             <div class="bg-red-600 text-white px-4 py-3">
                 <h5 class="font-semibold">
-                    📋 Danh sách độc giả đang mượn sách
+                    Danh sách độc giả đang mượn sách
                 </h5>
             </div>
             <div class="p-4">
                 <div id="borrowingReadersList" class="min-h-96">
                     <div class="text-center text-gray-500 py-4">
-                        <span class="animate-spin inline-block mr-2">⏳</span> Đang tải danh sách...
+                        <span class="animate-spin inline-block mr-2"></span> Đang tải danh sách...
                     </div>
                 </div>
             </div>
@@ -204,7 +204,7 @@
         <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
             <div class="bg-cyan-500 text-white px-4 py-3">
                 <h5 class="font-semibold">
-                    📜 Danh sách phiếu mượn sách
+                    Danh sách phiếu mượn sách
                 </h5>
             </div>
             <div class="p-4">
@@ -219,7 +219,7 @@
                 </div>
                 <div id="historyList" class="overflow-x-auto min-h-96">
                     <div class="text-center text-gray-500 py-4">
-                        <span class="animate-spin inline-block mr-2">⏳</span> Đang tải lịch sử...
+                        <span class="animate-spin inline-block mr-2"></span> Đang tải lịch sử...
                     </div>
                 </div>
             </div>

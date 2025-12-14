@@ -97,7 +97,7 @@ function loadBooks(search = '') {
             } else {
                 bookList.innerHTML = data.data.map(book => `
                     <div class="book-item p-3 border-l-4 border-transparent cursor-pointer mb-2 rounded hover:bg-gray-50 hover:border-blue-500 transition-all ${selectedBooks.includes(book.id) ? 'bg-green-50 border-green-500 font-medium' : ''}" data-id="${book.id}">
-                        <div class="font-medium text-gray-900">${selectedBooks.includes(book.id) ? '✓ ' : ''}${book.title}</div>
+                        <div class="font-medium text-gray-900">${selectedBooks.includes(book.id) ? '' : ''}${book.title}</div>
                         <div class="text-sm text-gray-500">
                             ${book.year} • ${book.category}
                             <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full ml-2">Còn ${book.remaining}</span>
@@ -151,11 +151,11 @@ function selectBook(id, title) {
         if (selectedBooks.includes(itemId)) {
             item.classList.add('bg-green-50', 'border-green-500', 'font-medium');
             item.classList.remove('border-transparent');
-            item.querySelector('.font-medium').textContent = '✓ ' + item.querySelector('.font-medium').textContent.replace('✓ ', '');
+            item.querySelector('.font-medium').textContent = '' + item.querySelector('.font-medium').textContent.replace('', '');
         } else {
             item.classList.remove('bg-green-50', 'border-green-500', 'font-medium');
             item.classList.add('border-transparent');
-            item.querySelector('.font-medium').textContent = item.querySelector('.font-medium').textContent.replace('✓ ', '');
+            item.querySelector('.font-medium').textContent = item.querySelector('.font-medium').textContent.replace('', '');
         }
     });
 
@@ -172,7 +172,7 @@ function updateBookDisplay() {
         selectedBooks.forEach(id => {
             const item = document.querySelector(`.book-item[data-id="${id}"]`);
             if (item) {
-                bookNames.push(item.querySelector('.font-medium').textContent.replace('✓ ', ''));
+                bookNames.push(item.querySelector('.font-medium').textContent.replace('', ''));
             }
         });
         selectedBookDiv.innerHTML = `<strong>${bookNames.join(', ')}</strong><br><small class="text-gray-500">(${selectedBooks.length} quyển)</small>`;
@@ -212,7 +212,7 @@ function loadBorrowingReaders() {
                             </div>
                             <div class="text-right">
                                 <span class="inline-block px-2 py-1 text-xs rounded-full ${reader.is_overdue ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'}">
-                                    ${reader.is_overdue ? '⚠️ Quá hạn' : '📚 ' + reader.borrowed_count + ' quyển'}
+                                    ${reader.is_overdue ? 'Quá hạn' : reader.borrowed_count + ' quyển'}
                                 </span>
                                 <div class="text-xs text-gray-500 mt-1">
                                     Phải trả: ${reader.latest_due_date}
@@ -253,7 +253,7 @@ function showBorrowingDetail(readerId, readerName, readerEmail, books) {
                 <td class="px-4 py-2 text-sm">${book.borrow_date}</td>
                 <td class="px-4 py-2 text-sm">${book.due_date}</td>
                 <td class="px-4 py-2 text-sm">
-                    ${isOverdue ? '<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">⚠️ Quá hạn</span>' : '<span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">✓ Còn hạn</span>'}
+                    ${isOverdue ? '<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Quá hạn</span>' : '<span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Còn hạn</span>'}
                 </td>
             </tr>
         `;
@@ -263,7 +263,7 @@ function showBorrowingDetail(readerId, readerName, readerEmail, books) {
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="borrowingDetailModal">
             <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden">
                 <div class="bg-cyan-500 text-white px-4 py-3 flex justify-between items-center">
-                    <h5 class="font-semibold">ℹ️ Chi tiết sách mượn</h5>
+                    <h5 class="font-semibold"> Chi tiết sách mượn</h5>
                     <button onclick="document.getElementById('borrowingDetailModal').remove()" class="text-white hover:text-gray-200">✕</button>
                 </div>
                 <div class="p-4 overflow-y-auto max-h-[70vh]">

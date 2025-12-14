@@ -376,5 +376,5 @@ function exportToCSV(tableId) {
 }
 
 // ===== INIT =====
-console.log('📚 Library Management System - Apple Design v1.0');
-console.log('🎨 Design: Blue Ocean + Pink Pastel + Purple Lavender');
+console.log('Library Management System - Apple Design v1.0');
+console.log('Design: Blue Ocean + Pink Pastel + Purple Lavender');

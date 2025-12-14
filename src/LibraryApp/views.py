@@ -538,14 +538,14 @@ def borrow_book_view(request):
                     if len(receipts) == 1:
                         messages.success(
                             request,
-                            f'✓ Cho mượn thành công! Phiếu #{receipts[0].id} - Phải trả trước {due_date.strftime("%d/%m/%Y")}'
+                            f'Cho mượn thành công! Phiếu #{receipts[0].id} - Phải trả trước {due_date.strftime("%d/%m/%Y")}'
                         )
                         return redirect('borrow_book_detail', receipt_id=receipts[0].id)
                     else:
                         receipt_ids = ', '.join([f'#{r.id}' for r in receipts])
                         messages.success(
                             request,
-                            f'✓ Cho mượn {len(receipts)} quyển thành công! Phiếu: {receipt_ids} - Phải trả trước {due_date.strftime("%d/%m/%Y")}'
+                            f'Cho mượn {len(receipts)} quyển thành công! Phiếu: {receipt_ids} - Phải trả trước {due_date.strftime("%d/%m/%Y")}'
                         )
                         return redirect('borrow_book_list')
                     
@@ -775,7 +775,7 @@ def return_book_view(request):
             receipts = form.save()
             if receipts:
                 count = len(receipts)
-                messages.success(request, f'✓ Đã ghi nhận trả sách - {count} quyển')
+                messages.success(request, f'Đã ghi nhận trả sách - {count} quyển')
                 return redirect('return_book_list')
             else:
                 messages.error(request, 'Lỗi khi lưu thông tin trả sách')
@@ -1017,16 +1017,16 @@ def receipt_form_view(request):
             if receipt:
                 messages.success(
                     request,
-                    f'✓ Đã ghi nhận thu tiền {receipt.collected_amount:,}đ từ {receipt.reader.reader_name}. '
+                    f'Đã ghi nhận thu tiền {receipt.collected_amount:,}đ từ {receipt.reader.reader_name}. '
                     f'Nợ còn lại: {receipt.reader.total_debt:,}đ'
                 )
                 return redirect('receipt_list')
             else:
-                messages.error(request, '❌ Lỗi khi lưu phiếu thu tiền')
+                messages.error(request, 'Lỗi khi lưu phiếu thu tiền')
         else:
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f'❌ {field}: {error}')
+                    messages.error(request, f'{field}: {error}')
     else:
         form = ReceiptForm()
     

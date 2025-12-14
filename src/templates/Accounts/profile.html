@@ -17,7 +17,7 @@
     {% for message in messages %}
       <div class="{% if message.tags == 'success' %}bg-green-50 border-green-500 text-green-700{% elif message.tags == 'error' %}bg-red-50 border-red-500 text-red-700{% else %}bg-blue-50 border-blue-500 text-blue-700{% endif %} border-l-4 p-4 rounded mb-6 flex justify-between items-start">
         <div class="flex items-center gap-2">
-          {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% else %}ℹ️{% endif %}
+          {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% else %}{% endif %}
           <span>{{ message }}</span>
         </div>
         <button type="button" onclick="this.parentElement.remove()" class="text-current opacity-50 hover:opacity-100 text-lg leading-none">×</button>
@@ -41,9 +41,9 @@
           <h2 class="text-lg font-bold text-white">{{ profile_user.username }}</h2>
           <div class="flex justify-center gap-2 mt-2">
             {% if profile_user.is_superuser %}
-              <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">👑 Admin</span>
+              <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">Admin</span>
             {% elif profile_user.is_staff %}
-              <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">📚 Staff</span>
+              <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">Staff</span>
             {% endif %}
           </div>
         </div>

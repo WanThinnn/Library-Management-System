@@ -42,15 +42,15 @@
             </div>
             <div class="md:col-span-4">
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    🔍 Tìm kiếm
+                    Tìm kiếm
                 </button>
             </div>
             <div class="md:col-span-12 flex flex-wrap gap-2">
                 <a href="{% url 'return_book_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
-                    🔄 Xóa lọc
+                    Xóa lọc
                 </a>
                 <a href="{% url 'return_book' %}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
-                    ➕ Nhận trả sách
+                    Nhận trả sách
                 </a>
             </div>
 
@@ -106,11 +106,11 @@
                         {% if receipt.is_overdue %}
                             <br>
                             <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full whitespace-nowrap">
-                                ⚠️ Quá {{ receipt.days_overdue }} ngày
+                                Quá {{ receipt.days_overdue }} ngày
                             </span>
                         {% else %}
                             <br>
-                            <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full whitespace-nowrap">✓ Đúng hạn</span>
+                            <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full whitespace-nowrap">Đúng hạn</span>
                         {% endif %}
                     </td>
                     <td class="px-4 py-3 text-sm">
@@ -131,7 +131,7 @@
                     </td>
                     <td class="px-4 py-3 text-sm">
                         <a href="{% url 'return_book_detail' receipt.id %}" class="bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-medium py-1 px-3 rounded-lg transition-colors inline-flex items-center gap-1">
-                            👁️ Xem
+                             Xem
                         </a>
                     </td>
                 </tr>
@@ -191,13 +191,13 @@
 {% elif request.GET %}
 <!-- Không có kết quả -->
 <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded">
-    ⚠️ <strong>Không tìm thấy phiếu trả sách phù hợp với tiêu chí tìm kiếm.</strong>
+    <strong>Không tìm thấy phiếu trả sách phù hợp với tiêu chí tìm kiếm.</strong>
     <p class="mt-2">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'return_book_list' %}" class="underline hover:text-yellow-900">xóa lọc</a>.</p>
 </div>
 {% else %}
 <!-- Chưa tìm kiếm -->
 <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
-    ℹ️ <strong>Nhập tiêu chí tìm kiếm ở trên để bắt đầu.</strong>
+     <strong>Nhập tiêu chí tìm kiếm ở trên để bắt đầu.</strong>
 </div>
 {% endif %}
 {% endblock %}

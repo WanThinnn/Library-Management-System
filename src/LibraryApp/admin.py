@@ -94,11 +94,11 @@ class ReaderAdmin(admin.ModelAdmin):
     
     def card_status(self, obj):
         if obj.is_card_expired:
-            return '❌ Hết hạn'
+            return 'Hết hạn'
         elif obj.days_until_expiration <= 30:
-            return f'⚠️ Còn {obj.days_until_expiration} ngày'
+            return f'Còn {obj.days_until_expiration} ngày'
         else:
-            return f'✓ Còn {obj.days_until_expiration} ngày'
+            return f'Còn {obj.days_until_expiration} ngày'
     card_status.short_description = 'Trạng thái thẻ'
     
     actions = ['activate_readers', 'deactivate_readers']
@@ -226,11 +226,11 @@ class BookAdmin(admin.ModelAdmin):
     
     def availability_status(self, obj):
         if obj.remaining_quantity == 0:
-            return '❌ Hết sách'
+            return 'Hết sách'
         elif obj.remaining_quantity < obj.quantity * 0.2:
-            return f'⚠️ Còn {obj.remaining_quantity}'
+            return f'Còn {obj.remaining_quantity}'
         else:
-            return f'✓ Còn {obj.remaining_quantity}'
+            return f'Còn {obj.remaining_quantity}'
     availability_status.short_description = 'Tình trạng'
 
 
@@ -268,7 +268,7 @@ class BookItemAdmin(admin.ModelAdmin):
     get_publisher.short_description = 'Xuất bản'
     
     def status_display_admin(self, obj):
-        return '📕 Đang mượn' if obj.is_borrowed else '📗 Sẵn sàng'
+        return 'Đang mượn' if obj.is_borrowed else 'Sẵn sàng'
     status_display_admin.short_description = 'Trạng thái'
     
     actions = ['mark_as_borrowed', 'mark_as_available']
@@ -403,11 +403,11 @@ class BorrowReturnReceiptAdmin(admin.ModelAdmin):
     
     def status_display(self, obj):
         if obj.is_returned:
-            return '✓ Đã trả'
+            return 'Đã trả'
         elif obj.is_overdue:
-            return f'⚠️ Quá hạn {obj.days_overdue} ngày'
+            return f'Quá hạn {obj.days_overdue} ngày'
         else:
-            return '📖 Đang mượn'
+            return 'Đang mượn'
     status_display.short_description = 'Trạng thái'
     
     def fine_amount_display(self, obj):
@@ -541,7 +541,7 @@ class LateReturnReportAdmin(admin.ModelAdmin):
         if obj.late_return_days > 7:
             return f'🔴 {obj.late_return_days} ngày'
         elif obj.late_return_days > 3:
-            return f'⚠️ {obj.late_return_days} ngày'
+            return f'{obj.late_return_days} ngày'
         else:
             return f'{obj.late_return_days} ngày'
     late_return_days_display.short_description = 'Số ngày trễ'
@@ -626,11 +626,11 @@ class PermissionAdmin(admin.ModelAdmin):
     
     def permissions_display(self, obj):
         perms = []
-        if obj.can_view: perms.append('✓ Xem')
-        if obj.can_add: perms.append('✓ Thêm')
-        if obj.can_edit: perms.append('✓ Sửa')
-        if obj.can_delete: perms.append('✓ Xóa')
-        return ' | '.join(perms) if perms else '❌ Không có quyền'
+        if obj.can_view: perms.append('Xem')
+        if obj.can_add: perms.append('Thêm')
+        if obj.can_edit: perms.append('Sửa')
+        if obj.can_delete: perms.append('Xóa')
+        return ' | '.join(perms) if perms else 'Không có quyền'
     permissions_display.short_description = 'Quyền'
 
 

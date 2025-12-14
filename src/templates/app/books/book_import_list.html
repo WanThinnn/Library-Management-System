@@ -42,13 +42,13 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    🔍 Lọc
+                    Lọc
                 </button>
-                <a href="{% url 'book_import_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    🔄 Xóa bộ lọc
+                <a href="{% url 'book_import_list' %}" class="bg-red-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Xóa bộ lọc
                 </a>
                 <a href="{% url 'book_import' %}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    ➕ Nhập sách mới
+                    Nhập sách mới
                 </a>
             </div>
         </form>
@@ -101,7 +101,7 @@
                             <td class="px-4 py-3 text-sm">
                                 <a href="{% url 'book_import_detail' receipt.id %}" 
                                    class="bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-medium py-1 px-3 rounded-lg transition-colors inline-flex items-center gap-1">
-                                    👁️ Chi tiết
+                                    Chi tiết
                                 </a>
                             </td>
                         </tr>

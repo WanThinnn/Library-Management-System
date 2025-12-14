@@ -32,9 +32,9 @@
           <h2 class="text-lg font-bold text-white">{{ edit_user.username }}</h2>
           <div class="flex justify-center gap-2 mt-2">
             {% if edit_user.is_superuser %}
-              <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">👑 Admin</span>
+              <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">Admin</span>
             {% elif edit_user.is_staff %}
-              <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">📚 Staff</span>
+              <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">Staff</span>
             {% endif %}
           </div>
         </div>
@@ -140,10 +140,10 @@
             </label>
             <select class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" id="role" name="role" required>
               <option value="staff" {% if edit_user and current_role == 'staff' %}selected{% endif %}>
-                📚 Thủ thư (Nhân viên)
+                Thủ thư (Nhân viên)
               </option>
               <option value="manager" {% if edit_user and current_role == 'manager' %}selected{% endif %}>
-                👑 Quản lý (Toàn quyền)
+                Quản lý (Toàn quyền)
               </option>
             </select>
             <p class="text-gray-400 text-xs mt-1">

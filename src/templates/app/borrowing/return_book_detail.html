@@ -149,7 +149,7 @@
         <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
             <div class="bg-blue-600 text-white px-4 py-3">
                 <h5 class="font-semibold">
-                    📋 Tóm tắt
+                     Tóm tắt
                 </h5>
             </div>
             <div class="p-4 space-y-4">
@@ -189,7 +189,7 @@
 
                 {% if receipt.reader.is_card_expired %}
                 <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-3 rounded">
-                    <strong>⚠️ Thẻ hết hạn</strong><br>
+                    <strong>Thẻ hết hạn</strong><br>
                     <small>{{ receipt.reader.expiration_date|date:"d/m/Y" }}</small>
                 </div>
                 {% endif %}

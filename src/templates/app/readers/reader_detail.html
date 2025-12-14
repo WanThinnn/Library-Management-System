@@ -68,7 +68,7 @@
         <!-- Sách đang mượn -->
         <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
             <div class="bg-amber-500 text-white px-4 py-3">
-                <h5 class="font-semibold">📚 Sách đang mượn</h5>
+                <h5 class="font-semibold">Sách đang mượn</h5>
             </div>
             <div class="p-4" id="readerBorrowingList">
                 <div class="text-center text-gray-500 py-8">
@@ -107,7 +107,7 @@
                     {% if reader.is_active %}
                         <span class="bg-green-500 text-white text-sm px-3 py-1 rounded-full">✅ Đang hoạt động</span>
                     {% else %}
-                        <span class="bg-red-500 text-white text-sm px-3 py-1 rounded-full">❌ Đã khóa</span>
+                        <span class="bg-red-500 text-white text-sm px-3 py-1 rounded-full">Đã khóa</span>
                     {% endif %}
                 </div>
                 <div>
@@ -126,10 +126,10 @@
             </div>
             <div class="p-4 space-y-2">
                 <a href="{% url 'reader_create' %}" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                    ➕ Lập thẻ độc giả khác
+                    Lập thẻ độc giả khác
                 </a>
                 <a href="{% url 'reader_list' %}" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                    📋 Danh sách độc giả
+                     Danh sách độc giả
                 </a>
             </div>
         </div>
@@ -149,7 +149,7 @@ function loadReaderBorrowingInfo() {
             const readerData = data.data?.find(r => r.reader_id == readerId);
             
             if (!readerData) {
-                container.innerHTML = '<div class="text-center text-green-600 py-4"><em>✓ Độc giả không có sách mượn</em></div>';
+                container.innerHTML = '<div class="text-center text-green-600 py-4"><em>Độc giả không có sách mượn</em></div>';
             } else {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
