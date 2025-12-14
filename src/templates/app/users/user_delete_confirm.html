@@ -43,9 +43,9 @@
                     <span class="text-gray-600">Vai trò:</span>
                     <span>
                         {% if delete_user.is_superuser %}
-                            <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">👑 Quản lý</span>
+                            <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Quản lý</span>
                         {% elif delete_user.is_staff %}
-                            <span class="bg-cyan-500 text-white text-xs px-2 py-1 rounded-full">📚 Thủ thư</span>
+                            <span class="bg-cyan-500 text-white text-xs px-2 py-1 rounded-full">Thủ thư</span>
                         {% else %}
                             <span class="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">Người dùng</span>
                         {% endif %}
