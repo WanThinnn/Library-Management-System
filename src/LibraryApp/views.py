@@ -150,7 +150,7 @@ def user_profile_view(request):
 
 # ==================== YC1: LẬP THẺ ĐỘC GIẢ ====================
 
-@permission_required('Lập thẻ đọc giả', 'add')
+@permission_required('Lập thẻ độc giả', 'add')
 def reader_create_view(request):
     """
     View lập thẻ độc giả mới - YC1
@@ -198,7 +198,7 @@ def reader_create_view(request):
     
     return render(request, 'app/readers/reader_create.html', context)
 
-@permission_required('Quản lý đọc giả', 'view')
+@permission_required('Quản lý độc giả', 'view')
 def reader_detail_view(request, reader_id):
     """
     Xem chi tiết thẻ độc giả - Hiển thị thông tin sau khi lập thẻ
@@ -213,7 +213,7 @@ def reader_detail_view(request, reader_id):
     return render(request, 'app/readers/reader_detail.html', context)
 
 
-@permission_required('Quản lý đọc giả', 'view')
+@permission_required('Quản lý độc giả', 'view')
 def reader_list_view(request):
     """
     Danh sách độc giả - Để tra cứu và quản lý
@@ -623,7 +623,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 
-@permission_required('Quản lý đọc giả', 'view')
+@permission_required('Quản lý độc giả', 'view')
 @require_http_methods(["GET"])
 def api_readers_list(request):
     """
@@ -987,7 +987,7 @@ def api_reader_borrowed_books(request, reader_id):
 
 # ==================== PAYMENT MANAGEMENT (YC6) ====================
 
-@permission_required('Quản lý đọc giả', 'view')
+@permission_required('Quản lý độc giả', 'view')
 def receipt_form_view(request):
     """
     Lập phiếu thu tiền phạt - YC6 (BM6)
@@ -1702,12 +1702,13 @@ def user_create_view(request):
         password_confirm = request.POST.get('password_confirm', '')
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
-        role = request.POST.get('role', 'staff')  # staff hoặc manager
-        user_group_id = request.POST.get('user_group')  # Nhóm quyền cho staff
+        user_group_id = request.POST.get('user_group')  # Vai trò = UserGroup
         
         # Validation
         if not username or not password:
             messages.error(request, 'Tên đăng nhập và mật khẩu là bắt buộc.')
+        elif not user_group_id:
+            messages.error(request, 'Vui lòng chọn vai trò.')
         elif password != password_confirm:
             messages.error(request, 'Mật khẩu xác nhận không khớp.')
         elif User.objects.filter(username=username).exists():
@@ -1717,6 +1718,10 @@ def user_create_view(request):
         else:
             try:
                 with transaction.atomic():
+                    # Lấy UserGroup đã chọn
+                    user_group = UserGroup.objects.get(id=user_group_id)
+                    role_name = user_group.user_group_name
+                    
                     # Tạo user mới
                     user = User.objects.create_user(
                         username=username,
@@ -1726,44 +1731,36 @@ def user_create_view(request):
                         last_name=last_name
                     )
                     
-                    # Gán vai trò
-                    if role == 'manager':
+                    # Gán vai trò dựa trên UserGroup
+                    # "Quản lý" = superuser, còn lại = staff
+                    if role_name == 'Quản lý':
                         user.is_staff = True
                         user.is_superuser = True
-                        role_text = 'Quản lý'
                     else:
                         user.is_staff = True
                         user.is_superuser = False
-                        role_text = 'Thủ thư'
+                        
+                        # Tạo LibraryUser liên kết với UserGroup
+                        LibraryUser.objects.create(
+                            user=user,
+                            full_name=f"{first_name} {last_name}".strip() or username,
+                            date_of_birth=date(1990, 1, 1),
+                            position=role_name,
+                            user_group=user_group,
+                            email=email or '',
+                            is_active=True
+                        )
                     
                     user.save()
                     
-                    # Tự động tạo LibraryUser cho staff (không phải manager)
-                    if role == 'staff':
-                        try:
-                            # Lấy nhóm được chọn hoặc mặc định "Thủ thư"
-                            if user_group_id:
-                                user_group = UserGroup.objects.get(id=user_group_id)
-                            else:
-                                user_group = UserGroup.objects.get(user_group_name='Thủ thư')
-                            LibraryUser.objects.create(
-                                user=user,
-                                full_name=f"{first_name} {last_name}".strip() or username,
-                                date_of_birth=date(1990, 1, 1),
-                                position='Thủ thư',
-                                user_group=user_group,
-                                email=email or '',
-                                is_active=True
-                            )
-                        except UserGroup.DoesNotExist:
-                            messages.warning(request, 'Chưa có nhóm quyền. Chạy: python manage.py setup_permissions')
-                    
                     messages.success(
                         request,
-                        f'Đã tạo tài khoản {role_text} "{username}" thành công!'
+                        f'Đã tạo tài khoản "{username}" với vai trò "{role_name}" thành công!'
                     )
                     return redirect('user_list')
                     
+            except UserGroup.DoesNotExist:
+                messages.error(request, 'Vai trò không hợp lệ.')
             except Exception as e:
                 messages.error(request, f'Có lỗi xảy ra: {str(e)}')
     

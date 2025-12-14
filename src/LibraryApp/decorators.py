@@ -69,6 +69,10 @@ def permission_required(function_name, permission_type='view'):
                 }
                 action = action_names.get(permission_type, permission_type)
                 messages.error(request, f'Bạn không có quyền {action} "{function_name}".')
+                # Redirect về trang trước hoặc home nếu không có referer
+                referer = request.META.get('HTTP_REFERER')
+                if referer:
+                    return redirect(referer)
                 return redirect('home')
             
             return view_func(request, *args, **kwargs)
