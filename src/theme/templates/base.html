@@ -291,7 +291,7 @@
                 </ul>
               </div>
             </li>
-            {% if user.is_superuser %}
+            {% if can_view_settings or can_view_users or can_view_permissions or user.is_superuser %}
             <li class="relative group">
               <button
                 class="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer"
@@ -316,6 +316,7 @@
                 class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full md:right-0 md:left-auto mt-1 border border-gray-100"
               >
                 <ul class="py-2 text-gray-700">
+                  {% if can_view_settings %}
                   <li>
                     <a
                       href="{% url 'parameter_update' %}"
@@ -323,6 +324,8 @@
                       >Thay đổi quy định</a
                     >
                   </li>
+                  {% endif %}
+                  {% if can_view_users %}
                   <li>
                     <a
                       href="{% url 'user_list' %}"
@@ -330,6 +333,8 @@
                       >Quản lý người dùng</a
                     >
                   </li>
+                  {% endif %}
+                  {% if can_view_permissions %}
                   <li>
                     <a
                       href="{% url 'user_group_list' %}"
@@ -337,6 +342,8 @@
                       >Quản lý quyền</a
                     >
                   </li>
+                  {% endif %}
+                  {% if user.is_superuser %}
                   <div class="my-1 border-t border-gray-100"></div>
                   <li>
                     <a
@@ -345,6 +352,7 @@
                       >Admin Panel</a
                     >
                   </li>
+                  {% endif %}
                 </ul>
               </div>
             </li>

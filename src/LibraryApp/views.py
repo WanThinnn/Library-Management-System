@@ -150,7 +150,7 @@ def user_profile_view(request):
 
 # ==================== YC1: LẬP THẺ ĐỘC GIẢ ====================
 
-@staff_required
+@permission_required('Lập thẻ đọc giả', 'add')
 def reader_create_view(request):
     """
     View lập thẻ độc giả mới - YC1
@@ -198,8 +198,7 @@ def reader_create_view(request):
     
     return render(request, 'app/readers/reader_create.html', context)
 
-
-@staff_required
+@permission_required('Quản lý đọc giả', 'view')
 def reader_detail_view(request, reader_id):
     """
     Xem chi tiết thẻ độc giả - Hiển thị thông tin sau khi lập thẻ
@@ -214,7 +213,7 @@ def reader_detail_view(request, reader_id):
     return render(request, 'app/readers/reader_detail.html', context)
 
 
-@staff_required
+@permission_required('Quản lý đọc giả', 'view')
 def reader_list_view(request):
     """
     Danh sách độc giả - Để tra cứu và quản lý
@@ -246,7 +245,7 @@ def reader_list_view(request):
 
 # ==================== YC2: TIẾP NHẬN SÁCH MỚI ====================
 
-@staff_required
+@permission_required('Nhập sách', 'add')
 def book_import_view(request):
     """
     View tiếp nhận sách mới - YC2
@@ -374,7 +373,7 @@ def book_import_view(request):
     return render(request, 'app/books/book_import.html', context)
 
 
-@staff_required
+@permission_required('Nhập sách', 'view')
 def book_import_detail_view(request, import_id):
     """
     Xem chi tiết phiếu nhập sách
@@ -391,7 +390,7 @@ def book_import_detail_view(request, import_id):
     return render(request, 'app/books/book_import_detail.html', context)
 
 
-@staff_required
+@permission_required('Nhập sách', 'view')
 def book_import_list_view(request):
     """
     Danh sách phiếu nhập sách
@@ -478,7 +477,7 @@ def book_search_view(request):
 
 # ==================== BORROW BOOK (YC4) ====================
 
-@staff_required
+@permission_required('Mượn sách', 'add')
 def borrow_book_view(request):
     """
     Cho mượn sách - YC4
@@ -571,7 +570,7 @@ def borrow_book_view(request):
     return render(request, 'app/borrowing/borrow_book.html', context)
 
 
-@staff_required
+@permission_required('Mượn sách', 'view')
 def borrow_book_detail_view(request, receipt_id):
     """
     Xem chi tiết phiếu mượn sách
@@ -586,7 +585,7 @@ def borrow_book_detail_view(request, receipt_id):
     return render(request, 'app/borrowing/borrow_book_detail.html', context)
 
 
-@staff_required
+@permission_required('Mượn sách', 'view')
 def borrow_book_list_view(request):
     """
     Danh sách phiếu mượn sách
@@ -624,7 +623,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 
-@staff_required
+@permission_required('Quản lý đọc giả', 'view')
 @require_http_methods(["GET"])
 def api_readers_list(request):
     """
@@ -655,7 +654,7 @@ def api_readers_list(request):
     return JsonResponse({'success': True, 'data': data})
 
 
-@staff_required
+@permission_required('Quản lý sách', 'view')
 @require_http_methods(["GET"])
 def api_books_list(request):
     """
@@ -690,7 +689,7 @@ def api_books_list(request):
     return JsonResponse({'success': True, 'data': data})
 
 
-@staff_required
+@permission_required('Mượn sách', 'view')
 @require_http_methods(["GET"])
 def api_borrowing_readers(request):
     """
@@ -754,7 +753,7 @@ from .models import BorrowReturnReceipt, Parameter, Reader
 from .forms import ReturnBookForm
 
 
-@staff_required
+@permission_required('Trả sách', 'add')
 def return_book_view(request):
     """
     Trang nhận trả sách - YC5
@@ -798,7 +797,7 @@ def return_book_view(request):
     return render(request, 'app/borrowing/return_book.html', context)
 
 
-@staff_required
+@permission_required('Trả sách', 'view')
 def return_book_detail_view(request, receipt_id):
     """
     Xem chi tiết phiếu trả sách - YC5
@@ -823,7 +822,7 @@ def return_book_detail_view(request, receipt_id):
     return render(request, 'app/borrowing/return_book_detail.html', context)
 
 
-@staff_required
+@permission_required('Trả sách', 'view')
 def return_book_list_view(request):
     """
     Danh sách phiếu trả sách - YC5
@@ -888,7 +887,7 @@ def return_book_list_view(request):
 
 
 @login_required
-@staff_required
+@permission_required('Trả sách', 'view')
 @require_http_methods(["GET"])
 def api_unreturned_receipts(request):
     """
@@ -944,7 +943,7 @@ def api_unreturned_receipts(request):
 
 
 @login_required
-@staff_required
+@permission_required('Mượn sách', 'view')
 @require_http_methods(["GET"])
 def api_reader_borrowed_books(request, reader_id):
     """
@@ -988,7 +987,7 @@ def api_reader_borrowed_books(request, reader_id):
 
 # ==================== PAYMENT MANAGEMENT (YC6) ====================
 
-@staff_required
+@permission_required('Quản lý đọc giả', 'view')
 def receipt_form_view(request):
     """
     Lập phiếu thu tiền phạt - YC6 (BM6)
@@ -1039,7 +1038,7 @@ def receipt_form_view(request):
     return render(request, 'app/receipts/receipt_form.html', context)
 
 
-@staff_required
+@permission_required('Thu tiền phạt', 'add')
 def receipt_list_view(request):
     """
     Danh sách phiếu thu tiền
@@ -1087,7 +1086,7 @@ def receipt_list_view(request):
     return render(request, 'app/receipts/receipt_list.html', context)
 
 
-@staff_required
+@permission_required('Thu tiền phạt', 'view')
 def receipt_detail_view(request, receipt_id):
     """
     Chi tiết phiếu thu tiền
@@ -1103,7 +1102,7 @@ def receipt_detail_view(request, receipt_id):
 
 
 @login_required
-@staff_required
+@permission_required('Quản lý đọc giả', 'view')
 @require_http_methods(["GET"])
 def api_reader_debt(request, reader_id):
     """
@@ -1128,7 +1127,7 @@ def api_reader_debt(request, reader_id):
 
 # ==================== REPORTS - YC7 ====================
 
-@staff_required
+@permission_required('Báo cáo', 'view')
 def report_borrow_by_category_view(request):
     """
     YC7 - BM7.1: Báo cáo thống kê tình hình mượn sách theo thể loại
@@ -1195,7 +1194,7 @@ def report_borrow_by_category_view(request):
     return render(request, 'app/reports/report_borrow_by_category.html', context)
 
 
-@staff_required
+@permission_required('Báo cáo', 'view')
 def report_overdue_books_view(request):
     """
     YC7 - BM7.2: Báo cáo thống kê sách trả trễ
@@ -1243,7 +1242,7 @@ def report_overdue_books_view(request):
     return render(request, 'app/reports/report_overdue_books.html', context)
 
 
-@staff_required
+@permission_required('Báo cáo', 'view')
 def report_borrow_by_category_excel(request):
     """
     Export báo cáo mượn sách theo thể loại ra file Excel
@@ -1333,7 +1332,7 @@ def report_borrow_by_category_excel(request):
     return response
 
 
-@staff_required
+@permission_required('Báo cáo', 'view')
 def report_overdue_books_excel(request):
     """
     Export báo cáo sách trả trễ ra file Excel
@@ -1412,7 +1411,7 @@ def report_overdue_books_excel(request):
     return response
 
 
-@staff_required
+@permission_required('Báo cáo', 'view')
 def report_borrow_situation_view(request):
     """
     Báo cáo tình hình mượn sách theo khoảng thời gian
@@ -1488,7 +1487,7 @@ def report_borrow_situation_view(request):
     return render(request, 'app/reports/report_borrow_situation.html', context)
 
 
-@staff_required
+@permission_required('Báo cáo', 'view')
 def report_borrow_situation_excel(request):
     """
     Export báo cáo tình hình mượn sách ra file Excel
@@ -1598,7 +1597,7 @@ def report_borrow_situation_excel(request):
 
 # ==================== SYSTEM PARAMETERS - YC8 ====================
 
-@manager_required
+@permission_required('Cài đặt hệ thống', 'view')
 def parameter_update_view(request):
     """
     YC8 - Thay đổi quy định hệ thống
@@ -1704,6 +1703,7 @@ def user_create_view(request):
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
         role = request.POST.get('role', 'staff')  # staff hoặc manager
+        user_group_id = request.POST.get('user_group')  # Nhóm quyền cho staff
         
         # Validation
         if not username or not password:
@@ -1741,8 +1741,11 @@ def user_create_view(request):
                     # Tự động tạo LibraryUser cho staff (không phải manager)
                     if role == 'staff':
                         try:
-                            # Auto-assign nhóm "Thủ thư"
-                            user_group = UserGroup.objects.get(user_group_name='Thủ thư')
+                            # Lấy nhóm được chọn hoặc mặc định "Thủ thư"
+                            if user_group_id:
+                                user_group = UserGroup.objects.get(id=user_group_id)
+                            else:
+                                user_group = UserGroup.objects.get(user_group_name='Thủ thư')
                             LibraryUser.objects.create(
                                 user=user,
                                 full_name=f"{first_name} {last_name}".strip() or username,
@@ -1753,7 +1756,7 @@ def user_create_view(request):
                                 is_active=True
                             )
                         except UserGroup.DoesNotExist:
-                            messages.warning(request, 'Chưa có nhóm "Thủ thư". Chạy: python manage.py setup_permissions')
+                            messages.warning(request, 'Chưa có nhóm quyền. Chạy: python manage.py setup_permissions')
                     
                     messages.success(
                         request,
@@ -1764,8 +1767,12 @@ def user_create_view(request):
             except Exception as e:
                 messages.error(request, f'Có lỗi xảy ra: {str(e)}')
     
+    # Lấy danh sách user groups cho dropdown
+    user_groups = UserGroup.objects.all().order_by('user_group_name')
+    
     context = {
-        'page_title': 'Tạo người dùng mới'
+        'page_title': 'Tạo người dùng mới',
+        'user_groups': user_groups
     }
     
     return render(request, 'app/users/user_form.html', context)
@@ -1951,7 +1958,7 @@ def register_view(request):
 
 # ==================== BOOK DETAIL & EDIT ====================
 
-@staff_required
+@permission_required('Quản lý sách', 'view')
 def book_detail_view(request, book_id):
     """
     Xem chi tiết sách
@@ -1974,7 +1981,7 @@ def book_detail_view(request, book_id):
     return render(request, 'app/books/book_detail.html', context)
 
 
-@staff_required
+@permission_required('Quản lý sách', 'edit')
 def book_edit_view(request, book_id):
     """
     Chỉnh sửa thông tin sách
@@ -2129,7 +2136,7 @@ def reader_type_delete_view(request, reader_type_id):
 
 # ==================== PERMISSION MANAGEMENT VIEWS ====================
 
-@manager_required
+@permission_required('Quản lý quyền', 'view')
 def user_group_list_view(request):
     """Danh sách nhóm người dùng"""
     user_groups = UserGroup.objects.all().order_by('user_group_name')
@@ -2141,7 +2148,7 @@ def user_group_list_view(request):
     return render(request, 'app/permissions/user_group_list.html', context)
 
 
-@manager_required
+@permission_required('Quản lý quyền', 'add')
 def user_group_create_view(request):
     """Tạo nhóm người dùng mới"""
     if request.method == 'POST':
@@ -2161,7 +2168,7 @@ def user_group_create_view(request):
     return render(request, 'app/permissions/user_group_form.html', context)
 
 
-@manager_required
+@permission_required('Quản lý quyền', 'edit')
 def user_group_edit_view(request, group_id):
     """Sửa nhóm người dùng"""
     user_group = get_object_or_404(UserGroup, id=group_id)
@@ -2184,7 +2191,7 @@ def user_group_edit_view(request, group_id):
     return render(request, 'app/permissions/user_group_form.html', context)
 
 
-@manager_required
+@permission_required('Quản lý quyền', 'delete')
 def user_group_delete_view(request, group_id):
     """Xóa nhóm người dùng"""
     user_group = get_object_or_404(UserGroup, id=group_id)
@@ -2210,7 +2217,7 @@ def user_group_delete_view(request, group_id):
     return render(request, 'app/permissions/user_group_delete.html', context)
 
 
-@manager_required
+@permission_required('Quản lý quyền', 'view')
 def function_list_view(request):
     """Danh sách chức năng"""
     functions = Function.objects.all().order_by('function_name')
@@ -2222,7 +2229,7 @@ def function_list_view(request):
     return render(request, 'app/permissions/function_list.html', context)
 
 
-@manager_required
+@permission_required('Quản lý quyền', 'add')
 def function_create_view(request):
     """Tạo chức năng mới"""
     if request.method == 'POST':
@@ -2242,7 +2249,7 @@ def function_create_view(request):
     return render(request, 'app/permissions/function_form.html', context)
 
 
-@manager_required
+@permission_required('Quản lý quyền', 'edit')
 def function_edit_view(request, function_id):
     """Sửa chức năng"""
     function = get_object_or_404(Function, id=function_id)
@@ -2265,7 +2272,7 @@ def function_edit_view(request, function_id):
     return render(request, 'app/permissions/function_form.html', context)
 
 
-@manager_required
+@permission_required('Quản lý quyền', 'delete')
 def function_delete_view(request, function_id):
     """Xóa chức năng"""
     function = get_object_or_404(Function, id=function_id)
@@ -2287,7 +2294,7 @@ def function_delete_view(request, function_id):
     return render(request, 'app/permissions/function_delete.html', context)
 
 
-@manager_required
+@permission_required('Quản lý quyền', 'edit')
 def permission_matrix_view(request, group_id):
     """Quản lý quyền cho nhóm người dùng (ma trận quyền)"""
     user_group = get_object_or_404(UserGroup, id=group_id)

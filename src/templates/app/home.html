@@ -67,17 +67,20 @@
   <h2 class="text-2xl font-bold mb-6 text-gray-800">Tính năng chính</h2>
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    {% if can_view_readers or can_add_readers %}
     <!-- Độc giả - 2 items, no pagination needed -->
     <div class="bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
       <div class="p-6">
         <h3 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">Quản lý Độc giả</h3>
         <div class="flex flex-col space-y-3">
-          <a href="{% url 'reader_create' %}" class="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">Lập thẻ độc giả</a>
-          <a href="{% url 'reader_list' %}" class="text-blue-700 bg-white border border-blue-600 hover:bg-blue-50 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">Danh sách độc giả</a>
+          {% if can_add_readers %}<a href="{% url 'reader_create' %}" class="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">Lập thẻ độc giả</a>{% endif %}
+          {% if can_view_readers %}<a href="{% url 'reader_list' %}" class="text-blue-700 bg-white border border-blue-600 hover:bg-blue-50 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">Danh sách độc giả</a>{% endif %}
         </div>
       </div>
     </div>
+    {% endif %}
 
+    {% if can_view_books or can_add_books %}
     <!-- Sách - 3 items, needs pagination -->
     <div class="bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
       <div class="p-6">
@@ -86,23 +89,29 @@
           <div class="flex flex-col space-y-3">
             <!-- Page 1 -->
             <div class="carousel-page">
-              <a href="{% url 'book_import' %}" class="block text-white bg-emerald-600 hover:bg-emerald-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">Tiếp nhận sách</a>
-              <a href="{% url 'book_search' %}" class="block text-emerald-700 bg-white border border-emerald-600 hover:bg-emerald-50 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">Tra cứu sách</a>
+              {% if can_add_books %}<a href="{% url 'book_import' %}" class="block text-white bg-emerald-600 hover:bg-emerald-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">Tiếp nhận sách</a>{% endif %}
+              {% if can_view_books %}<a href="{% url 'book_search' %}" class="block text-emerald-700 bg-white border border-emerald-600 hover:bg-emerald-50 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">Tra cứu sách</a>{% endif %}
             </div>
+            {% if can_add_books %}
             <!-- Page 2 -->
             <div class="carousel-page hidden">
               <a href="{% url 'book_import_list' %}" class="block text-white bg-emerald-600 hover:bg-emerald-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">DS phiếu nhập sách</a>
             </div>
+            {% endif %}
           </div>
+          {% if can_add_books %}
           <div class="flex justify-center items-center gap-2 mt-3 pt-2 border-t border-gray-100">
             <button class="carousel-prev p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30" disabled>‹</button>
             <span class="carousel-indicator text-xs text-gray-500">1/2</span>
             <button class="carousel-next p-1 text-gray-400 hover:text-gray-600">›</button>
           </div>
+          {% endif %}
         </div>
       </div>
     </div>
+    {% endif %}
 
+    {% if can_view_borrow or can_add_borrow or can_view_return or can_add_return %}
     <!-- Mượn/Trả - 4 items, needs pagination -->
     <div class="bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
       <div class="p-6">
@@ -111,13 +120,13 @@
           <div class="flex flex-col space-y-3">
             <!-- Page 1 -->
             <div class="carousel-page">
-              <a href="{% url 'borrow_book' %}" class="block text-white bg-purple-600 hover:bg-purple-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">Lập phiếu mượn</a>
-              <a href="{% url 'return_book' %}" class="block text-purple-700 bg-white border border-purple-600 hover:bg-purple-50 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">Lập phiếu trả</a>
+              {% if can_add_borrow %}<a href="{% url 'borrow_book' %}" class="block text-white bg-purple-600 hover:bg-purple-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">Lập phiếu mượn</a>{% endif %}
+              {% if can_add_return %}<a href="{% url 'return_book' %}" class="block text-purple-700 bg-white border border-purple-600 hover:bg-purple-50 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">Lập phiếu trả</a>{% endif %}
             </div>
             <!-- Page 2 -->
             <div class="carousel-page hidden">
-              <a href="{% url 'borrow_book_list' %}" class="block text-white bg-purple-600 border-purple-600 hover:bg-purple-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">DS phiếu mượn</a>
-              <a href="{% url 'return_book_list' %}" class="block text-purple-700 bg-white border border-purple-600 hover:bg-purple-50 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">DS phiếu trả</a>
+              {% if can_view_borrow %}<a href="{% url 'borrow_book_list' %}" class="block text-white bg-purple-600 border-purple-600 hover:bg-purple-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">DS phiếu mượn</a>{% endif %}
+              {% if can_view_return %}<a href="{% url 'return_book_list' %}" class="block text-purple-700 bg-white border border-purple-600 hover:bg-purple-50 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">DS phiếu trả</a>{% endif %}
             </div>
           </div>
           <div class="flex justify-center items-center gap-2 mt-3 pt-2 border-t border-gray-100">
@@ -128,7 +137,9 @@
         </div>
       </div>
     </div>
+    {% endif %}
 
+    {% if can_view_receipt or can_add_receipt or can_view_reports %}
     <!-- Thu tiền & Báo cáo - 4 items, needs pagination -->
     <div class="bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
       <div class="p-6">
@@ -137,18 +148,22 @@
           <div class="flex flex-col space-y-3">
             <!-- Page 1 -->
             <div class="carousel-page">
-              <a href="{% url 'receipt_form' %}" class="block text-white bg-orange-500 hover:bg-orange-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">Lập phiếu thu</a>
-              <a href="{% url 'report_borrow_by_category' %}" class="block text-orange-600 bg-white border border-orange-500 hover:bg-orange-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">BC mượn theo thể loại</a>
+              {% if can_add_receipt %}<a href="{% url 'receipt_form' %}" class="block text-white bg-orange-500 hover:bg-orange-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">Lập phiếu thu</a>{% endif %}
+              {% if can_view_reports %}<a href="{% url 'report_borrow_by_category' %}" class="block text-orange-600 bg-white border border-orange-500 hover:bg-orange-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">BC mượn theo thể loại</a>{% endif %}
             </div>
+            {% if can_view_receipt or can_view_reports %}
             <!-- Page 2 -->
             <div class="carousel-page hidden">
-              <a href="{% url 'receipt_list' %}" class="block text-white bg-orange-500 border-orange-500 hover:bg-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">DS phiếu thu</a>
-              <a href="{% url 'report_overdue_books' %}" class="block text-orange-600 bg-white border border-orange-500 hover:bg-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">BC sách trả trễ</a>
+              {% if can_view_receipt %}<a href="{% url 'receipt_list' %}" class="block text-white bg-orange-500 border-orange-500 hover:bg-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">DS phiếu thu</a>{% endif %}
+              {% if can_view_reports %}<a href="{% url 'report_overdue_books' %}" class="block text-orange-600 bg-white border border-orange-500 hover:bg-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">BC sách trả trễ</a>{% endif %}
             </div>
+            {% endif %}
+            {% if can_view_reports %}
             <!-- Page 3 -->
             <div class="carousel-page hidden">
               <a href="{% url 'report_borrow_situation' %}" class="block text-white bg-orange-500 border-orange-500 hover:bg-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">BC tình hình mượn sách</a>
             </div>
+            {% endif %}
           </div>
           <div class="flex justify-center items-center gap-2 mt-3 pt-2 border-t border-gray-100">
             <button class="carousel-prev p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30" disabled>‹</button>
@@ -158,6 +173,7 @@
         </div>
       </div>
     </div>
+    {% endif %}
   </div>
 </div>
 
