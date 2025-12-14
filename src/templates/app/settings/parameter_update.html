@@ -62,9 +62,52 @@
                 </div>
             </div>
         </div>
-        <p class="text-gray-500 text-sm mt-4">
+        <p class="text-gray-500 text-sm mt-4 pt-4 border-t">
             Cập nhật lần cuối: {{ parameter.updated_at|date:"d/m/Y H:i" }}
         </p>
+    </div>
+</div>
+
+<!-- Quản lý loại độc giả -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
+    <div class="bg-purple-600 text-white px-4 py-3 flex justify-between items-center">
+        <h5 class="font-semibold">Quản lý loại độc giả</h5>
+        <a href="{% url 'reader_type_create' %}" class="bg-white text-purple-600 hover:bg-purple-50 text-xs font-medium py-1 px-3 rounded-lg transition-colors inline-flex items-center gap-1">
+            ➕ Thêm mới
+        </a>
+    </div>
+    <div class="p-4">
+        {% if reader_types %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Tên loại</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Mô tả</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Số lượng</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for rt in reader_types %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ rt.reader_type_name }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-600">{{ rt.description|default:"-"|truncatewords:10 }}</td>
+                        <td class="px-4 py-2 text-sm">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">{{ rt.reader_count }}</span>
+                        </td>
+                        <td class="px-4 py-2 text-sm whitespace-nowrap">
+                            <a href="{% url 'reader_type_edit' rt.id %}" class="text-yellow-600 hover:text-yellow-800 mr-2">Sửa</a>
+                            <a href="{% url 'reader_type_delete' rt.id %}" class="text-red-600 hover:text-red-800">Xóa</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-center py-4">Chưa có loại độc giả nào. <a href="{% url 'reader_type_create' %}" class="text-purple-600 hover:underline">Thêm mới</a></p>
+        {% endif %}
     </div>
 </div>
 
@@ -73,101 +116,66 @@
     <div class="bg-blue-600 text-white px-4 py-3">
         <h5 class="font-semibold">Thay đổi quy định</h5>
     </div>
-    <div class="p-6">
+    <div class="p-4">
         <form method="POST" id="parameterForm">
             {% csrf_token %}
             
-            <!-- QĐ1: Quy định về độc giả -->
-            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                <h6 class="font-semibold text-blue-600 mb-4">QĐ1: Quy định về độc giả</h6>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="{{ form.min_age.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                            Tuổi tối thiểu <span class="text-red-500">*</span>
-                        </label>
-                        {{ form.min_age }}
-                        <p class="text-gray-500 text-xs mt-1">Độ tuổi thấp nhất được lập thẻ</p>
-                    </div>
-                    <div>
-                        <label for="{{ form.max_age.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                            Tuổi tối đa <span class="text-red-500">*</span>
-                        </label>
-                        {{ form.max_age }}
-                        <p class="text-gray-500 text-xs mt-1">Độ tuổi cao nhất được lập thẻ</p>
-                    </div>
-                    <div>
-                        <label for="{{ form.card_validity_period.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                            Thời hạn thẻ (tháng) <span class="text-red-500">*</span>
-                        </label>
-                        {{ form.card_validity_period }}
-                        <p class="text-gray-500 text-xs mt-1">Số tháng thẻ có hiệu lực</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- QĐ2: Quy định về sách -->
-            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                <h6 class="font-semibold text-blue-600 mb-4">QĐ2: Quy định về sách</h6>
+            <!-- Grid layout gọn gàng -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <!-- QĐ1: Tuổi -->
                 <div>
-                    <label for="{{ form.book_return_period.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        Khoảng cách năm xuất bản (năm) <span class="text-red-500">*</span>
-                    </label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Tuổi tối thiểu *</label>
+                    {{ form.min_age }}
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Tuổi tối đa *</label>
+                    {{ form.max_age }}
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Thời hạn thẻ (tháng) *</label>
+                    {{ form.card_validity_period }}
+                </div>
+                <!-- QĐ2: Sách -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Năm XB tối đa *</label>
                     {{ form.book_return_period }}
-                    <p class="text-gray-500 text-xs mt-1">Chỉ nhận sách xuất bản trong vòng X năm gần nhất</p>
                 </div>
             </div>
-
-            <!-- QĐ4: Quy định mượn sách -->
-            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                <h6 class="font-semibold text-blue-600 mb-4">QĐ4: Quy định mượn sách</h6>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="{{ form.max_borrowed_books.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                            Số sách mượn tối đa <span class="text-red-500">*</span>
-                        </label>
-                        {{ form.max_borrowed_books }}
-                        <p class="text-gray-500 text-xs mt-1">Số cuốn sách tối đa một độc giả được mượn</p>
-                    </div>
-                    <div>
-                        <label for="{{ form.max_borrow_days.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                            Số ngày mượn tối đa <span class="text-red-500">*</span>
-                        </label>
-                        {{ form.max_borrow_days }}
-                        <p class="text-gray-500 text-xs mt-1">Số ngày tối đa được mượn sách</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- QĐ5: Quy định tiền phạt -->
-            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                <h6 class="font-semibold text-blue-600 mb-4">QĐ5: Quy định tiền phạt</h6>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <!-- QĐ4: Mượn sách -->
                 <div>
-                    <label for="{{ form.fine_rate.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        Đơn giá phạt (VNĐ/ngày) <span class="text-red-500">*</span>
-                    </label>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Số sách mượn tối đa *</label>
+                    {{ form.max_borrowed_books }}
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Số ngày mượn tối đa *</label>
+                    {{ form.max_borrow_days }}
+                </div>
+                <!-- QĐ5: Tiền phạt -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Tiền phạt (VNĐ/ngày) *</label>
                     {{ form.fine_rate }}
-                    <p class="text-gray-500 text-xs mt-1">Số tiền phạt cho mỗi ngày trả trễ</p>
                 </div>
-            </div>
-
-            <!-- QĐ6: Quy định thu tiền -->
-            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                <h6 class="font-semibold text-blue-600 mb-4">QĐ6: Quy định thu tiền</h6>
-                <div class="flex items-center gap-3">
-                    {{ form.enable_receipt_amount_validation }}
-                    <label for="{{ form.enable_receipt_amount_validation.id_for_label }}" class="text-sm text-gray-700">
-                        Kiểm tra số tiền thu không vượt quá nợ
-                    </label>
+                <!-- QĐ6: Thu tiền -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Kiểm tra tiền thu</label>
+                    <div class="flex items-center h-[38px] px-3 bg-white border border-gray-300 rounded-md">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="enable_receipt_amount_validation" {% if form.enable_receipt_amount_validation.value %}checked{% endif %} class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                            <span class="ml-2 text-xs text-gray-600">{% if form.enable_receipt_amount_validation.value %}Bật{% else %}Tắt{% endif %}</span>
+                        </label>
+                    </div>
                 </div>
-                <p class="text-gray-500 text-xs mt-2">Nếu bật, hệ thống sẽ không cho phép thu tiền nhiều hơn số tiền nợ của độc giả</p>
             </div>
 
             <!-- Buttons -->
-            <div class="flex justify-end gap-3 mt-6">
-                <button type="reset" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+            <div class="flex justify-end gap-3 pt-3 border-t">
+                <button type="reset" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm">
                     Đặt lại
                 </button>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm">
                     Lưu thay đổi
                 </button>
             </div>

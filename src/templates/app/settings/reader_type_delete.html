@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+    <div class="p-6">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">
+            {{ page_title }}
+        </h1>
+        <p class="text-gray-500">Xác nhận xóa loại độc giả khỏi hệ thống</p>
+    </div>
+</div>
+
+<!-- Thông tin loại độc giả -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
+    <div class="bg-red-600 text-white px-4 py-3">
+        <h5 class="font-semibold">⚠️ Xác nhận xóa</h5>
+    </div>
+    <div class="p-6">
+        <div class="space-y-4">
+            <div class="flex justify-between py-2 border-b">
+                <span class="text-gray-600">Tên loại độc giả</span>
+                <strong class="text-gray-900">{{ reader_type.reader_type_name }}</strong>
+            </div>
+            <div class="flex justify-between py-2 border-b">
+                <span class="text-gray-600">Mô tả</span>
+                <span class="text-gray-900">{{ reader_type.description|default:"-" }}</span>
+            </div>
+            <div class="flex justify-between py-2">
+                <span class="text-gray-600">Số lượng độc giả</span>
+                <span class="{% if reader_count > 0 %}text-red-600 font-bold{% else %}text-green-600{% endif %}">
+                    {{ reader_count }} độc giả
+                </span>
+            </div>
+        </div>
+        
+        {% if reader_count > 0 %}
+        <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mt-4">
+            <strong>Không thể xóa!</strong>
+            <p class="mt-1">Loại độc giả này đang được sử dụng bởi {{ reader_count }} độc giả. Vui lòng chuyển các độc giả sang loại khác trước khi xóa.</p>
+        </div>
+        {% else %}
+        <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded mt-4">
+            <strong>Cảnh báo!</strong>
+            <p class="mt-1">Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa loại độc giả "{{ reader_type.reader_type_name }}"?</p>
+        </div>
+        {% endif %}
+        
+        <!-- Buttons -->
+        <div class="flex justify-end gap-3 mt-6">
+            <a href="{% url 'reader_type_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                Hủy
+            </a>
+            {% if reader_count == 0 %}
+            <form method="POST" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    🗑️ Xác nhận xóa
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
