@@ -321,12 +321,13 @@ function loadBorrowHistory(filter = 'all') {
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Phiếu #</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 whitespace-nowrap">Phiếu #</th>
                                     <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Độc giả</th>
-                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Ngày mượn</th>
-                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Phải trả</th>
-                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Ngày trả</th>
-                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600">Trạng thái</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 whitespace-nowrap">Ngày mượn</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 whitespace-nowrap">Phải trả</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 whitespace-nowrap">Ngày trả</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 whitespace-nowrap">Trạng thái</th>
+                                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 whitespace-nowrap">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody id="historyBody" class="divide-y divide-gray-200"></tbody>

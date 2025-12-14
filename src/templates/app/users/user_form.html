@@ -146,9 +146,16 @@
                 Quản lý (Toàn quyền)
               </option>
             </select>
-            <p class="text-gray-400 text-xs mt-1">
-              Thủ thư: Nghiệp vụ | Quản lý: Toàn quyền
+          </div>
+          
+          <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+            <p class="text-sm text-gray-600">
+              <span class="font-medium">Quyền được gán:</span>
             </p>
+            <ul class="text-xs text-gray-500 mt-1 ml-6 list-disc">
+              <li class="ml-2"><strong>Thủ thư:</strong> Quyền nghiệp vụ (mượn/trả, độc giả, báo cáo)</li>
+              <li class="ml-2"><strong>Quản lý:</strong> Toàn quyền quản trị hệ thống</li>
+            </ul>
           </div>
           
           {% if edit_user %}

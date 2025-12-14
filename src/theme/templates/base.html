@@ -95,6 +95,7 @@
                   class="py-2 text-gray-700"
                   aria-labelledby="dropdownLargeButton"
                 >
+                  {% if can_add_readers or can_view_readers %}
                   <li>
                     <div
                       class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider"
@@ -102,6 +103,8 @@
                       Độc giả
                     </div>
                   </li>
+                  {% endif %}
+                  {% if can_add_readers %}
                   <li>
                     <a
                       href="{% url 'reader_create' %}"
@@ -109,6 +112,8 @@
                       >Lập thẻ độc giả</a 
                     >
                   </li>
+                  {% endif %}
+                  {% if can_view_readers %}
                   <li>
                     <a
                       href="{% url 'reader_list' %}"
@@ -116,6 +121,8 @@
                       >Danh sách độc giả</a
                     >
                   </li>
+                  {% endif %}
+                  {% if can_view_books or can_add_books %}
                   <div class="my-1 border-t border-gray-100"></div>
                   <li>
                     <div
@@ -124,6 +131,8 @@
                       Sách
                     </div>
                   </li>
+                  {% endif %}
+                  {% if can_add_books %}
                   <li>
                     <a
                       href="{% url 'book_import' %}"
@@ -138,6 +147,8 @@
                       >Danh sách phiếu nhập</a
                     >
                   </li>
+                  {% endif %}
+                  {% if can_view_books %}
                   <li>
                     <a
                       href="{% url 'book_search' %}"
@@ -145,6 +156,8 @@
                       >Tra cứu sách</a
                     >
                   </li>
+                  {% endif %}
+                  {% if can_view_borrow or can_add_borrow or can_view_return or can_add_return %}
                   <div class="my-1 border-t border-gray-100"></div>
                   <li>
                     <div
@@ -153,6 +166,8 @@
                       Mượn/Trả
                     </div>
                   </li>
+                  {% endif %}
+                  {% if can_add_borrow %}
                   <li>
                     <a
                       href="{% url 'borrow_book' %}"
@@ -160,6 +175,8 @@
                       >Lập phiếu mượn</a
                     >
                   </li>
+                  {% endif %}
+                  {% if can_view_borrow %}
                   <li>
                     <a
                       href="{% url 'borrow_book_list' %}"
@@ -167,6 +184,8 @@
                       >Danh sách phiếu mượn</a
                     >
                   </li>
+                  {% endif %}
+                  {% if can_add_return %}
                   <li>
                     <a
                       href="{% url 'return_book' %}"
@@ -174,6 +193,8 @@
                       >Lập phiếu trả</a
                     >
                   </li>
+                  {% endif %}
+                  {% if can_view_return %}
                   <li>
                     <a
                       href="{% url 'return_book_list' %}"
@@ -181,6 +202,7 @@
                       >Danh sách phiếu trả</a
                     >
                   </li>
+                  {% endif %}
                 </ul>
               </div>
             </li>
@@ -208,6 +230,7 @@
                 class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full left-0 mt-1 border border-gray-100"
               >
                 <ul class="py-2 text-gray-700">
+                  {% if can_view_receipt or can_add_receipt %}
                   <li>
                     <div
                       class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider"
@@ -215,6 +238,8 @@
                       Thu tiền phạt
                     </div>
                   </li>
+                  {% endif %}
+                  {% if can_add_receipt %}
                   <li>
                     <a
                       href="{% url 'receipt_form' %}"
@@ -222,6 +247,8 @@
                       >Lập phiếu thu</a
                     >
                   </li>
+                  {% endif %}
+                  {% if can_view_receipt %}
                   <li>
                     <a
                       href="{% url 'receipt_list' %}"
@@ -229,6 +256,8 @@
                       >Danh sách phiếu thu</a
                     >
                   </li>
+                  {% endif %}
+                  {% if can_view_reports %}
                   <div class="my-1 border-t border-gray-100"></div>
                   <li>
                     <div
@@ -258,6 +287,7 @@
                       >Sách trả trễ</a
                     >
                   </li>
+                  {% endif %}
                 </ul>
               </div>
             </li>

@@ -96,3 +96,6 @@ theme/static_src/.parcel-cache/
 theme/static_src/dist/
 theme/static_src/build/
 Procfile.tailwind
+
+# Bank info
+bank/

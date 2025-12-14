@@ -1,0 +1,114 @@
+Cách 1: Sử dụng API VietQR
+VietQR là gì ?
+VietQR là nhận diện thương hiệu chung dành cho các dịch vụ thanh toán, chuyển khoản bằng mã QR được xử lý qua mạng lưới NAPAS và các Ngân hàng thành viên, các trung gian thanh toán, các đối tác thanh toán trong và ngoài nước. VietQR tuân thủ tiêu chuẩn thanh toán QR của EMV Co. và bộ Tiêu chuẩn cơ sở cho mã QR do NHNN ban hành tại Quyết định số 1928/QĐ-NHNN.
+
+Cách sử dụng API VietQR
+Tài liệu của VietQR Bấm vào đây.
+
+Cái chúng ta sẽ sử dụng là quicklink.
+
+https://img.vietqr.io/image/<BANK_ID>-<ACCOUNT_NO>-<TEMPLATE>.png?amount=<AMOUNT>&addInfo=<DESCRIPTION>&accountName=<ACCOUNT_NAME>
+
+Trong đó:
+
+<BANK_ID>: Mã BIN ngân hàng, được quy định bởi ngân hàng nhà nước hoặc tên thường gọi phổ biến / tên viết tắt quy ước bởi NAPAS của ngân hàng bấm vào đây để xem.
+<ACCOUNT_NO> : Số tài khoản người nhận tại ngân hàng thụ hưởng.
+<TEMPLATE> : là hình thức trình bày của file ảnh chứa mã VietQR.
+Theme	Size	Ý nghĩa
+compact2	540x640	Bao gồm : Mã QR, các logo , thông tin chuyển khoản
+compact	540x540	QR kèm logo VietQR, Napas, ngân hàng
+qr_only	480x480	Trả về ảnh QR đơn giản, chỉ bao gồm QR
+print	600x776	Bao gồm : Mã QR, các logo và đầy đủ thông tin chuyển khoản.
+<AMOUNT> : Số tiền chuyển khoản ( tối đa 13 số).
+<DESCRIPTION>: Nội dung chuyển khoản.
+<ACCOUNT_NAME>: quy định tên người thụ hưởng hiển thị lên file ảnh VietQR. Trường này không nằm trong tiêu chuẩn tạo mã VietQR.
+Ví dụ ta cần tạo 1 mã chuyển khoản 50k nội dung là test đến ngân hàng TPBank, số tài khoản là mynamebvh và sử dụng template compact2 link sẽ có dạng:
+
+https://img.vietqr.io/image/tpbank-mynamebvh-compact2.jpg?amount=50000&addInfo=test&accountName=Bui%20Viet%20Hoang
+
+Tiếp theo truy cập link trên và sử dụng 1 ứng dụng của ngân hàng bất kì và test thử.
+
+Cách 2: Tự xây dựng
+Ta có thể dựa vào tài liệu của VietQR để tự xây dựng bấm vào đây
+
+Trong tài liệu có nhiều thành phần nhưng ta chỉ quan tâm đến QR động đến tài khoản ngân hàng.
+
+Các thành phần chính
+Ta sẽ lấy 1 ví dụ để giải thích.
+
+00020101021238530010A000000727012300069704230109mynamebvh0208QRIBFTTA53037045405500005802VN62080804test6304AB76
+
+Đây là nội dung mình phân tách ra cho ae dễ nhìn
+
+000201
+010212
+38530010A000000727012300069704230109mynamebvh0208QRIBFTTA
+5303704
+540550000
+5802VN
+62080804test
+6304AB76
+
+Giải thích như ảnh dưới (do ví dụ mình đã sửa nên ảnh dưới ae bỏ qua cột giá trị nhé)image.png
+
+Nội dung của mã QR động sẽ có các phần ghép lại tạo thành 1 nội dung hoàn chỉnh ( mỗi phần bao gồm mã ID, độ dài của giá trị và giá trị).
+
+1. Payload Format Indicator:
+Lấy 6 ký tự đầu của đoạn văn bản phía trên nó sẽ là 000210 -> ID: 00, Độ dài: 02, Giá trị: 01.
+
+2. Point of Initiation Method:
+Tiếp tục sẽ là 010212 -> ID: 01, Độ dài: 02, Giá trị: 12 (các phần dưới tương tự).
+
+Giải thích giá trị:
+
+11 = QR tĩnh – áp dụng khi mã QR cho phép thực hiện nhiều lần giao dịch.
+12 = QR động – áp dụng khi mã QR chỉ cho phép thực hiện một lần giao dịch.
+3. Consumer Account Information:
+Tiếp tục sẽ là 38530010A000000727012300069704230109mynamebvh0208QRIBFTTA -> ID: 38, Độ dài: 53, Giá trị: 0010A000000727012300069704230109mynamebvh0208QRIBFTTA
+
+Giá trị nó lại chia thành 3 phần:
+
+Định danh toàn cầu (GUID): 0010A000000727 -> ID: 00, Độ dài: 10, Giá trị: A000000727
+Tổ chức ngân hàng thụ hưởng: 012300069704230109mynamebvh -> ID: 01, Độ dài: 23, Giá trị: 00069704230109mynamebvh. Giá trị này lại chia làm 2 phần:
+Acquier ID/BNB ID: 0006970423 -> ID: 00, Độ dài: 06, Giá trị: 970423 (970423 chính là mã BIN TPBank).
+Merchant ID/Consumer ID: 0109mynamebvh, ID: 01, Độ dài: 09, Giá trị: mynamebvh (Chính là số tài khoản).
+Mã dịch vụ: 0208QRIBFTTA -> ID: 02, Độ dài: 08, Giá trị: QRIBFTTA (QRIBFTTA: dịch vụ chuyển nhanh NAPAS247 bằng mã QR đến Tài khoản)
+4. Transaction Currency
+5303704 -> ID: 53, Độ dài: 03, Giá trị: 704
+
+Giải thích: 704 mã tiền tệ VN.
+
+5. Transaction Amount
+5406180000 -> ID: 54, Độ dài: 06, Giá trị: 180000
+
+Đây là để set số tiền chuyển khoản.
+
+6. Country Code
+5802VN -> ID: 58, Độ dài: 02, Giá trị: VN
+
+Cái này là mã quốc gia
+
+7. Additional Data Field Template
+62080804test -> ID: 62, Độ dài: 08, Giá trị: 0804test
+
+Giá trị gồm: ID: 08, Độ dài 04, Giá trị: test (ID: 08 là Giá trị nhằm xác định mục đích của giao dịch, VD: nạp tiền điện thoại, mua hàng hóa… và test là nội dung chuyển khoản. Xem ID 62 ở tài liệu để biết thêm các ID khác ngoài ID 08.
+
+8. CRC
+6304AB76 -> ID: 63, Độ dài: 04, Giá trị: AB76 Đây là một phương pháp kiểm tra tính toàn vẹn dữ liệu trong việc truyền tải thông tin. Ở đây họ sử dụng CRC 0xFFFF. Cách tính là lấy nội dung của QRCode như ví dụ trên sẽ là 00020101021238530010A000000727012300069704230109mynamebvh0208QRIBFTTA53037045405500005802VN62080804test6304 rồi cho qua hàm tính CRC sẽ ra kết quả: AB76.
+
+Bắt đầu xây dựng
+Việc tạo nội dung mã QR này không hề khó nhưng dễ nhầm lẫn.
+
+Payload Format Indicator: Phần này ta để nguyên như ví dụ.
+Point of Initiation Method: Phần này ta cũng để nguyên như ví dụ -> vì ta cần QR động.
+Consumer Account Information:
+GUI giữ nguyên.
+Acquier ID/BNB ID: Sửa thành mã BIN ngân hàng thụ hưởng (dùng API của VietQR để lấy).
+Merchant ID/Consumer ID: Sửa số tài khoản thụ hưởng.
+Mã dịch vụ giữ nguyên: vì ta cần QR đến số tài khoản (nếu muốn đến thẻ thì đổi thành QRIBFTTC)
+Transaction Currency: Giữ nguyên.
+Transaction Amount: Sửa thành số tiền muốn chuyển.
+Country Code: Giữ nguyên.
+Additional Data Field Template: Sửa nội dung chuyển khoản.
+Tính CRC.
+Sau đó ghép các phần lại với nhau và tạo QR là ta đã hoàn thành. Công việc còn lại chỉ là mang ứng dụng ngân hàng ra test.

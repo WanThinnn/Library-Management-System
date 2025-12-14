@@ -12,7 +12,7 @@ from django.db.models import Count, Q
 from datetime import datetime, timedelta
 from .models import Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt, Category, UserGroup, Function, Permission
 from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm, ParameterForm, BookEditForm, ReaderTypeForm, UserGroupForm, FunctionForm
-from .decorators import manager_required, staff_required
+from .decorators import manager_required, staff_required, permission_required
 
 
 def home_view(request):
@@ -1693,6 +1693,9 @@ def user_create_view(request):
     - Thủ thư (is_staff=True)
     - Quản lý (is_superuser=True)
     """
+    from .models import LibraryUser
+    from datetime import date
+    
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
@@ -1734,6 +1737,23 @@ def user_create_view(request):
                         role_text = 'Thủ thư'
                     
                     user.save()
+                    
+                    # Tự động tạo LibraryUser cho staff (không phải manager)
+                    if role == 'staff':
+                        try:
+                            # Auto-assign nhóm "Thủ thư"
+                            user_group = UserGroup.objects.get(user_group_name='Thủ thư')
+                            LibraryUser.objects.create(
+                                user=user,
+                                full_name=f"{first_name} {last_name}".strip() or username,
+                                date_of_birth=date(1990, 1, 1),
+                                position='Thủ thư',
+                                user_group=user_group,
+                                email=email or '',
+                                is_active=True
+                            )
+                        except UserGroup.DoesNotExist:
+                            messages.warning(request, 'Chưa có nhóm "Thủ thư". Chạy: python manage.py setup_permissions')
                     
                     messages.success(
                         request,
@@ -2294,7 +2314,7 @@ def permission_matrix_view(request, group_id):
             )
         
         messages.success(request, f'Đã cập nhật quyền cho nhóm "{user_group.user_group_name}" thành công!')
-        return redirect('user_group_list')
+        return redirect('permission_matrix', group_id=group_id)
     
     # Lấy quyền hiện tại
     permissions = {}
