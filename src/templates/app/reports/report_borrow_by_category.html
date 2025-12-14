@@ -37,10 +37,28 @@
                        value="{{ year }}" min="2000" max="2100" required>
             </div>
             <div class="md:col-span-6 flex flex-wrap gap-2">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Xem báo cáo
                 </button>
+                <a href="{% url 'report_borrow_by_category_excel' %}?month={{ month }}&year={{ year }}"  class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Xuất Excel
+                </a>
+                <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    In báo cáo
+                </button>
             </div>
+
+            {% comment %}             
+            <!-- Nút in và xuất -->
+            <div class="mt-4 flex gap-2 justify-center">
+                <button onclick="window.print()" class="bg-green-600 hover:bg-cyan-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    In báo cáo
+                </button>
+                <a href="{% url 'report_borrow_by_category_excel' %}?month={{ month }}&year={{ year }}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Xuất Excel
+                </a>
+            </div> 
+            {% endcomment %}
         </form>
     </div>
 </div>
@@ -85,15 +103,6 @@
                 </table>
             </div>
 
-            <!-- Nút in và xuất -->
-            <div class="mt-4 flex gap-2 justify-center">
-                <button onclick="window.print()" class="bg-green-600 hover:bg-cyan-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    In báo cáo
-                </button>
-                <a href="{% url 'report_borrow_by_category_excel' %}?month={{ month }}&year={{ year }}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    Xuất Excel
-                </a>
-            </div>
         {% else %}
             <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
                 Không có dữ liệu mượn sách trong tháng {{ month }}/{{ year }}
