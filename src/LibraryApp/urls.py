@@ -58,7 +58,11 @@ urlpatterns = [
     
     # YC7: Lập báo cáo
     path('report/borrow-by-category/', views.report_borrow_by_category_view, name='report_borrow_by_category'),
+    path('report/borrow-by-category/excel/', views.report_borrow_by_category_excel, name='report_borrow_by_category_excel'),
     path('report/overdue-books/', views.report_overdue_books_view, name='report_overdue_books'),
+    path('report/overdue-books/excel/', views.report_overdue_books_excel, name='report_overdue_books_excel'),
+    path('report/borrow-situation/', views.report_borrow_situation_view, name='report_borrow_situation'),
+    path('report/borrow-situation/excel/', views.report_borrow_situation_excel, name='report_borrow_situation_excel'),
     
     # YC8: Thay đổi quy định
     path('parameters/', views.parameter_update_view, name='parameter_update'),

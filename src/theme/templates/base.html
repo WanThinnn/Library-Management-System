@@ -23,7 +23,7 @@
           ><span class="text-3xl"></span>
           <div class="flex flex-col leading-tight">
             <span
-              class="self-center text-xl font-bold whitespace-nowrap text-blue-700"
+              class="self-center text-2xl font-bold whitespace-nowrap text-blue-700"
               >Quản lý Thư viện</span
             ><span
               class="text-xs text-gray-500 tracking-wider uppercase font-medium"
@@ -236,6 +236,13 @@
                     >
                       Báo cáo
                     </div>
+                  </li>
+                  <li>
+                    <a
+                      href="{% url 'report_borrow_situation' %}"
+                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      >Tình hình mượn</a
+                    >
                   </li>
                   <li>
                     <a

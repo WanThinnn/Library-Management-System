@@ -1243,6 +1243,359 @@ def report_overdue_books_view(request):
     return render(request, 'app/reports/report_overdue_books.html', context)
 
 
+@staff_required
+def report_borrow_by_category_excel(request):
+    """
+    Export báo cáo mượn sách theo thể loại ra file Excel
+    """
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+    from django.http import HttpResponse
+    from calendar import monthrange
+    
+    # Lấy tháng/năm từ request
+    month = int(request.GET.get('month', timezone.now().month))
+    year = int(request.GET.get('year', timezone.now().year))
+    
+    # Tính ngày đầu và cuối tháng
+    first_day = timezone.datetime(year, month, 1, tzinfo=timezone.get_current_timezone())
+    last_day_num = monthrange(year, month)[1]
+    last_day = timezone.datetime(year, month, last_day_num, 23, 59, 59, tzinfo=timezone.get_current_timezone())
+    
+    # Lấy dữ liệu
+    borrow_receipts = BorrowReturnReceipt.objects.filter(
+        borrow_date__gte=first_day,
+        borrow_date__lte=last_day
+    )
+    
+    category_stats = {}
+    total_borrows = 0
+    
+    for receipt in borrow_receipts:
+        if receipt.book_item and receipt.book_item.book:
+            category_name = receipt.book_item.book.book_title.category.category_name
+            category_stats[category_name] = category_stats.get(category_name, 0) + 1
+            total_borrows += 1
+    
+    # Tạo workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = f"Mượn sách T{month}-{year}"
+    
+    # Style
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="2563EB", end_color="2563EB", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin')
+    )
+    
+    # Title
+    ws.merge_cells('A1:D1')
+    ws['A1'] = f'Báo cáo mượn sách theo thể loại - Tháng {month}/{year}'
+    ws['A1'].font = Font(bold=True, size=14)
+    ws['A1'].alignment = Alignment(horizontal='center')
+    
+    # Headers
+    headers = ['STT', 'Tên thể loại', 'Số lượt mượn', 'Tỉ lệ (%)']
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=3, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = thin_border
+        cell.alignment = Alignment(horizontal='center')
+    
+    # Data
+    row = 4
+    for idx, (category_name, borrow_count) in enumerate(sorted(category_stats.items()), 1):
+        percentage = round((borrow_count / total_borrows * 100), 2) if total_borrows > 0 else 0
+        ws.cell(row=row, column=1, value=idx).border = thin_border
+        ws.cell(row=row, column=2, value=category_name).border = thin_border
+        ws.cell(row=row, column=3, value=borrow_count).border = thin_border
+        ws.cell(row=row, column=4, value=f"{percentage}%").border = thin_border
+        row += 1
+    
+    # Total
+    ws.merge_cells(f'A{row}:B{row}')
+    ws.cell(row=row, column=1, value='Tổng số lượt mượn:').font = Font(bold=True)
+    ws.cell(row=row, column=3, value=total_borrows).font = Font(bold=True)
+    
+    # Column widths
+    ws.column_dimensions['A'].width = 8
+    ws.column_dimensions['B'].width = 30
+    ws.column_dimensions['C'].width = 15
+    ws.column_dimensions['D'].width = 12
+    
+    # Response
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="bao_cao_muon_sach_{month}_{year}.xlsx"'
+    wb.save(response)
+    return response
+
+
+@staff_required
+def report_overdue_books_excel(request):
+    """
+    Export báo cáo sách trả trễ ra file Excel
+    """
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+    from django.http import HttpResponse
+    
+    # Lấy ngày báo cáo
+    report_date_str = request.GET.get('report_date')
+    if report_date_str:
+        try:
+            report_date = timezone.datetime.strptime(report_date_str, '%Y-%m-%d')
+            report_date = timezone.make_aware(report_date, timezone.get_current_timezone())
+        except ValueError:
+            report_date = timezone.now()
+    else:
+        report_date = timezone.now()
+    
+    # Lấy dữ liệu
+    overdue_receipts = BorrowReturnReceipt.objects.filter(
+        return_date__isnull=True,
+        due_date__lt=report_date
+    ).select_related('book_item__book__book_title')
+    
+    # Tạo workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Sách trả trễ"
+    
+    # Style
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="DC2626", end_color="DC2626", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin')
+    )
+    
+    # Title
+    ws.merge_cells('A1:D1')
+    ws['A1'] = f'Báo cáo sách trả trễ - Ngày {report_date.strftime("%d/%m/%Y")}'
+    ws['A1'].font = Font(bold=True, size=14)
+    ws['A1'].alignment = Alignment(horizontal='center')
+    
+    # Headers
+    headers = ['STT', 'Tên sách', 'Ngày mượn', 'Số ngày trễ']
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=3, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = thin_border
+        cell.alignment = Alignment(horizontal='center')
+    
+    # Data
+    row = 4
+    for idx, receipt in enumerate(overdue_receipts, 1):
+        overdue_days = (report_date.date() - receipt.due_date.date()).days
+        book_title = receipt.book_item.book.book_title.book_title if receipt.book_item else "N/A"
+        
+        ws.cell(row=row, column=1, value=idx).border = thin_border
+        ws.cell(row=row, column=2, value=book_title).border = thin_border
+        ws.cell(row=row, column=3, value=receipt.borrow_date.strftime("%d/%m/%Y %H:%M")).border = thin_border
+        ws.cell(row=row, column=4, value=overdue_days).border = thin_border
+        row += 1
+    
+    # Column widths
+    ws.column_dimensions['A'].width = 8
+    ws.column_dimensions['B'].width = 50
+    ws.column_dimensions['C'].width = 20
+    ws.column_dimensions['D'].width = 15
+    
+    # Response
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="bao_cao_sach_tra_tre_{report_date.strftime("%Y_%m_%d")}.xlsx"'
+    wb.save(response)
+    return response
+
+
+@staff_required
+def report_borrow_situation_view(request):
+    """
+    Báo cáo tình hình mượn sách theo khoảng thời gian
+    """
+    from datetime import timedelta
+    
+    # Lấy ngày từ request
+    from_date_str = request.GET.get('from_date')
+    to_date_str = request.GET.get('to_date')
+    
+    # Mặc định: 1 năm trước đến hiện tại
+    now = timezone.now()
+    if from_date_str:
+        try:
+            from_date = timezone.datetime.strptime(from_date_str, '%Y-%m-%d')
+            from_date = timezone.make_aware(from_date, timezone.get_current_timezone())
+        except ValueError:
+            from_date = now - timedelta(days=365)
+    else:
+        from_date = now - timedelta(days=365)
+    
+    if to_date_str:
+        try:
+            to_date = timezone.datetime.strptime(to_date_str, '%Y-%m-%d')
+            to_date = timezone.make_aware(to_date.replace(hour=23, minute=59, second=59), timezone.get_current_timezone())
+        except ValueError:
+            to_date = now
+    else:
+        to_date = now
+    
+    # Lấy dữ liệu mượn trong khoảng thời gian
+    borrow_receipts = BorrowReturnReceipt.objects.filter(
+        borrow_date__gte=from_date,
+        borrow_date__lte=to_date
+    ).select_related('book_item__book__book_title__category')
+    
+    # Đếm theo thể loại
+    category_stats = {}
+    total_borrows = 0
+    
+    for receipt in borrow_receipts:
+        if receipt.book_item and receipt.book_item.book:
+            category_name = receipt.book_item.book.book_title.category.category_name
+            category_stats[category_name] = category_stats.get(category_name, 0) + 1
+            total_borrows += 1
+    
+    # Tạo dữ liệu báo cáo
+    report_data = []
+    for idx, (category_name, borrow_count) in enumerate(sorted(category_stats.items(), key=lambda x: -x[1]), 1):
+        percentage = round((borrow_count / total_borrows * 100), 2) if total_borrows > 0 else 0
+        report_data.append({
+            'stt': idx,
+            'category_name': category_name,
+            'borrow_count': borrow_count,
+            'percentage': percentage
+        })
+    
+    # Dữ liệu cho biểu đồ (JSON)
+    import json
+    chart_labels = [item['category_name'] for item in report_data]
+    chart_data = [item['borrow_count'] for item in report_data]
+    
+    context = {
+        'report_data': report_data,
+        'total_borrows': total_borrows,
+        'from_date': from_date,
+        'to_date': to_date,
+        'chart_labels': json.dumps(chart_labels),
+        'chart_data': json.dumps(chart_data),
+        'page_title': 'Báo cáo Tình hình mượn sách'
+    }
+    
+    return render(request, 'app/reports/report_borrow_situation.html', context)
+
+
+@staff_required
+def report_borrow_situation_excel(request):
+    """
+    Export báo cáo tình hình mượn sách ra file Excel
+    """
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+    from django.http import HttpResponse
+    from datetime import timedelta
+    
+    # Lấy ngày từ request
+    from_date_str = request.GET.get('from_date')
+    to_date_str = request.GET.get('to_date')
+    
+    now = timezone.now()
+    if from_date_str:
+        try:
+            from_date = timezone.datetime.strptime(from_date_str, '%Y-%m-%d')
+            from_date = timezone.make_aware(from_date, timezone.get_current_timezone())
+        except ValueError:
+            from_date = now - timedelta(days=365)
+    else:
+        from_date = now - timedelta(days=365)
+    
+    if to_date_str:
+        try:
+            to_date = timezone.datetime.strptime(to_date_str, '%Y-%m-%d')
+            to_date = timezone.make_aware(to_date.replace(hour=23, minute=59, second=59), timezone.get_current_timezone())
+        except ValueError:
+            to_date = now
+    else:
+        to_date = now
+    
+    # Lấy dữ liệu
+    borrow_receipts = BorrowReturnReceipt.objects.filter(
+        borrow_date__gte=from_date,
+        borrow_date__lte=to_date
+    ).select_related('book_item__book__book_title__category')
+    
+    category_stats = {}
+    total_borrows = 0
+    
+    for receipt in borrow_receipts:
+        if receipt.book_item and receipt.book_item.book:
+            category_name = receipt.book_item.book.book_title.category.category_name
+            category_stats[category_name] = category_stats.get(category_name, 0) + 1
+            total_borrows += 1
+    
+    # Tạo workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Tình hình mượn sách"
+    
+    # Style
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="2563EB", end_color="2563EB", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin')
+    )
+    
+    # Title
+    ws.merge_cells('A1:D1')
+    ws['A1'] = f'Báo cáo Tình hình mượn sách'
+    ws['A1'].font = Font(bold=True, size=14)
+    ws['A1'].alignment = Alignment(horizontal='center')
+    
+    ws.merge_cells('A2:D2')
+    ws['A2'] = f'Từ {from_date.strftime("%d/%m/%Y")} đến {to_date.strftime("%d/%m/%Y")}'
+    ws['A2'].alignment = Alignment(horizontal='center')
+    
+    # Headers
+    headers = ['STT', 'Tên thể loại', 'Số lượt mượn', 'Tỉ lệ (%)']
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=4, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = thin_border
+        cell.alignment = Alignment(horizontal='center')
+    
+    # Data
+    row = 5
+    for idx, (category_name, borrow_count) in enumerate(sorted(category_stats.items(), key=lambda x: -x[1]), 1):
+        percentage = round((borrow_count / total_borrows * 100), 2) if total_borrows > 0 else 0
+        ws.cell(row=row, column=1, value=idx).border = thin_border
+        ws.cell(row=row, column=2, value=category_name).border = thin_border
+        ws.cell(row=row, column=3, value=borrow_count).border = thin_border
+        ws.cell(row=row, column=4, value=f"{percentage}%").border = thin_border
+        row += 1
+    
+    # Total
+    ws.merge_cells(f'A{row}:B{row}')
+    ws.cell(row=row, column=1, value='Tổng số lượt mượn:').font = Font(bold=True)
+    ws.cell(row=row, column=3, value=total_borrows).font = Font(bold=True)
+    
+    # Column widths
+    ws.column_dimensions['A'].width = 8
+    ws.column_dimensions['B'].width = 30
+    ws.column_dimensions['C'].width = 15
+    ws.column_dimensions['D'].width = 12
+    
+    # Response
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="bao_cao_tinh_hinh_muon_{from_date.strftime("%Y%m%d")}_{to_date.strftime("%Y%m%d")}.xlsx"'
+    wb.save(response)
+    return response
+
+
 # ==================== SYSTEM PARAMETERS - YC8 ====================
 
 @manager_required

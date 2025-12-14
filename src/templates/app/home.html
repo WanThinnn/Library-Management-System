@@ -138,17 +138,21 @@
             <!-- Page 1 -->
             <div class="carousel-page">
               <a href="{% url 'receipt_form' %}" class="block text-white bg-orange-500 hover:bg-orange-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">Lập phiếu thu</a>
-              <a href="{% url 'report_borrow_by_category' %}" class="block text-orange-600 bg-white border border-orange-500 hover:bg-orange-50 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">BC mượn theo thể loại</a>
+              <a href="{% url 'report_borrow_by_category' %}" class="block text-orange-600 bg-white border border-orange-500 hover:bg-orange-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">BC mượn theo thể loại</a>
             </div>
             <!-- Page 2 -->
             <div class="carousel-page hidden">
-              <a href="{% url 'receipt_list' %}" class="block text-white bg-orange-500 border-orange-500 hover:bg-orange-50 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">DS phiếu thu</a>
-              <a href="{% url 'report_overdue_books' %}" class="block text-orange-600 bg-white border border-orange-500 hover:bg-orange-50 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">BC sách trả trễ</a>
+              <a href="{% url 'receipt_list' %}" class="block text-white bg-orange-500 border-orange-500 hover:bg-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">DS phiếu thu</a>
+              <a href="{% url 'report_overdue_books' %}" class="block text-orange-600 bg-white border border-orange-500 hover:bg-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">BC sách trả trễ</a>
+            </div>
+            <!-- Page 3 -->
+            <div class="carousel-page hidden">
+              <a href="{% url 'report_borrow_situation' %}" class="block text-white bg-orange-500 border-orange-500 hover:bg-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors mb-3">BC tình hình mượn sách</a>
             </div>
           </div>
           <div class="flex justify-center items-center gap-2 mt-3 pt-2 border-t border-gray-100">
             <button class="carousel-prev p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30" disabled>‹</button>
-            <span class="carousel-indicator text-xs text-gray-500">1/2</span>
+            <span class="carousel-indicator text-xs text-gray-500">1/3</span>
             <button class="carousel-next p-1 text-gray-400 hover:text-gray-600">›</button>
           </div>
         </div>

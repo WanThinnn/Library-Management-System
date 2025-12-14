@@ -74,13 +74,13 @@
             </div>
 
             <!-- Nút in và xuất -->
-            <div class="mt-4 flex gap-2">
-                <button onclick="window.print()" class="bg-cyan-500 hover:bg-cyan-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+            <div class="mt-4 flex gap-2 justify-center">
+                <button onclick="window.print()" class="bg-green-600 hover:bg-cyan-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     In báo cáo
                 </button>
-                <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    Xuất CSV
-                </button>
+                <a href="{% url 'report_overdue_books_excel' %}?report_date={{ report_date|date:'Y-m-d' }}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Xuất Excel
+                </a>
             </div>
         {% else %}
             <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded">
@@ -90,20 +90,7 @@
     </div>
 </div>
 
-<script>
-function exportToCSV() {
-    let csv = 'STT,Tên Sách,Ngày Mượn,Số Ngày Trả Trễ\n';
-    {% for item in report_data %}
-    csv += '{{ item.stt }},{{ item.book_title }},{{ item.borrow_date|date:"d/m/Y H:i" }},{{ item.overdue_days }}\n';
-    {% endfor %}
-    
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'bao_cao_sach_tra_tre_{{ report_date|date:"Y_m_d" }}.csv';
-    link.click();
-}
-</script>
+
 
 <style>
 @media print {

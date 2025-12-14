@@ -250,9 +250,9 @@ function showBorrowingDetail(readerId, readerName, readerEmail, books) {
         return `
             <tr class="${isOverdue ? 'bg-red-50' : ''}">
                 <td class="px-4 py-2 text-sm"><strong>${book.title}</strong></td>
-                <td class="px-4 py-2 text-sm">${book.borrow_date}</td>
-                <td class="px-4 py-2 text-sm">${book.due_date}</td>
-                <td class="px-4 py-2 text-sm">
+                <td class="px-4 py-2 text-sm whitespace-nowrap">${book.borrow_date}</td>
+                <td class="px-4 py-2 text-sm whitespace-nowrap">${book.due_date}</td>
+                <td class="px-4 py-2 text-sm whitespace-nowrap">
                     ${isOverdue ? '<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Quá hạn</span>' : '<span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Còn hạn</span>'}
                 </td>
             </tr>
