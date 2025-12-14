@@ -16,7 +16,7 @@
 
 <!-- Form chọn ngày -->
 <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
-    <div class="bg-amber-500 text-white px-4 py-3">
+    <div class="bg-blue-600 text-white px-4 py-3">
         <h5 class="font-semibold">Chọn Ngày Báo Cáo</h5>
     </div>
     <div class="p-4">
@@ -28,7 +28,7 @@
                        value="{{ report_date|date:'Y-m-d' }}" required>
             </div>
             <div class="md:col-span-8 flex flex-wrap gap-2">
-                <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Xem báo cáo
                 </button>
             </div>
@@ -38,7 +38,7 @@
 
 <!-- Báo cáo BM7.2 -->
 <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-    <div class="bg-red-600 text-white px-4 py-3">
+    <div class="bg-blue-600 text-white px-4 py-3">
         <h5 class="font-semibold">BM7.2 – Báo Cáo Thống Kê Sách Trả Trễ</h5>
         <p class="text-sm mt-1">Ngày: <strong>{{ report_date|date:'d/m/Y' }}</strong></p>
     </div>
