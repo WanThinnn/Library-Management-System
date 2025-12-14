@@ -101,7 +101,7 @@ class Command(BaseCommand):
             except:
                 self.stdout.write(f"  - {user.username}: NOT linked to LibraryUser (needs manual setup)")
         
-        self.stdout.write(self.style.SUCCESS('\n✓ Permission system setup complete!'))
+        self.stdout.write(self.style.SUCCESS('\nPermission system setup complete!'))
         self.stdout.write('\nNext steps:')
         self.stdout.write('1. Go to /permissions/groups/ to manage group permissions')
         self.stdout.write('2. Go to /permissions/functions/ to add/edit functions')

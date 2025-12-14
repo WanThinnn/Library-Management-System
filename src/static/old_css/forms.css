@@ -225,7 +225,7 @@ textarea:hover {
 }
 
 .form-check-input:checked::before {
-  content: '✓';
+  content: '';
   color: white;
   font-size: 14px;
   font-weight: bold;

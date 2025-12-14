@@ -774,7 +774,18 @@ def return_book_view(request):
             receipts = form.save()
             if receipts:
                 count = len(receipts)
-                messages.success(request, f'Đã ghi nhận trả sách - {count} quyển')
+                # Lấy reader từ receipt đầu tiên và kiểm tra nợ
+                reader = receipts[0].reader if receipts else None
+                if reader and reader.total_debt > 0:
+                    messages.success(
+                        request, 
+                        f'Đã ghi nhận trả sách - {count} quyển. '
+                        f'Độc giả còn nợ {reader.total_debt:,}đ. '
+                        f'<a href="/receipt/" class="text-blue-600 underline font-semibold">Lập phiếu thu ngay</a>',
+                        extra_tags='safe'
+                    )
+                else:
+                    messages.success(request, f'Đã ghi nhận trả sách - {count} quyển')
                 return redirect('return_book_list')
             else:
                 messages.error(request, 'Lỗi khi lưu thông tin trả sách')
