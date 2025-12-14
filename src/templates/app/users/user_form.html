@@ -3,147 +3,202 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <!-- Header -->
-    <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
-        <div class="p-6">
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">
-                {{ page_title }}
-            </h1>
-            <p class="text-gray-500">{% if edit_user %}Chỉnh sửa thông tin tài khoản{% else %}Tạo tài khoản người dùng mới{% endif %}</p>
+<div class="mx-auto px-5">
+  <!-- Header -->
+  <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+    <div class="p-6">
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">
+        {{ page_title }}
+      </h1>
+      <p class="text-gray-500">{% if edit_user %}Chỉnh sửa thông tin tài khoản{% else %}Tạo tài khoản người dùng mới{% endif %}</p>
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="update">
+    
+    <!-- 3 Cards Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+      
+      <!-- Card 1: User Info (if editing) or Account Info (if creating) -->
+      <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col">
+        {% if edit_user %}
+        <!-- Avatar Section for Edit Mode -->
+        <div class="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-6 text-center">
+          <div class="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-3xl font-bold text-white mx-auto mb-3 shadow-lg">
+            {{ edit_user.username|slice:":1"|upper }}
+          </div>
+          <h2 class="text-lg font-bold text-white">{{ edit_user.username }}</h2>
+          <div class="flex justify-center gap-2 mt-2">
+            {% if edit_user.is_superuser %}
+              <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">👑 Admin</span>
+            {% elif edit_user.is_staff %}
+              <span class="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">📚 Staff</span>
+            {% endif %}
+          </div>
         </div>
+        <div class="p-5 space-y-3 flex-1">
+          <div class="flex items-center gap-3 text-sm">
+            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">📅</div>
+            <div>
+              <p class="text-gray-500 text-xs">Ngày tạo tài khoản</p>
+              <p class="font-medium text-gray-900">{{ edit_user.date_joined|date:"d/m/Y" }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 text-sm">
+            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">🕐</div>
+            <div>
+              <p class="text-gray-500 text-xs">Đăng nhập lần cuối</p>
+              <p class="font-medium text-gray-900">{{ edit_user.last_login|date:"d/m/Y H:i"|default:"Chưa có" }}</p>
+            </div>
+          </div>
+          <hr class="my-3">
+          <div class="flex items-center gap-3">
+            <input type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" id="is_active" name="is_active"
+                   {% if edit_user.is_active %}checked{% endif %}>
+            <label for="is_active" class="text-sm text-gray-700">Kích hoạt tài khoản</label>
+          </div>
+          <p class="text-gray-400 text-xs">Tài khoản bị khóa sẽ không thể đăng nhập</p>
+        </div>
+        {% else %}
+        <!-- Create Mode: Account Credentials -->
+        <div class="bg-green-600 text-white px-5 py-4">
+          <h3 class="font-semibold text-lg">Thông tin đăng nhập</h3>
+        </div>
+        <div class="p-5 space-y-4 flex-1">
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+              Tên đăng nhập <span class="text-red-500">*</span>
+            </label>
+            <input type="text" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" id="username" name="username" required>
+            <p class="text-gray-400 text-xs mt-1">Chỉ gồm chữ, số và dấu gạch dưới</p>
+          </div>
+          
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+              Mật khẩu <span class="text-red-500">*</span>
+            </label>
+            <input type="password" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" id="password" name="password" required placeholder="••••••••">
+          </div>
+          
+          <div>
+            <label for="password_confirm" class="block text-sm font-medium text-gray-700 mb-1">
+              Xác nhận mật khẩu <span class="text-red-500">*</span>
+            </label>
+            <input type="password" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" id="password_confirm" name="password_confirm" required placeholder="••••••••">
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Card 2: Personal Info -->
+      <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col">
+        <div class="bg-blue-600 text-white px-5 py-4">
+          <h3 class="font-semibold text-lg">Thông tin cá nhân</h3>
+        </div>
+        <div class="p-5 space-y-4 flex-1">
+          {% if edit_user %}
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập</label>
+            <input type="text" value="{{ edit_user.username }}" disabled
+              class="w-full px-3 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 cursor-not-allowed text-sm">
+            <p class="text-xs text-gray-400 mt-1">Không thể thay đổi</p>
+          </div>
+          {% endif %}
+          
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input type="email" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" id="email" name="email"
+                   value="{% if edit_user %}{{ edit_user.email }}{% endif %}" placeholder="email@example.com">
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Họ</label>
+              <input type="text" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" id="last_name" name="last_name" 
+                     value="{% if edit_user %}{{ edit_user.last_name }}{% endif %}" placeholder="Nguyễn">
+            </div>
+            <div>
+              <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">Tên</label>
+              <input type="text" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" id="first_name" name="first_name"
+                     value="{% if edit_user %}{{ edit_user.first_name }}{% endif %}" placeholder="Văn A">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Role & Permissions OR Reset Password (if editing) -->
+      <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col">
+        <div class="bg-amber-500 text-white px-5 py-4">
+          <h3 class="font-semibold text-lg">{% if edit_user %}Quyền & Mật khẩu{% else %}Vai trò & Quyền hạn{% endif %}</h3>
+        </div>
+        <div class="p-5 space-y-4 flex-1">
+          <div>
+            <label for="role" class="block text-sm font-medium text-gray-700 mb-1">
+              Vai trò <span class="text-red-500">*</span>
+            </label>
+            <select class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" id="role" name="role" required>
+              <option value="staff" {% if edit_user and current_role == 'staff' %}selected{% endif %}>
+                📚 Thủ thư (Nhân viên)
+              </option>
+              <option value="manager" {% if edit_user and current_role == 'manager' %}selected{% endif %}>
+                👑 Quản lý (Toàn quyền)
+              </option>
+            </select>
+            <p class="text-gray-400 text-xs mt-1">
+              Thủ thư: Nghiệp vụ | Quản lý: Toàn quyền
+            </p>
+          </div>
+          
+          {% if edit_user %}
+          <hr class="my-2">
+          <p class="text-sm font-medium text-gray-700">Reset mật khẩu</p>
+          </form>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reset_password">
+            <div class="space-y-3 mt-2">
+              <div>
+                <input type="password" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm" id="new_password" name="new_password" required placeholder="Mật khẩu mới">
+              </div>
+              <div>
+                <input type="password" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm" id="confirm_password" name="confirm_password" required placeholder="Xác nhận mật khẩu">
+              </div>
+              <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm" onclick="return confirm('Bạn có chắc muốn reset mật khẩu?')">
+                Reset mật khẩu
+              </button>
+            </div>
+          </form>
+          {% endif %}
+        </div>
+      </div>
     </div>
 
-    <!-- Form Card -->
-    <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
-        <div class="bg-blue-600 text-white px-4 py-3">
-            <h5 class="font-semibold">Thông tin tài khoản</h5>
-        </div>
-        <div class="p-6">
-            <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="update">
-                
-                {% if edit_user %}
-                    <!-- Chế độ chỉnh sửa -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập</label>
-                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" value="{{ edit_user.username }}" disabled>
-                        <p class="text-gray-500 text-xs mt-1">Không thể thay đổi tên đăng nhập</p>
-                    </div>
-                {% else %}
-                    <!-- Chế độ tạo mới -->
-                    <div class="mb-4">
-                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
-                            Tên đăng nhập <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="username" name="username" required>
-                        <p class="text-gray-500 text-xs mt-1">Chỉ gồm chữ, số và dấu gạch dưới</p>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
-                            Mật khẩu <span class="text-red-500">*</span>
-                        </label>
-                        <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="password" name="password" required>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="password_confirm" class="block text-sm font-medium text-gray-700 mb-1">
-                            Xác nhận mật khẩu <span class="text-red-500">*</span>
-                        </label>
-                        <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="password_confirm" name="password_confirm" required>
-                    </div>
-                {% endif %}
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Họ</label>
-                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="last_name" name="last_name" 
-                               value="{% if edit_user %}{{ edit_user.last_name }}{% endif %}">
-                    </div>
-                    <div>
-                        <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">Tên</label>
-                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="first_name" name="first_name"
-                               value="{% if edit_user %}{{ edit_user.first_name }}{% endif %}">
-                    </div>
-                </div>
-                
-                <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="email" name="email"
-                           value="{% if edit_user %}{{ edit_user.email }}{% endif %}">
-                </div>
-                
-                <div class="mb-4">
-                    <label for="role" class="block text-sm font-medium text-gray-700 mb-1">
-                        Vai trò <span class="text-red-500">*</span>
-                    </label>
-                    <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="role" name="role" required>
-                        <option value="staff" {% if edit_user and current_role == 'staff' %}selected{% endif %}>
-                            Thủ thư (Nhân viên)
-                        </option>
-                        <option value="manager" {% if edit_user and current_role == 'manager' %}selected{% endif %}>
-                            Quản lý (Toàn quyền)
-                        </option>
-                    </select>
-                    <p class="text-gray-500 text-xs mt-1">
-                        Thủ thư: Truy cập các chức năng nghiệp vụ | Quản lý: Toàn quyền + Quản lý người dùng & thay đổi quy định
-                    </p>
-                </div>
-                
-                {% if edit_user %}
-                <div class="mb-4">
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" id="is_active" name="is_active"
-                               {% if edit_user.is_active %}checked{% endif %}>
-                        <label for="is_active" class="text-sm text-gray-700">Kích hoạt tài khoản</label>
-                    </div>
-                    <p class="text-gray-500 text-xs mt-1">Tài khoản bị khóa sẽ không thể đăng nhập</p>
-                </div>
-                {% endif %}
-                
-                <div class="flex gap-3 mt-6">
-                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        {% if edit_user %}Cập nhật{% else %}Tạo tài khoản{% endif %}
-                    </button>
-                    <a href="{% url 'user_list' %}" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-center">
-                        Hủy bỏ
-                    </a>
-                </div>
-            </form>
-            
-            {% if edit_user %}
-            <hr class="my-6">
-            
-            <!-- Reset mật khẩu -->
-            <div class="bg-yellow-50 rounded-lg p-4">
-                <h6 class="font-semibold text-yellow-700 mb-4">Reset mật khẩu</h6>
-                <form method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="reset_password">
-                    
-                    <div class="mb-4">
-                        <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">
-                            Mật khẩu mới <span class="text-red-500">*</span>
-                        </label>
-                        <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="new_password" name="new_password" required>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-1">
-                            Xác nhận mật khẩu <span class="text-red-500">*</span>
-                        </label>
-                        <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="confirm_password" name="confirm_password" required>
-                    </div>
-                    
-                    <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-lg transition-colors" onclick="return confirm('Bạn có chắc muốn reset mật khẩu?')">
-                        Reset mật khẩu
-                    </button>
-                </form>
-            </div>
-            {% endif %}
-        </div>
+    <!-- Action Buttons -->
+    {% if not edit_user %}
+    <div class="flex flex-wrap gap-4 justify-center">
+      <button type="submit"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors shadow-md hover:shadow-lg">
+        {% if edit_user %}Cập nhật{% else %}Tạo tài khoản{% endif %}
+      </button>
+      <a href="{% url 'user_list' %}"
+        class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-8 rounded-lg transition-colors">
+        Hủy bỏ
+      </a>
     </div>
+    </form>
+    {% else %}
+    <div class="flex flex-wrap gap-4 justify-center">
+      <button type="submit" form="update-form"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors shadow-md hover:shadow-lg">
+        Cập nhật
+      </button>
+      <a href="{% url 'user_list' %}"
+        class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-8 rounded-lg transition-colors">
+        Quay lại
+      </a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
