@@ -107,7 +107,7 @@
             <div class="p-4 space-y-4">
                 <div>
                     <p class="text-gray-500 text-sm">Được ghi nhận:</p>
-                    <p class="text-gray-900 font-medium">{{ receipt.created_date|date:"Ngày d/m/Y lúc H:i" }}</p>
+                    <p class="text-gray-900 font-medium">Ngày {{ receipt.created_date|date:"d/m/Y" }} lúc {{ receipt.created_date|date:"H:i" }}</p>
                 </div>
                 <hr>
                 <div>

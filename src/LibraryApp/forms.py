@@ -983,3 +983,64 @@ class ParameterForm(forms.ModelForm):
             raise ValidationError('Tuổi tối thiểu phải nhỏ hơn tuổi tối đa')
         
         return cleaned_data
+
+
+# ==================== PERMISSION MANAGEMENT FORMS ====================
+
+from .models import UserGroup, Function, Permission
+
+
+class UserGroupForm(forms.ModelForm):
+    """Form for UserGroup management"""
+    
+    class Meta:
+        model = UserGroup
+        fields = ['user_group_name', 'description']
+        widgets = {
+            'user_group_name': forms.TextInput(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'placeholder': 'Nhập tên nhóm người dùng'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'rows': 3,
+                'placeholder': 'Mô tả nhóm người dùng'
+            })
+        }
+        labels = {
+            'user_group_name': 'Tên nhóm',
+            'description': 'Mô tả'
+        }
+
+
+class FunctionForm(forms.ModelForm):
+    """Form for Function management"""
+    
+    class Meta:
+        model = Function
+        fields = ['function_name', 'screen_name', 'url_pattern', 'description']
+        widgets = {
+            'function_name': forms.TextInput(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'placeholder': 'VD: Quản lý sách'
+            }),
+            'screen_name': forms.TextInput(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'placeholder': 'VD: Danh sách sách'
+            }),
+            'url_pattern': forms.TextInput(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'placeholder': 'VD: /books/'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'rows': 3,
+                'placeholder': 'Mô tả chức năng'
+            })
+        }
+        labels = {
+            'function_name': 'Tên chức năng',
+            'screen_name': 'Tên màn hình',
+            'url_pattern': 'URL pattern',
+            'description': 'Mô tả'
+        }

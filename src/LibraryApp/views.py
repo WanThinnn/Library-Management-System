@@ -10,8 +10,8 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 from datetime import datetime, timedelta
-from .models import Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt, Category
-from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm, ParameterForm, BookEditForm, ReaderTypeForm
+from .models import Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt, Category, UserGroup, Function, Permission
+from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm, ParameterForm, BookEditForm, ReaderTypeForm, UserGroupForm, FunctionForm
 from .decorators import manager_required, staff_required
 
 
@@ -2105,3 +2105,213 @@ def reader_type_delete_view(request, reader_type_id):
     }
     
     return render(request, 'app/settings/reader_type_delete.html', context)
+
+
+# ==================== PERMISSION MANAGEMENT VIEWS ====================
+
+@manager_required
+def user_group_list_view(request):
+    """Danh sách nhóm người dùng"""
+    user_groups = UserGroup.objects.all().order_by('user_group_name')
+    
+    context = {
+        'user_groups': user_groups,
+        'page_title': 'Quản lý nhóm người dùng'
+    }
+    return render(request, 'app/permissions/user_group_list.html', context)
+
+
+@manager_required
+def user_group_create_view(request):
+    """Tạo nhóm người dùng mới"""
+    if request.method == 'POST':
+        form = UserGroupForm(request.POST)
+        if form.is_valid():
+            user_group = form.save()
+            messages.success(request, f'Đã tạo nhóm "{user_group.user_group_name}" thành công!')
+            return redirect('user_group_list')
+    else:
+        form = UserGroupForm()
+    
+    context = {
+        'form': form,
+        'page_title': 'Thêm nhóm người dùng',
+        'is_edit': False
+    }
+    return render(request, 'app/permissions/user_group_form.html', context)
+
+
+@manager_required
+def user_group_edit_view(request, group_id):
+    """Sửa nhóm người dùng"""
+    user_group = get_object_or_404(UserGroup, id=group_id)
+    
+    if request.method == 'POST':
+        form = UserGroupForm(request.POST, instance=user_group)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Đã cập nhật nhóm "{user_group.user_group_name}" thành công!')
+            return redirect('user_group_list')
+    else:
+        form = UserGroupForm(instance=user_group)
+    
+    context = {
+        'form': form,
+        'user_group': user_group,
+        'page_title': f'Sửa nhóm - {user_group.user_group_name}',
+        'is_edit': True
+    }
+    return render(request, 'app/permissions/user_group_form.html', context)
+
+
+@manager_required
+def user_group_delete_view(request, group_id):
+    """Xóa nhóm người dùng"""
+    user_group = get_object_or_404(UserGroup, id=group_id)
+    
+    # Đếm số user thuộc nhóm này
+    from .models import LibraryUser
+    user_count = LibraryUser.objects.filter(user_group=user_group).count()
+    
+    if request.method == 'POST':
+        if user_count > 0:
+            messages.error(request, f'Không thể xóa nhóm "{user_group.user_group_name}" vì còn {user_count} người dùng!')
+        else:
+            name = user_group.user_group_name
+            user_group.delete()
+            messages.success(request, f'Đã xóa nhóm "{name}" thành công!')
+        return redirect('user_group_list')
+    
+    context = {
+        'user_group': user_group,
+        'user_count': user_count,
+        'page_title': f'Xóa nhóm - {user_group.user_group_name}'
+    }
+    return render(request, 'app/permissions/user_group_delete.html', context)
+
+
+@manager_required
+def function_list_view(request):
+    """Danh sách chức năng"""
+    functions = Function.objects.all().order_by('function_name')
+    
+    context = {
+        'functions': functions,
+        'page_title': 'Quản lý chức năng hệ thống'
+    }
+    return render(request, 'app/permissions/function_list.html', context)
+
+
+@manager_required
+def function_create_view(request):
+    """Tạo chức năng mới"""
+    if request.method == 'POST':
+        form = FunctionForm(request.POST)
+        if form.is_valid():
+            function = form.save()
+            messages.success(request, f'Đã tạo chức năng "{function.function_name}" thành công!')
+            return redirect('function_list')
+    else:
+        form = FunctionForm()
+    
+    context = {
+        'form': form,
+        'page_title': 'Thêm chức năng',
+        'is_edit': False
+    }
+    return render(request, 'app/permissions/function_form.html', context)
+
+
+@manager_required
+def function_edit_view(request, function_id):
+    """Sửa chức năng"""
+    function = get_object_or_404(Function, id=function_id)
+    
+    if request.method == 'POST':
+        form = FunctionForm(request.POST, instance=function)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Đã cập nhật chức năng "{function.function_name}" thành công!')
+            return redirect('function_list')
+    else:
+        form = FunctionForm(instance=function)
+    
+    context = {
+        'form': form,
+        'function': function,
+        'page_title': f'Sửa chức năng - {function.function_name}',
+        'is_edit': True
+    }
+    return render(request, 'app/permissions/function_form.html', context)
+
+
+@manager_required
+def function_delete_view(request, function_id):
+    """Xóa chức năng"""
+    function = get_object_or_404(Function, id=function_id)
+    
+    # Đếm số permission liên quan
+    permission_count = Permission.objects.filter(function=function).count()
+    
+    if request.method == 'POST':
+        name = function.function_name
+        function.delete()
+        messages.success(request, f'Đã xóa chức năng "{name}" thành công!')
+        return redirect('function_list')
+    
+    context = {
+        'function': function,
+        'permission_count': permission_count,
+        'page_title': f'Xóa chức năng - {function.function_name}'
+    }
+    return render(request, 'app/permissions/function_delete.html', context)
+
+
+@manager_required
+def permission_matrix_view(request, group_id):
+    """Quản lý quyền cho nhóm người dùng (ma trận quyền)"""
+    user_group = get_object_or_404(UserGroup, id=group_id)
+    functions = Function.objects.all().order_by('function_name')
+    
+    if request.method == 'POST':
+        # Xử lý cập nhật quyền
+        for function in functions:
+            can_view = request.POST.get(f'view_{function.id}') == 'on'
+            can_add = request.POST.get(f'add_{function.id}') == 'on'
+            can_edit = request.POST.get(f'edit_{function.id}') == 'on'
+            can_delete = request.POST.get(f'delete_{function.id}') == 'on'
+            
+            # Cập nhật hoặc tạo mới permission
+            permission, created = Permission.objects.update_or_create(
+                user_group=user_group,
+                function=function,
+                defaults={
+                    'can_view': can_view,
+                    'can_add': can_add,
+                    'can_edit': can_edit,
+                    'can_delete': can_delete
+                }
+            )
+        
+        messages.success(request, f'Đã cập nhật quyền cho nhóm "{user_group.user_group_name}" thành công!')
+        return redirect('user_group_list')
+    
+    # Lấy quyền hiện tại
+    permissions = {}
+    for p in Permission.objects.filter(user_group=user_group):
+        permissions[str(p.function_id)] = {
+            'can_view': p.can_view,
+            'can_add': p.can_add,
+            'can_edit': p.can_edit,
+            'can_delete': p.can_delete
+        }
+    
+    import json
+    context = {
+        'user_group': user_group,
+        'functions': functions,
+        'permissions': json.dumps(permissions),
+        'page_title': f'Phân quyền - {user_group.user_group_name}'
+    }
+    return render(request, 'app/permissions/permission_matrix.html', context)
+

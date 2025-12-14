@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+    <div class="p-6">
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ page_title }}</h1>
+        <p class="text-gray-500">Quản lý nhóm người dùng và phân quyền hệ thống</p>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="mb-6 flex flex-wrap gap-3">
+    <a href="{% url 'user_group_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+        + Thêm nhóm mới
+    </a>
+    <a href="{% url 'function_list' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+        Quản lý chức năng
+    </a>
+    <a href="{% url 'user_list' %}" class="bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+        Quay lại quản lý người dùng
+    </a>
+</div>
+
+<!-- Danh sách -->
+<div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+    <div class="bg-blue-600 text-white px-4 py-3">
+        <h5 class="font-semibold">Danh sách nhóm người dùng</h5>
+    </div>
+    
+    {% if user_groups %}
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">STT</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tên nhóm</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Mô tả</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ngày tạo</th>
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for group in user_groups %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm text-gray-900">{{ forloop.counter }}</td>
+                    <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ group.user_group_name }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-500">{{ group.description|default:"-"|truncatewords:10 }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">{{ group.created_at|date:"d/m/Y" }}</td>
+                    <td class="px-4 py-3 text-sm text-center whitespace-nowrap">
+                        <div class="flex justify-center gap-2">
+                            <a href="{% url 'permission_matrix' group.id %}" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded transition-colors">
+                                Phân quyền
+                            </a>
+                            <a href="{% url 'user_group_edit' group.id %}" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">
+                                Sửa
+                            </a>
+                            <a href="{% url 'user_group_delete' group.id %}" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded transition-colors">
+                                Xóa
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="p-4">
+        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
+            Chưa có nhóm người dùng nào. <a href="{% url 'user_group_create' %}" class="underline">Thêm nhóm mới</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

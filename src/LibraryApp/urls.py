@@ -76,4 +76,15 @@ urlpatterns = [
     path('reader-type/create/', views.reader_type_create_view, name='reader_type_create'),
     path('reader-type/<int:reader_type_id>/edit/', views.reader_type_edit_view, name='reader_type_edit'),
     path('reader-type/<int:reader_type_id>/delete/', views.reader_type_delete_view, name='reader_type_delete'),
+    
+    # Permission Management
+    path('permissions/groups/', views.user_group_list_view, name='user_group_list'),
+    path('permissions/group/create/', views.user_group_create_view, name='user_group_create'),
+    path('permissions/group/<int:group_id>/edit/', views.user_group_edit_view, name='user_group_edit'),
+    path('permissions/group/<int:group_id>/delete/', views.user_group_delete_view, name='user_group_delete'),
+    path('permissions/group/<int:group_id>/permissions/', views.permission_matrix_view, name='permission_matrix'),
+    path('permissions/functions/', views.function_list_view, name='function_list'),
+    path('permissions/function/create/', views.function_create_view, name='function_create'),
+    path('permissions/function/<int:function_id>/edit/', views.function_edit_view, name='function_edit'),
+    path('permissions/function/<int:function_id>/delete/', views.function_delete_view, name='function_delete'),
 ]
