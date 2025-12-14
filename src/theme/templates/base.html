@@ -385,33 +385,49 @@
           target.classList.toggle("hidden");
         });
 
-      // Dropdown menus with timeout
-      document.querySelectorAll('.relative.group').forEach(dropdown => {
+      // Dropdown menus with timeout - close others immediately
+      const allDropdowns = document.querySelectorAll('.relative.group');
+      const dropdownData = new Map();
+      
+      allDropdowns.forEach(dropdown => {
         const menu = dropdown.querySelector('.dropdown-menu') || dropdown.querySelector('[class*="hidden"][class*="absolute"]');
         if (!menu) return;
         
-        let timeout;
+        dropdownData.set(dropdown, { menu, timeout: null });
         
         dropdown.addEventListener('mouseenter', () => {
-          clearTimeout(timeout);
+          // Close all other dropdowns immediately
+          dropdownData.forEach((data, otherDropdown) => {
+            if (otherDropdown !== dropdown) {
+              clearTimeout(data.timeout);
+              data.menu.classList.add('hidden');
+            }
+          });
+          
+          // Open this dropdown
+          const data = dropdownData.get(dropdown);
+          clearTimeout(data.timeout);
           menu.classList.remove('hidden');
         });
         
         dropdown.addEventListener('mouseleave', () => {
-          timeout = setTimeout(() => {
+          const data = dropdownData.get(dropdown);
+          data.timeout = setTimeout(() => {
             menu.classList.add('hidden');
-          }, 300); // 300ms delay before hiding
+          }, 150); // Shorter delay
         });
         
         // Keep menu open when hovering over it
         menu.addEventListener('mouseenter', () => {
-          clearTimeout(timeout);
+          const data = dropdownData.get(dropdown);
+          clearTimeout(data.timeout);
         });
         
         menu.addEventListener('mouseleave', () => {
-          timeout = setTimeout(() => {
+          const data = dropdownData.get(dropdown);
+          data.timeout = setTimeout(() => {
             menu.classList.add('hidden');
-          }, 300);
+          }, 150);
         });
       });
 
