@@ -20,7 +20,7 @@
     {% for message in messages %}
         <div class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-700{% else %}bg-blue-50 border-l-4 border-blue-500 text-blue-700{% endif %} p-4 rounded mb-6 flex justify-between items-start">
             <div class="flex items-center gap-2">
-                {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% else %}{% endif %}
+                {% if message.tags == 'success' %}{% elif message.tags == 'error' %}❌{% else %}{% endif %}
                 <span>{{ message }}</span>
             </div>
             <button type="button" onclick="this.parentElement.remove()" class="text-current opacity-50 hover:opacity-100 text-lg leading-none">×</button>

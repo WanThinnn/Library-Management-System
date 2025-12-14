@@ -1622,7 +1622,7 @@ def parameter_update_view(request):
                 
                 messages.success(
                     request,
-                    '✅ Cập nhật quy định thành công! '
+                    ' Cập nhật quy định thành công! '
                     f'Tuổi: {updated_param.min_age}-{updated_param.max_age}, '
                     f'Thời hạn thẻ: {updated_param.card_validity_period} tháng, '
                     f'Số sách mượn tối đa: {updated_param.max_borrowed_books}, '

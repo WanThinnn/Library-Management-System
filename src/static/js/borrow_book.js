@@ -262,7 +262,7 @@ function showBorrowingDetail(readerId, readerName, readerEmail, books) {
     const modalHtml = `
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" id="borrowingDetailModal">
             <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden">
-                <div class="bg-cyan-500 text-white px-4 py-3 flex justify-between items-center">
+                <div class="bg-blue-600 text-white px-4 py-3 flex justify-between items-center">
                     <h5 class="font-semibold"> Chi tiết sách mượn</h5>
                     <button onclick="document.getElementById('borrowingDetailModal').remove()" class="text-white hover:text-gray-200">✕</button>
                 </div>
@@ -289,7 +289,8 @@ function showBorrowingDetail(readerId, readerName, readerEmail, books) {
                         </table>
                     </div>
                 </div>
-                <div class="bg-gray-50 px-4 py-3 flex justify-end">
+                <div class="bg-gray-50 px-4 py-3 flex justify-between">
+                    <a href="/reader/${readerId}/" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">Xem chi tiết độc giả</a>
                     <button onclick="document.getElementById('borrowingDetailModal').remove()" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">Đóng</button>
                 </div>
             </div>
