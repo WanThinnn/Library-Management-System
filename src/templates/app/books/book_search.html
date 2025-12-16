@@ -129,11 +129,11 @@
 <div class="flex justify-center items-center gap-2 mt-8">
     {% if page_obj.has_previous %}
     <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
-       class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
+       class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
         Đầu tiên
     </a>
     <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
-       class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
+       class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
         Trước
     </a>
     {% endif %}
@@ -143,7 +143,7 @@
         <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-700 border border-blue-600 rounded-lg">{{ num }}</span>
         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
         <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
-           class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
+           class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
             {{ num }}
         </a>
         {% endif %}
@@ -151,11 +151,11 @@
 
     {% if page_obj.has_next %}
     <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
-       class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
+       class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
         Tiếp
     </a>
     <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
-       class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
+       class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
         Cuối
     </a>
     {% endif %}
@@ -170,7 +170,7 @@
 </div>
 {% else %}
 <!-- Start search -->
-<div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded">
+<div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded mt-4">
     <strong>Nhập tiêu chí tìm kiếm ở trên để bắt đầu.</strong>
 </div>
 {% endif %}
