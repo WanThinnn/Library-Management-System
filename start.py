@@ -52,7 +52,7 @@ def color_env_label(environment: str) -> str:
 def env_status_lines(environment: str, use_ssl: bool) -> str:
     label = color_env_label(environment)
     ssl_note = "on" if use_ssl else "off"
-    return f"{label} SSL={ssl_note}"
+    return f"{label} SSL/TLS={ssl_note}"
 
 
 def env_access_urls(use_ssl: bool) -> str:

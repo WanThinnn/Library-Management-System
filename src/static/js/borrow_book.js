@@ -120,18 +120,43 @@ function loadBooks(search = '') {
 function selectReader(id, name, email) {
     selectedReaderId = id;
     document.getElementById('readerId').value = id;
-    document.getElementById('selectedReader').innerHTML = `<strong>${name}</strong><br><small class="text-gray-500">${email}</small>`;
+    document.getElementById('selectedReader').innerHTML = `
+        <div class="flex items-center justify-between">
+            <div>
+                <strong class="text-gray-900 dark:text-gray-100">${name}</strong><br>
+                <small class="text-gray-500 dark:text-gray-400">${email}</small>
+            </div>
+            <button type="button" onclick="clearReader()" class="ml-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-bold text-lg leading-none" title="Xóa và chọn lại">
+                ×
+            </button>
+        </div>
+    `;
 
-    document.querySelectorAll('.reader-item').forEach(item => {
-        if (item.dataset.id == id) {
-            item.classList.add('bg-green-50', 'border-green-500', 'font-medium');
-            item.classList.remove('border-transparent');
-        } else {
-            item.classList.remove('bg-green-50', 'border-green-500', 'font-medium');
-            item.classList.add('border-transparent');
-        }
-    });
+    // Update selectedReaderDisplay
+    document.getElementById('readerSearch').value = email;
+    document.getElementById('selectedReaderDisplay').classList.remove('hidden');
+    document.getElementById('selectedReaderName').innerHTML = `
+        <div class="flex items-center justify-between">
+            <span class="text-gray-900 dark:text-gray-100">${name} (${email})</span>
+            <button type="button" onclick="clearReader()" class="ml-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-bold text-lg leading-none" title="Xóa và chọn lại">
+                ×
+            </button>
+        </div>
+    `;
+    
+    // Hide reader list
+    document.getElementById('readerList').innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-4"><em>Đã chọn độc giả</em></div>';
 
+    checkFormValid();
+}
+
+function clearReader() {
+    selectedReaderId = null;
+    document.getElementById('readerId').value = '';
+    document.getElementById('selectedReader').innerHTML = '<em class="text-gray-400">Chưa chọn</em>';
+    document.getElementById('readerSearch').value = '';
+    document.getElementById('selectedReaderDisplay').classList.add('hidden');
+    loadReaders();
     checkFormValid();
 }
 
@@ -149,11 +174,11 @@ function selectBook(id, title) {
     document.querySelectorAll('.book-item').forEach(item => {
         const itemId = parseInt(item.dataset.id);
         if (selectedBooks.includes(itemId)) {
-            item.classList.add('bg-green-50', 'border-green-500', 'font-medium');
+            item.classList.add('bg-green-50', 'dark:bg-green-900', 'border-green-500', 'font-medium');
             item.classList.remove('border-transparent');
             item.querySelector('.font-medium').textContent = '' + item.querySelector('.font-medium').textContent.replace('', '');
         } else {
-            item.classList.remove('bg-green-50', 'border-green-500', 'font-medium');
+            item.classList.remove('bg-green-50', 'dark:bg-green-900', 'border-green-500', 'font-medium');
             item.classList.add('border-transparent');
             item.querySelector('.font-medium').textContent = item.querySelector('.font-medium').textContent.replace('', '');
         }
@@ -175,7 +200,7 @@ function updateBookDisplay() {
                 bookNames.push(item.querySelector('.font-medium').textContent.replace('', ''));
             }
         });
-        selectedBookDiv.innerHTML = `<strong>${bookNames.join(', ')}</strong><br><small class="text-gray-500">(${selectedBooks.length} quyển)</small>`;
+        selectedBookDiv.innerHTML = `<strong class="text-gray-900 dark:text-gray-100">${bookNames.join(', ')}</strong><br><small class="text-gray-500 dark:text-gray-400">(${selectedBooks.length} quyển)</small>`;
     }
 }
 

@@ -149,18 +149,32 @@ function selectReader(readerId) {
 
     const reader = readersData.find(r => r.id === readerId);
 
-    document.getElementById('readerSearch').value = '';
+    document.getElementById('readerSearch').value = reader.email;
     document.getElementById('selectedReaderDisplay').classList.remove('hidden');
-    document.getElementById('selectedReaderName').textContent = reader.reader_name + ' (' + reader.email + ')';
+    document.getElementById('selectedReaderName').innerHTML = `
+        <div class="flex items-center justify-between">
+            <span>${reader.reader_name} (${reader.email})</span>
+            <button type="button" onclick="clearReader()" class="ml-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-bold text-lg leading-none" title="Xóa và chọn lại">
+                ×
+            </button>
+        </div>
+    `;
 
     // Update form panel reader display
     const readerDisplay2 = document.getElementById('selectedReaderDisplay2');
     if (readerDisplay2) {
-        readerDisplay2.innerHTML = `<strong>${reader.reader_name}</strong>`;
+        readerDisplay2.innerHTML = `
+            <div class="flex items-center justify-between">
+                <strong class="text-gray-900 dark:text-gray-100">${reader.reader_name}</strong>
+                <button type="button" onclick="clearReader()" class="ml-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-bold text-lg leading-none" title="Xóa và chọn lại">
+                    ×
+                </button>
+            </div>
+        `;
     }
 
     document.getElementById('readerList').innerHTML = `
-        <div class="text-center text-gray-500 p-2">
+        <div class="text-center text-gray-500 dark:text-gray-400 p-2">
             <small>Độc giả đã chọn: <strong>${reader.reader_name}</strong></small>
         </div>
     `;
@@ -172,6 +186,28 @@ function selectReader(readerId) {
     }
 
     loadReaderBooks(selectedReader);
+    updateSummary();
+}
+
+function clearReader() {
+    selectedReader = null;
+    selectedBooks = [];
+    document.getElementById('readerSearch').value = '';
+    document.getElementById('selectedReaderDisplay').classList.add('hidden');
+    
+    const readerDisplay2 = document.getElementById('selectedReaderDisplay2');
+    if (readerDisplay2) {
+        readerDisplay2.innerHTML = '<em class="text-gray-400">Chưa chọn</em>';
+    }
+    
+    const booksDisplay = document.getElementById('selectedBooksDisplay');
+    if (booksDisplay) {
+        booksDisplay.innerHTML = '<em class="text-gray-400">Chưa chọn</em>';
+    }
+    
+    document.getElementById('booksList').innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 p-3"><small>Chọn độc giả để xem sách mượn</small></div>';
+    
+    loadReaders();
     updateSummary();
 }
 
@@ -199,18 +235,18 @@ function renderBooks(books) {
     const booksList = document.getElementById('booksList');
 
     if (!books.length) {
-        booksList.innerHTML = '<div class="text-center text-gray-500"><em>Độc giả này không có sách mượn chưa trả</em></div>';
+        booksList.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 p-3"><em>Độc giả này không có sách mượn chưa trả</em></div>';
         return;
     }
 
     booksList.innerHTML = books.map((book, idx) => `
-        <div class="book-item p-3 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all ${book.is_overdue ? 'bg-yellow-50 dark:bg-yellow-900 border-yellow-400' : 'bg-gray-50 dark:bg-gray-800'}" data-book-id="${book.book_item_id}">
+        <div class="book-item p-3 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all ${book.is_overdue ? 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-400' : 'bg-white dark:bg-gray-800'}" data-book-id="${book.book_item_id}">
             <input type="checkbox" class="book-checkbox w-5 h-5 cursor-pointer" value="${book.book_item_id}" onchange="updateSelectedBooks()">
             <div class="flex-1">
                 <div class="font-medium text-gray-900 dark:text-gray-100">${book.book_title}</div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
                     Mượn: ${book.borrow_date} | Phải trả: ${book.due_date}
-                    ${book.is_overdue ? `<span class="bg-yellow-400 dark:bg-yellow-600 text-gray-900 dark:text-gray-100 text-xs px-2 py-0.5 rounded-full ml-2">Quá hạn ${book.days_overdue} ngày</span>` : ''}
+                    ${book.is_overdue ? `<span class="bg-yellow-400 dark:bg-yellow-600 text-gray-900 dark:text-yellow-100 text-xs px-2 py-0.5 rounded-full ml-2">Quá hạn ${book.days_overdue} ngày</span>` : ''}
                 </div>
             </div>
         </div>
@@ -236,7 +272,7 @@ function updateSelectedBooks() {
             checkedBoxes.forEach(checkbox => {
                 const bookItem = checkbox.closest('.book-item');
                 const bookTitle = bookItem.querySelector('.font-medium').textContent;
-                booksHtml += `<div class="text-xs">• ${bookTitle}</div>`;
+                booksHtml += `<div class="text-xs text-gray-900 dark:text-gray-100">• ${bookTitle}</div>`;
             });
             booksDisplay.innerHTML = booksHtml;
         } else {

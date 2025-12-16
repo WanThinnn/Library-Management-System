@@ -79,7 +79,7 @@
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {% for book in books %}
-                <tr class="hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ forloop.counter }}</td>
                     <td class="px-4 py-3 text-sm">
                         <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-800 dark:text-gray-200 font-mono text-xs">{{ book.id }}</code>
@@ -164,9 +164,9 @@
 
 {% elif request.GET %}
 <!-- No results -->
-<div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded">
+<div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded">
     <strong>Không tìm thấy sách phù hợp với tiêu chí tìm kiếm.</strong>
-    <p class="mt-2">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'book_search' %}" class="text-yellow-800 underline hover:text-yellow-900">xóa lọc</a>.</p>
+    <p class="mt-2">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'book_search' %}" class="text-yellow-800 dark:text-yellow-200 underline hover:text-yellow-900">xóa lọc</a>.</p>
 </div>
 {% else %}
 <!-- Start search -->
