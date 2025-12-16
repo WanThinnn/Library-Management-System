@@ -4,9 +4,9 @@
 
 {% block content %}
 <!-- Header -->
-<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 mb-6">
     <div class="p-6">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {{ page_title }}
         </h1>
         <p class="text-gray-500">Chi tiết thông tin thẻ độc giả</p>
@@ -34,31 +34,31 @@
         </div>
 
         <!-- Thông tin cá nhân -->
-        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-            <div class="bg-blue-600 text-white px-4 py-3">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 overflow-hidden">
+            <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
                 <h5 class="font-semibold">Thông tin cá nhân</h5>
             </div>
             <div class="p-4">
                 <table class="w-full">
                     <tbody class="divide-y divide-gray-200">
                         <tr>
-                            <td class="py-3 font-semibold text-gray-700" style="width: 150px;">Họ và tên:</td>
-                            <td class="py-3 text-gray-900">{{ reader.reader_name }}</td>
+                            <td class="py-3 font-semibold text-gray-700 dark:text-gray-300" style="width: 150px;">Họ và tên:</td>
+                            <td class="py-3 text-gray-900 dark:text-gray-100">{{ reader.reader_name }}</td>
                         </tr>
                         <tr>
-                            <td class="py-3 font-semibold text-gray-700">Ngày sinh:</td>
-                            <td class="py-3 text-gray-900">
+                            <td class="py-3 font-semibold text-gray-700 dark:text-gray-300">Ngày sinh:</td>
+                            <td class="py-3 text-gray-900 dark:text-gray-100">
                                 {{ reader.date_of_birth|date:"d/m/Y" }}
                                 <span class="text-gray-500">({{ reader.age }} tuổi)</span>
                             </td>
                         </tr>
                         <tr>
-                            <td class="py-3 font-semibold text-gray-700">Email:</td>
-                            <td class="py-3 text-gray-900">{{ reader.email }}</td>
+                            <td class="py-3 font-semibold text-gray-700 dark:text-gray-300">Email:</td>
+                            <td class="py-3 text-gray-900 dark:text-gray-100">{{ reader.email }}</td>
                         </tr>
                         <tr>
-                            <td class="py-3 font-semibold text-gray-700">Địa chỉ:</td>
-                            <td class="py-3 text-gray-900">{{ reader.address|default:"Chưa cập nhật" }}</td>
+                            <td class="py-3 font-semibold text-gray-700 dark:text-gray-300">Địa chỉ:</td>
+                            <td class="py-3 text-gray-900 dark:text-gray-100">{{ reader.address|default:"Chưa cập nhật" }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -66,8 +66,8 @@
         </div>
 
         <!-- Sách đang mượn -->
-        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-            <div class="bg-blue-600 text-white px-4 py-3">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 overflow-hidden">
+            <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
                 <h5 class="font-semibold">Sách đang mượn</h5>
             </div>
             <div class="p-4" id="readerBorrowingList">
@@ -82,18 +82,18 @@
     <!-- Right Column - Card Info & Actions -->
     <div class="space-y-6">
         <!-- Thông tin thẻ -->
-        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-            <div class="bg-blue-600 text-white px-4 py-3">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 overflow-hidden">
+            <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
                 <h5 class="font-semibold">Thông tin thẻ thư viện</h5>
             </div>
             <div class="p-4 space-y-4">
                 <div>
                     <p class="text-gray-500 text-sm">Ngày lập thẻ:</p>
-                    <p class="text-lg font-semibold text-gray-900">{{ reader.card_creation_date|date:"d/m/Y" }}</p>
+                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ reader.card_creation_date|date:"d/m/Y" }}</p>
                 </div>
                 <div>
                     <p class="text-gray-500 text-sm">Ngày hết hạn:</p>
-                    <p class="text-lg font-semibold text-gray-900">
+                    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
                         {{ reader.expiration_date|date:"d/m/Y" }}
                         {% if reader.is_card_expired %}
                             <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full ml-2">HẾT HẠN</span>
@@ -120,12 +120,12 @@
         </div>
 
         <!-- Actions -->
-        <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-            <div class="bg-blue-600 text-white px-4 py-3">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 overflow-hidden">
+            <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
                 <h5 class="font-semibold">Thao tác</h5>
             </div>
             <div class="p-4 space-y-2">
-                <a href="{% url 'reader_create' %}" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                <a href="{% url 'reader_create' %}" class="w-full bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                     Lập thẻ độc giả khác
                 </a>
                 <a href="{% url 'reader_list' %}" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
@@ -160,10 +160,10 @@ function loadReaderBorrowingInfo() {
                     const isOverdue = dueDate < today;
                     
                     return `
-                        <tr class="${isOverdue ? 'bg-red-50' : ''} hover:bg-gray-50">
+                        <tr class="${isOverdue ? 'bg-red-50' : ''} hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700">
                             <td class="px-3 py-2 text-sm"><strong>${book.title}</strong></td>
-                            <td class="px-3 py-2 text-sm text-gray-600">${book.borrow_date}</td>
-                            <td class="px-3 py-2 text-sm text-gray-600">${book.due_date}</td>
+                            <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">${book.borrow_date}</td>
+                            <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">${book.due_date}</td>
                             <td class="px-3 py-2 text-sm">
                                 ${isOverdue ? 
                                     '<span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">Quá hạn</span>' : 

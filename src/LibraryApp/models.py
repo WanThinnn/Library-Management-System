@@ -6,6 +6,59 @@ from django.core.exceptions import ValidationError
 
 # ==================== SYSTEM PARAMETERS ====================
 
+class BankAccount(models.Model):
+    """
+    Bảng BANK_ACCOUNT - Lưu trữ thông tin tài khoản ngân hàng cho thanh toán QR
+    Hệ thống chỉ cho phép cấu hình 1 tài khoản duy nhất
+    """
+    account_name = models.CharField(
+        max_length=255,
+        verbose_name='Tên tài khoản'
+    )
+    account_no = models.CharField(
+        max_length=50,
+        verbose_name='Số tài khoản'
+    )
+    bank_id = models.CharField(
+        max_length=10,
+        verbose_name='Mã ngân hàng'
+    )
+    template = models.CharField(
+        max_length=20,
+        verbose_name='Template QR',
+        default='print'
+    )
+    is_active = models.BooleanField(
+        verbose_name='Đang sử dụng',
+        default=True
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'bank_account'
+        verbose_name = 'Tài khoản ngân hàng'
+        verbose_name_plural = 'Tài khoản ngân hàng'
+    
+    def __str__(self):
+        return f"{self.account_name} - {self.account_no}"
+    
+    def save(self, *args, **kwargs):
+        # Đảm bảo chỉ có 1 bản ghi duy nhất
+        if not self.pk and BankAccount.objects.exists():
+            # Nếu đã tồn tại bản ghi, update thay vì tạo mới
+            existing = BankAccount.objects.first()
+            if existing:
+                self.pk = existing.pk
+        
+        # Đảm bảo tài khoản này là duy nhất active
+        if self.is_active:
+            BankAccount.objects.exclude(pk=self.pk).update(is_active=False)
+        
+        super().save(*args, **kwargs)
+
+
 class Parameter(models.Model):
     """
     Bảng PARAMETER - Lưu trữ các tham số cấu hình của hệ thống

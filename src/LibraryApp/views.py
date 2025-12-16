@@ -10,7 +10,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 from datetime import datetime, timedelta
-from .models import Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt, Category, UserGroup, Function, Permission
+from .models import BankAccount, Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt, Category, UserGroup, Function, Permission
 from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm, ParameterForm, BookEditForm, ReaderTypeForm, UserGroupForm, FunctionForm
 from .decorators import manager_required, staff_required, permission_required
 
@@ -1046,10 +1046,30 @@ def receipt_form_view(request):
     else:
         form = ReceiptForm()
     
+    # Bank configuration for VietQR - Query from database
+    bank_account = BankAccount.objects.filter(is_active=True).first()
+    
+    if bank_account:
+        bank_config = {
+            'bankId': bank_account.bank_id,
+            'accountNo': bank_account.account_no,
+            'accountName': bank_account.account_name,
+            'template': bank_account.template
+        }
+    else:
+        # Fallback nếu chưa có tài khoản trong DB
+        bank_config = {
+            'bankId': '',
+            'accountNo': '',
+            'accountName': '',
+            'template': 'print'
+        }
+    
     context = {
         'form': form,
         'readers_json': readers_json,
         'params': params,
+        'bank_config': json.dumps(bank_config),
     }
     
     return render(request, 'app/receipts/receipt_form.html', context)

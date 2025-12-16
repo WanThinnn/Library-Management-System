@@ -45,7 +45,7 @@ def color_env_label(environment: str) -> str:
     base = f"[{environment}]"
     if not sys.stdout.isatty():
         return base
-    color = "\033[91m" if environment == "prod" else "\033[94m"
+    color = "\033[92m" if environment == "prod" else "\033[94m"
     return f"\033[1m{color}{base}\033[0m"
 
 
@@ -57,7 +57,7 @@ def env_status_lines(environment: str, use_ssl: bool) -> str:
 
 def env_access_urls(use_ssl: bool) -> str:
     access_urls = (
-        "https://localhost, https://library.cyberfortress.local"
+        "https://localhost, https://library.cyberfortress.local (if you installed Root CA and set hosts)"
         if use_ssl
         else "http://localhost:8080"
     )
@@ -106,67 +106,68 @@ def main(argv: list[str]) -> int:
                 # setup.py already printed error messages and next steps
                 return exc.returncode or 1
         elif cmd == "build":
-            print(f"{status_line}\n")
+            # print(f"{status_line}\n")
             if args.prod:
                 run(c + ["pull"])
             run(c + ["build"])
             print(color_info(f"\n✓ Build completed.\n"))
             print(color_info("Next: "))
             print("  python start.py up")
-        elif cmd in {"up", "start"}:
-            print(f"{status_line}\n")
+        elif cmd in {"up"}:
+            # print(f"{status_line}\n")
             run(c + ["up", "-d"])
             print(color_info(f"✓ Services started.\n"))
             print(color_info(f"{env_access_urls(use_ssl)}"))
-        elif cmd in {"down", "stop"}:
-            print(f"{status_line}\n")
+        elif cmd in {"down"}:
+            # print(f"{status_line}\n")
             run(c + ["down"])
             print("✓ Services stopped.")
         elif cmd == "restart":
-            print(f"{status_line}\n")
+            # print(f"{status_line}\n")
             run(c + ["restart"])
             print("✓ Services restarted.")
         elif cmd == "logs":
-            print(f"{status_line}\n")
+            # print(f"{status_line}\n")
             run(c + ["logs", "-f"])
         elif cmd == "makemigrations":
-            print(f"{status_line}\n")
+            # print(f"{status_line}\n")
             run(add_manage_args(c + ["exec", "web", "python", "manage.py", "makemigrations"], extra))
         elif cmd == "migrate":
-            print(f"{status_line}\n")
+            # print(f"{status_line}\n")
             run(add_manage_args(c + ["exec", "web", "python", "manage.py", "migrate"], extra))
         elif cmd == "initdata":
-            print(f"{status_line}\n")
+            # print(f"{status_line}\n")
             run(c + ["exec", "web", "python", "init_data.py"])
         elif cmd == "createsuperuser":
-            print(f"{status_line}\n")
+            # print(f"{status_line}\n")
             run(c + ["exec", "web", "python", "manage.py", "createsuperuser"])
         elif cmd == "shell":
-            print(f"{status_line}\n")
+            # print(f"{status_line}\n")
             run(c + ["exec", "web", "python", "manage.py", "shell"])
         elif cmd == "collectstatic":
-            print(f"{status_line}\n")
+            # print(f"{status_line}\n")
             run(c + ["exec", "web", "python", "manage.py", "collectstatic", "--noinput"])
         elif cmd == "clean":
-            print(f"{status_line}\n")
+            # print(f"{status_line}\n")
             run(c + ["down", "-v"])
             run(["docker", "system", "prune", "-f"])
             print("✓ Cleaned up containers, volumes, and system.")
         elif cmd == "rebuild":
-            print(f"{status_line}\n")
+            # print(f"{status_line}\n")
             run(c + ["down"])
             run(c + ["build", "--no-cache"])
             run(c + ["up", "-d"])
             print(f"✓ Rebuilt and started services.\n")
             print(f"{env_access_urls(use_ssl)}")
         elif cmd == "help":
-            print("Library Management System - start.py")
-            print("Usage: python start.py [--prod|--dev] <command> [args]\n")
-            print("Commands:")
+            print(color_info("Library Management System"))
+            print("─" * 50)
+            print(color_info("Usage: python start.py [--prod|--dev] <command> [args]\n"))
+            print(color_info("Commands:"))
             print("  setup           Setup environment (.env, certs, Root CA)")
             print("  build           Build Docker images (pull first in prod)")
-            print("  up/start        Start all services")
-            print("  down/stop       Stop all services")
+            print("  up              Start all services")
+            print("  down            Stop all services")
             print("  restart         Restart all services")
             print("  logs            Follow logs")
             print("  makemigrations  Create new migrations (passes extra args)")
@@ -177,7 +178,7 @@ def main(argv: list[str]) -> int:
             print("  collectstatic   Collect static files")
             print("  clean           Remove containers and volumes, prune system")
             print("  rebuild         Clean rebuild and start\n")
-            print("Examples:")
+            print(color_info("Examples:"))
             print("  python start.py setup")
             print("  python start.py build")
             print("  python start.py up")

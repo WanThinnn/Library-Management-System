@@ -4,9 +4,9 @@
 
 {% block content %}
 <!-- Header -->
-<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 mb-6">
     <div class="p-6">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {{ page_title }}
         </h1>
         <p class="text-gray-500">Tạo thẻ độc giả mới theo quy định của thư viện</p>
@@ -17,15 +17,15 @@
 <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg shadow-md mb-6 p-6">
     <h3 class="text-lg font-bold mb-3">Quy định lập thẻ</h3>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-        <div class="bg-white/10 rounded-lg p-3">
+        <div class="bg-white dark:bg-gray-800/10 rounded-lg p-3">
             <strong>Độ tuổi:</strong><br>
             <span class="text-xl font-bold">{{ params.min_age }} - {{ params.max_age }} tuổi</span>
         </div>
-        <div class="bg-white/10 rounded-lg p-3">
+        <div class="bg-white dark:bg-gray-800/10 rounded-lg p-3">
             <strong>Loại độc giả:</strong><br>
             {% for rt in reader_types %}{{ rt.reader_type_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
         </div>
-        <div class="bg-white/10 rounded-lg p-3">
+        <div class="bg-white dark:bg-gray-800/10 rounded-lg p-3">
             <strong>Hiệu lực thẻ:</strong><br>
             <span class="text-xl font-bold">{{ params.card_validity_period }} tháng</span>
         </div>
@@ -33,8 +33,8 @@
 </div>
                
 <!-- Form Card -->
-<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
-    <div class="bg-blue-600 text-white px-4 py-3">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 mb-6 overflow-hidden">
+    <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
         <h5 class="font-semibold">Thông tin độc giả</h5>
     </div>
     <div class="p-6">
@@ -42,7 +42,7 @@
             {% csrf_token %}
             
             {% if form.non_field_errors %}
-            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4">
+            <div class="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4">
                 {{ form.non_field_errors }}
             </div>
             {% endif %}
@@ -50,7 +50,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Họ và tên (full width) -->
                 <div class="md:col-span-2">
-                    <label for="{{ form.reader_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="{{ form.reader_name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ form.reader_name.label }}
                         <span class="text-red-500">*</span>
                     </label>
@@ -62,7 +62,7 @@
                 
                 <!-- Loại độc giả -->
                 <div>
-                    <label for="{{ form.reader_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="{{ form.reader_type.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ form.reader_type.label }}
                         <span class="text-red-500">*</span>
                     </label>
@@ -74,7 +74,7 @@
                 
                 <!-- Ngày sinh -->
                 <div>
-                    <label for="{{ form.date_of_birth.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="{{ form.date_of_birth.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ form.date_of_birth.label }}
                         <span class="text-red-500">*</span>
                     </label>
@@ -87,7 +87,7 @@
                 
                 <!-- Email (full width) -->
                 <div class="md:col-span-2">
-                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ form.email.label }}
                         <span class="text-red-500">*</span>
                     </label>
@@ -99,7 +99,7 @@
                 
                 <!-- Địa chỉ (full width) -->
                 <div class="md:col-span-2">
-                    <label for="{{ form.address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="{{ form.address.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ form.address.label }}
                         <span class="text-red-500">*</span>
                     </label>
@@ -111,7 +111,7 @@
                 
                 <!-- Ngày lập thẻ -->
                 <div>
-                    <label for="{{ form.card_creation_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="{{ form.card_creation_date.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ form.card_creation_date.label }}
                         <span class="text-red-500">*</span>
                     </label>
@@ -124,7 +124,7 @@
             
             <!-- Buttons -->
             <div class="mt-6 flex flex-wrap gap-3 justify-center">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                <button type="submit" class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
                     Lập thẻ độc giả
                 </button>
                 <a href="{% url 'reader_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-lg transition-colors">

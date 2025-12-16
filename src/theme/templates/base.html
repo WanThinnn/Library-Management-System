@@ -6,6 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Hệ thống Quản lý Thư viện{% endblock %}</title>
     <link rel="icon" type="image/png" href="{% static 'image/favicon.png' %}">
+    <script>
+      // Apply dark mode immediately to prevent flash - runs before page render
+      (function() {
+        try {
+          const mode = localStorage.getItem('darkMode') || 'auto';
+          const html = document.documentElement;
+          
+          // Remove both classes first to ensure clean state
+          html.classList.remove('dark', 'light');
+          
+          if (mode === 'dark') {
+            html.classList.add('dark');
+          } else if (mode === 'light') {
+            // Explicitly light mode, do nothing (Tailwind default)
+          } else if (mode === 'auto') {
+            // Auto mode - follow system preference
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+              html.classList.add('dark');
+            }
+          }
+        } catch (e) {
+          console.error('Dark mode initialization error:', e);
+        }
+      })();
+    </script>
     {% tailwind_css %} {% block extra_css %}{% endblock %}
   </head>
   <body
@@ -57,12 +82,12 @@
         </button>
         <div class="hidden w-full md:block md:w-auto" id="navbar-default">
           <ul
-            class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:items-center md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white text-sm"
+            class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 md:flex-row md:items-center md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:md:bg-gray-800 text-sm"
           >
             <li>
               <a
                 href="{% url 'home' %}"
-                class="block py-2 px-3 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 {% if request.path == '/' %}text-blue-700{% else %}text-gray-900{% endif %}"
+                class="block py-2 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-700 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 {% if request.path == '/' %}text-blue-700{% else %}text-gray-900 dark:text-gray-100{% endif %}"
                 aria-current="page"
                 >Trang chủ</a
               >
@@ -70,7 +95,7 @@
             {% if user.is_authenticated %}
             <li class="relative group">
               <button
-                class="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer"
+                class="flex items-center justify-between w-full py-2 px-3 text-gray-900 dark:text-gray-100 rounded hover:bg-gray-100 dark:hover:bg-gray-700 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer"
               >
                 Quản lý<svg
                   class="w-2.5 h-2.5 ms-2.5"
@@ -89,16 +114,16 @@
                 </svg>
               </button>
               <div
-                class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full left-0 mt-1 border border-gray-100"
+                class="z-10 hidden font-normal bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full left-0 mt-1 border border-gray-100 dark:border-gray-700"
               >
                 <ul
-                  class="py-2 text-gray-700"
+                  class="py-2 text-gray-700 dark:text-gray-300"
                   aria-labelledby="dropdownLargeButton"
                 >
                   {% if can_add_readers or can_view_readers %}
                   <li>
                     <div
-                      class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                      class="px-4 py-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider"
                     >
                       Độc giả
                     </div>
@@ -108,7 +133,7 @@
                   <li>
                     <a
                       href="{% url 'reader_create' %}"
-                      class="block px-4 py-2 hover:bg-gray-50 hover:text-blue-600"
+                      class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400"
                       >Lập thẻ độc giả</a 
                     >
                   </li>
@@ -208,7 +233,7 @@
             </li>
             <li class="relative group">
               <button
-                class="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer"
+                class="flex items-center justify-between w-full py-2 px-3 text-gray-900 dark:text-gray-100 rounded hover:bg-gray-100 dark:hover:bg-gray-700 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer"
               >
                 Thu tiền & Báo cáo<svg
                   class="w-2.5 h-2.5 ms-2.5"
@@ -227,9 +252,9 @@
                 </svg>
               </button>
               <div
-                class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full left-0 mt-1 border border-gray-100"
+                class="z-10 hidden font-normal bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full left-0 mt-1 border border-gray-100 dark:border-gray-700"
               >
-                <ul class="py-2 text-gray-700">
+                <ul class="py-2 text-gray-700 dark:text-gray-300">
                   {% if can_view_receipt or can_add_receipt %}
                   <li>
                     <div
@@ -294,7 +319,7 @@
             {% if can_view_settings or can_view_users or can_view_permissions or user.is_superuser %}
             <li class="relative group">
               <button
-                class="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer"
+                class="flex items-center justify-between w-full py-2 px-3 text-gray-900 dark:text-gray-100 rounded hover:bg-gray-100 dark:hover:bg-gray-700 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer"
               >
                 Hệ thống<svg
                   class="w-2.5 h-2.5 ms-2.5"
@@ -313,9 +338,9 @@
                 </svg>
               </button>
               <div
-                class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full md:right-0 md:left-auto mt-1 border border-gray-100"
+                class="z-10 hidden font-normal bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full md:right-0 md:left-auto mt-1 border border-gray-100 dark:border-gray-700"
               >
-                <ul class="py-2 text-gray-700">
+                <ul class="py-2 text-gray-700 dark:text-gray-300">
                   {% if can_view_settings %}
                   <li>
                     <a
@@ -358,16 +383,16 @@
             </li>
             {% endif %}
             <li
-              class="relative group border-t md:border-t-0 pt-2 md:pt-0 mt-2 md:mt-0"
+              class="relative group border-t dark:border-gray-700 md:border-t-0 pt-2 md:pt-0 mt-2 md:mt-0"
             >
               <button
-                class="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer font-semibold"
+                class="flex items-center justify-between w-full py-2 px-3 text-gray-900 dark:text-gray-100 rounded hover:bg-gray-100 dark:hover:bg-gray-700 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:w-auto peer font-semibold"
               >
                 {{ user.username }} {% if user.is_superuser %}<span
-                  class="ms-2 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                  class="ms-2 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-2.5 py-0.5 rounded-full"
                   >Admin</span
                 >{% elif user.is_staff %}<span
-                  class="ms-2 bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full"
+                  class="ms-2 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-medium px-2.5 py-0.5 rounded-full"
                   >Staff</span
                 >{% endif %}
               </button>
@@ -418,7 +443,7 @@
             <li>
               <a
                 href="{% url 'book_search' %}"
-                class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0"
+                class="block py-2 px-3 text-gray-900 dark:text-gray-100 rounded hover:bg-gray-100 dark:hover:bg-gray-700 md:hover:bg-transparent md:hover:text-blue-700 md:p-0"
                 >Tra cứu sách</a
               >
             </li>
@@ -439,9 +464,9 @@
         {% if messages %}
         <div class="mb-4 space-y-2">
           {% for message in messages %}
-          <div class="flex items-center p-4 rounded-lg shadow-sm {% if message.tags == 'error' %}bg-red-100 text-red-800 border border-red-200{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-800 border border-yellow-200{% elif message.tags == 'success' %}bg-green-100 text-green-800 border border-green-200{% else %}bg-blue-100 text-blue-800 border border-blue-200{% endif %}" role="alert">
+          <div class="flex items-center p-4 rounded-lg shadow-sm {% if message.tags == 'error' %}bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-700{% elif message.tags == 'warning' %}bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-700{% elif message.tags == 'success' %}bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-700{% else %}bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700{% endif %}" role="alert">
             <span class="mr-2">
-              {% if message.tags == 'error' %}⚠️{% elif message.tags == 'warning' %}⚡{% elif message.tags == 'success' %}{% else %}ℹ️{% endif %}
+              {% if message.tags == 'error' %}{% elif message.tags == 'warning' %}{% elif message.tags == 'success' %}{% else %}ℹ{% endif %}
             </span>
             <span class="flex-1">{% if 'safe' in message.tags %}{{ message|safe }}{% else %}{{ message }}{% endif %}</span>
             <button type="button" class="ml-4 text-lg opacity-50 hover:opacity-100" onclick="this.parentElement.remove()">×</button>
@@ -519,15 +544,16 @@
 
       // Apply dark mode based on mode setting
       function applyDarkMode(mode) {
+        // Always remove first to ensure clean state
+        html.classList.remove('dark');
+        
         if (mode === 'dark') {
           html.classList.add('dark');
         } else if (mode === 'light') {
-          html.classList.remove('dark');
+          // Light mode - dark class already removed above
         } else { // auto
           if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
             html.classList.add('dark');
-          } else {
-            html.classList.remove('dark');
           }
         }
         updateCheckmarks(mode);
@@ -535,9 +561,9 @@
 
       // Update checkmarks in submenu
       function updateCheckmarks(mode) {
-        document.getElementById('check-auto').textContent = mode === 'auto' ? '' : '';
-        document.getElementById('check-light').textContent = mode === 'light' ? '' : '';
-        document.getElementById('check-dark').textContent = mode === 'dark' ? '' : '';
+        document.getElementById('check-auto').textContent = mode === 'auto' ? '✓' : '';
+        document.getElementById('check-light').textContent = mode === 'light' ? '✓' : '';
+        document.getElementById('check-dark').textContent = mode === 'dark' ? '✓' : '';
       }
 
       // Toggle submenu visibility
@@ -581,6 +607,7 @@
       document.querySelectorAll('.dark-mode-option').forEach(btn => {
         btn.addEventListener('click', () => {
           const mode = btn.dataset.mode;
+          console.log('Dark mode changed to:', mode);
           localStorage.setItem('darkMode', mode);
           applyDarkMode(mode);
           darkModeSubmenu?.classList.add('hidden');

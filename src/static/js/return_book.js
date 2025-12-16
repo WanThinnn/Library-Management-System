@@ -116,9 +116,9 @@ function renderReadersList(readers) {
     }
 
     readerList.innerHTML = readers.map(reader => `
-        <div class="reader-item p-3 border-b border-gray-200 cursor-pointer hover:bg-gray-100 transition-all" data-reader-id="${reader.id}">
-            <div class="font-medium text-gray-900">${reader.reader_name}</div>
-            <div class="text-sm text-gray-500">${reader.email}</div>
+        <div class="reader-item p-3 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all" data-reader-id="${reader.id}">
+            <div class="font-medium text-gray-900 dark:text-gray-100">${reader.reader_name}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">${reader.email}</div>
         </div>
     `).join('');
 
@@ -204,13 +204,13 @@ function renderBooks(books) {
     }
 
     booksList.innerHTML = books.map((book, idx) => `
-        <div class="book-item p-3 border border-gray-200 rounded-lg mb-2 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-all ${book.is_overdue ? 'bg-yellow-50 border-yellow-400' : 'bg-gray-50'}" data-book-id="${book.book_item_id}">
+        <div class="book-item p-3 border border-gray-200 dark:border-gray-700 rounded-lg mb-2 flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-all ${book.is_overdue ? 'bg-yellow-50 dark:bg-yellow-900 border-yellow-400' : 'bg-gray-50 dark:bg-gray-800'}" data-book-id="${book.book_item_id}">
             <input type="checkbox" class="book-checkbox w-5 h-5 cursor-pointer" value="${book.book_item_id}" onchange="updateSelectedBooks()">
             <div class="flex-1">
-                <div class="font-medium text-gray-900">${book.book_title}</div>
-                <div class="text-sm text-gray-500">
+                <div class="font-medium text-gray-900 dark:text-gray-100">${book.book_title}</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">
                     Mượn: ${book.borrow_date} | Phải trả: ${book.due_date}
-                    ${book.is_overdue ? `<span class="bg-yellow-400 text-gray-900 text-xs px-2 py-0.5 rounded-full ml-2">Quá hạn ${book.days_overdue} ngày</span>` : ''}
+                    ${book.is_overdue ? `<span class="bg-yellow-400 dark:bg-yellow-600 text-gray-900 dark:text-gray-100 text-xs px-2 py-0.5 rounded-full ml-2">Quá hạn ${book.days_overdue} ngày</span>` : ''}
                 </div>
             </div>
         </div>
@@ -260,22 +260,22 @@ function updateSummary() {
     }
 
     const reader = readersData.find(r => r.id === selectedReader);
-    let html = `<div class="mb-4 pb-4 border-b border-gray-200">
-        <strong class="text-gray-700">Độc giả:</strong><br>
-        <span class="text-gray-900">${reader.reader_name}</span><br>
-        <small class="text-gray-500">${reader.email}</small>
+    let html = `<div class="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <strong class="text-gray-700 dark:text-gray-300">Độc giả:</strong><br>
+        <span class="text-gray-900 dark:text-gray-100">${reader.reader_name}</span><br>
+        <small class="text-gray-500 dark:text-gray-400">${reader.email}</small>
     </div>`;
 
     if (selectedBooks.length > 0) {
         const checkedBoxes = document.querySelectorAll('.book-checkbox:checked');
 
-        html += `<div class="mb-4 pb-4 border-b border-gray-200">
-            <strong class="text-gray-700">Sách trả (${selectedBooks.length} quyển):</strong><br>`;
+        html += `<div class="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+            <strong class="text-gray-700 dark:text-gray-300">Sách trả (${selectedBooks.length} quyển):</strong><br>`;
 
         checkedBoxes.forEach(checkbox => {
             const bookItem = checkbox.closest('.book-item');
             const bookTitle = bookItem.querySelector('.font-medium').textContent;
-            html += `<small class="text-gray-600">• ${bookTitle}</small><br>`;
+            html += `<small class="text-gray-600 dark:text-gray-400">• ${bookTitle}</small><br>`;
         });
 
         html += `</div>`;
@@ -284,8 +284,8 @@ function updateSummary() {
     const returnDate = document.getElementById(config.returnDateInputId)?.value;
     if (returnDate) {
         html += `<div class="mb-4">
-            <strong class="text-gray-700">Ngày trả:</strong><br>
-            <span class="text-gray-900">${new Date(returnDate).toLocaleString('vi-VN')}</span>
+            <strong class="text-gray-700 dark:text-gray-300">Ngày trả:</strong><br>
+            <span class="text-gray-900 dark:text-gray-100">${new Date(returnDate).toLocaleString('vi-VN')}</span>
         </div>`;
     }
 

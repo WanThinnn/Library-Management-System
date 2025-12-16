@@ -4,9 +4,9 @@
 
 {% block content %}
 <!-- Header -->
-<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 mb-6">
     <div class="p-6">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ page_title }}</h1>
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ page_title }}</h1>
         <p class="text-gray-500">Cấu hình quyền truy cập cho nhóm "{{ user_group.user_group_name }}"</p>
     </div>
 </div>
@@ -19,8 +19,8 @@
 </div>
 
 <!-- Ma trận quyền -->
-<div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-    <div class="bg-blue-600 text-white px-4 py-3">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 overflow-hidden">
+    <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
         <h5 class="font-semibold">Ma trận phân quyền</h5>
         <p class="text-sm text-blue-100 mt-1">Tick vào các ô để cấp quyền tương ứng cho nhóm</p>
     </div>
@@ -31,30 +31,30 @@
         {% if functions %}
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-12">STT</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Chức năng</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Màn hình</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">
-                            <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded">Xem</span>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-12">STT</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Chức năng</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Màn hình</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-20">
+                            <span class="bg-blue-100 text-blue-700 dark:text-blue-400 px-2 py-1 rounded">Xem</span>
                         </th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-20">
                             <span class="bg-green-100 text-green-700 px-2 py-1 rounded">Thêm</span>
                         </th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-20">
                             <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded">Sửa</span>
                         </th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider w-20">
                             <span class="bg-red-100 text-red-700 px-2 py-1 rounded">Xóa</span>
                         </th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {% for func in functions %}
-                    <tr class="hover:bg-gray-50" data-func-id="{{ func.id }}">
-                        <td class="px-4 py-3 text-sm text-gray-900">{{ forloop.counter }}</td>
-                        <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ func.function_name }}</td>
+                    <tr class="hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700" data-func-id="{{ func.id }}">
+                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ forloop.counter }}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">{{ func.function_name }}</td>
                         <td class="px-4 py-3 text-sm text-gray-500">{{ func.screen_name }}</td>
                         <td class="px-4 py-3 text-center">
                             <input type="checkbox" name="view_{{ func.id }}" id="view_{{ func.id }}"
@@ -79,8 +79,8 @@
         </div>
         
         <!-- Buttons -->
-        <div class="p-4 bg-gray-50 border-t flex flex-wrap gap-3 justify-center">
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-8 rounded-lg transition-colors">
+        <div class="p-4 bg-gray-50 dark:bg-gray-700 border-t flex flex-wrap gap-3 justify-center">
+            <button type="submit" class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-8 rounded-lg transition-colors">
                 Lưu quyền
             </button>
             <button type="button" onclick="selectAll()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
@@ -92,7 +92,7 @@
         </div>
         {% else %}
         <div class="p-4">
-            <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
+            <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded">
                 Chưa có chức năng nào. <a href="{% url 'function_create' %}" class="underline">Thêm chức năng mới</a>
             </div>
         </div>

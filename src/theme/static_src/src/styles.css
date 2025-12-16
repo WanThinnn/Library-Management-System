@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Configure dark mode to use class strategy instead of media query */
+@variant dark (&:where(.dark, .dark *));
+
 /* Form control styling for Django forms */
 .form-control,
 .form-select,
@@ -38,6 +41,40 @@ select:disabled,
 textarea:disabled {
   background-color: #f3f4f6;
   cursor: not-allowed;
+}
+
+/* Dark mode styles for forms */
+.dark .form-control,
+.dark .form-select,
+.dark input[type="text"],
+.dark input[type="number"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="date"],
+.dark input[type="datetime-local"],
+.dark select,
+.dark textarea {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+.dark .form-control:focus,
+.dark .form-select:focus,
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+}
+
+.dark .form-control:disabled,
+.dark .form-select:disabled,
+.dark input:disabled,
+.dark select:disabled,
+.dark textarea:disabled {
+  background-color: #1f2937;
+  color: #6b7280;
 }
 
 /**

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    Parameter, ReaderType, Reader,
+    BankAccount, Parameter, ReaderType, Reader,
     Author, Category, BookTitle, AuthorDetail, Book, BookItem,
     BookImportReceipt, BookImportDetail,
     BorrowReturnReceipt, Receipt,
@@ -9,6 +9,29 @@ from .models import (
 )
 
 # ==================== SYSTEM PARAMETERS ADMIN ====================
+
+@admin.register(BankAccount)
+class BankAccountAdmin(admin.ModelAdmin):
+    list_display = ('account_name', 'account_no', 'bank_id', 'template', 'is_active', 'updated_at')
+    fieldsets = (
+        ('Thông tin tài khoản', {
+            'fields': ('account_name', 'account_no', 'bank_id', 'template', 'is_active')
+        }),
+        ('Thông tin hệ thống', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    readonly_fields = ('created_at', 'updated_at')
+    
+    def has_add_permission(self, request):
+        # Chỉ cho phép 1 bản ghi duy nhất
+        return not BankAccount.objects.exists()
+    
+    def has_delete_permission(self, request, obj=None):
+        # Không cho xóa tài khoản ngân hàng
+        return False
+
 
 @admin.register(Parameter)
 class ParameterAdmin(admin.ModelAdmin):

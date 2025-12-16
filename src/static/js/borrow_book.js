@@ -63,9 +63,9 @@ function loadReaders(search = '') {
                 readerList.innerHTML = '<div class="text-center text-gray-500 py-4"><em>Không tìm thấy độc giả</em></div>';
             } else {
                 readerList.innerHTML = data.data.map(reader => `
-                    <div class="reader-item p-3 border-l-4 border-transparent cursor-pointer mb-2 rounded hover:bg-gray-50 hover:border-blue-500 transition-all ${reader.id === selectedReaderId ? 'bg-green-50 border-green-500 font-medium' : ''}" data-id="${reader.id}">
-                        <div class="font-medium text-gray-900">${reader.name}</div>
-                        <div class="text-sm text-gray-500">${reader.email}</div>
+                    <div class="reader-item p-3 border-l-4 border-transparent cursor-pointer mb-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-blue-500 transition-all ${reader.id === selectedReaderId ? 'bg-green-50 dark:bg-green-900 border-green-500 font-medium' : ''}" data-id="${reader.id}">
+                        <div class="font-medium text-gray-900 dark:text-gray-100">${reader.name}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">${reader.email}</div>
                     </div>
                 `).join('');
 
@@ -96,11 +96,11 @@ function loadBooks(search = '') {
                 bookList.innerHTML = '<div class="text-center text-gray-500 py-4"><em>Không tìm thấy sách</em></div>';
             } else {
                 bookList.innerHTML = data.data.map(book => `
-                    <div class="book-item p-3 border-l-4 border-transparent cursor-pointer mb-2 rounded hover:bg-gray-50 hover:border-blue-500 transition-all ${selectedBooks.includes(book.id) ? 'bg-green-50 border-green-500 font-medium' : ''}" data-id="${book.id}">
-                        <div class="font-medium text-gray-900">${selectedBooks.includes(book.id) ? '' : ''}${book.title}</div>
-                        <div class="text-sm text-gray-500">
+                    <div class="book-item p-3 border-l-4 border-transparent cursor-pointer mb-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-blue-500 transition-all ${selectedBooks.includes(book.id) ? 'bg-green-50 dark:bg-green-900 border-green-500 font-medium' : ''}" data-id="${book.id}">
+                        <div class="font-medium text-gray-900 dark:text-gray-100">${selectedBooks.includes(book.id) ? '' : ''}${book.title}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
                             ${book.year} • ${book.category}
-                            <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full ml-2">Còn ${book.remaining}</span>
+                            <span class="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs px-2 py-0.5 rounded-full ml-2">Còn ${book.remaining}</span>
                         </div>
                     </div>
                 `).join('');

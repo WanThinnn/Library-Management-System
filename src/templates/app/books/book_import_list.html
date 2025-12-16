@@ -5,9 +5,9 @@
 
 {% block content %}
 <!-- Header -->
-<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 mb-6">
     <div class="p-6">
-        <h2 class="text-4xl font-bold text-gray-900 mb-2">
+        <h2 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {{ page_title }}
         </h2>
         <p class="text-gray-500">
@@ -17,19 +17,19 @@
 </div>
 
 <!-- Filter & Search -->
-<div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6 overflow-hidden">
-    <div class="bg-blue-600 text-white px-4 py-3">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 mb-6 overflow-hidden">
+    <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
         <h5 class="font-semibold">Tiêu chí tìm kiếm</h5>
     </div>
     <div class="p-4">
         <form method="get" class="flex flex-wrap items-end gap-4">
             <div class="w-full md:w-auto">
-                <label for="year" class="block text-sm font-medium text-gray-700 mb-1">Năm</label>
+                <label for="year" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Năm</label>
                 <input type="number" class="w-full md:w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" name="year" id="year" 
                        placeholder="2025" value="{{ request.GET.year }}">
             </div>
             <div class="w-full md:w-auto">
-                <label for="month" class="block text-sm font-medium text-gray-700 mb-1">Tháng</label>
+                <label for="month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tháng</label>
                 <select class="w-full md:w-40 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" name="month" id="month">
                     <option value="">-- Tất cả --</option>
                     {% for i in "x"|rjust:"12" %}
@@ -41,7 +41,7 @@
                 </select>
             </div>
             <div class="flex flex-wrap gap-2">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <button type="submit" class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Lọc
                 </button>
                 <a href="{% url 'book_import_list' %}" class="bg-red-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
@@ -57,10 +57,10 @@
 
 <!-- List -->
 {% if receipts %}
-    <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-blue-600 text-white">
+                <thead class="bg-blue-600 dark:bg-blue-700 text-white">
                     <tr>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="width: 10%">Phiếu #</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="width: 15%">Ngày nhập</th>
@@ -71,17 +71,17 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="width: 15%">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {% for receipt in receipts %}
-                        <tr class="hover:bg-gray-50 transition-colors">
+                        <tr class="hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
                             <td class="px-4 py-3 text-sm">
-                                <strong class="text-gray-900">#{{ receipt.id }}</strong>
+                                <strong class="text-gray-900 dark:text-gray-100">#{{ receipt.id }}</strong>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-700">
+                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                                 {{ receipt.import_date|date:"d/m/Y H:i" }}
                             </td>
                             <td class="px-4 py-3 text-sm">
-                                <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                                <span class="bg-blue-600 dark:bg-blue-700 text-white text-xs px-2 py-1 rounded-full">
                                     {{ receipt.import_details.count }}
                                 </span>
                             </td>
@@ -95,7 +95,7 @@
                                     {{ receipt.total_amount|floatformat:0 }}đ
                                 </strong>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-700">
+                            <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                                 {{ receipt.created_by }}
                             </td>
                             <td class="px-4 py-3 text-sm">
@@ -111,7 +111,7 @@
         </div>
     </div>
 {% else %}
-    <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-6 rounded text-center">
+    <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-6 rounded text-center">
         <div class="text-4xl mb-3">📦</div>
         <h5 class="font-semibold mb-2">Chưa có phiếu nhập nào</h5>
         <p class="text-sm">Bắt đầu nhập sách mới bằng cách click nút "Nhập sách mới"</p>
@@ -120,7 +120,7 @@
 
 <!-- Back to Home -->
 {% comment %} <div class="mt-6">
-    <a href="{% url 'home' %}" class="border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
+    <a href="{% url 'home' %}" class="border border-gray-300 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
         🏠 Về trang chủ
     </a>
 </div> {% endcomment %}
