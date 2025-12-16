@@ -53,7 +53,10 @@ DATABASE_URL=sqlite:///data/db.sqlite3
 Place your SSL certificates in the `certs/` directory:
 - `_.cyberfortress.local.crt` - SSL certificate
 - `_.cyberfortress.local.key` - Private key
-- `CyberFortressRootCA.crt` - Root CA certificate
+- `CyberFortress-RootCA.crt` - Root CA certificate
+
+Local development certificates:
+- Any OS: `python scripts/generate.py`
 
 ### Hosts File
 
@@ -65,6 +68,8 @@ Add to `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Wind
 
 
 ## Deployment
+
+Run everything from the repository root with `python start.py ...`; it auto-selects the PowerShell script on Windows and the bash script on Linux/macOS.
 
 ### Option 1: Build from Source (Development)
 
@@ -78,8 +83,7 @@ cd Library-Management-System
 **Step 2: Setup Environment**
 
 ```bash
-chmod +x start  # Make start script executable
-./start setup
+python start.py setup   # or: py start.py setup on Windows
 ```
 
 This will:
@@ -90,11 +94,11 @@ This will:
 **Step 3: Build and Run**
 
 ```bash
-./start build
-./start up
-./start makemigrations
-./start migrate
-./start initdata
+python start.py build
+python start.py up
+python start.py makemigrations
+python start.py migrate
+python start.py initdata
 ```
 
 **Step 4: Access Application**
@@ -114,23 +118,22 @@ cd Library-Management-System
 **Step 2: Configure Environment**
 
 ```bash
-chmod +x start  # Make start script executable
-./start --prod setup
+python start.py --prod setup
 ```
 
 **Step 3: Pull and Run**
 
 ```bash
-./start --prod build
-./start --prod up
+python start.py --prod build
+python start.py --prod up
 ```
 
 **Step 4: Initialize Database**
 
 ```bash
-./start --prod makemigrations
-./start --prod migrate
-./start --prod initdata
+python start.py --prod makemigrations
+python start.py --prod migrate
+python start.py --prod initdata
 ```
 
 **Step 5: Access Application**
@@ -149,68 +152,65 @@ docker pull wanthinnn/library-management-system:latest
 
 ## Quick Commands
 
-Use the `./start` script with `--prod` or `--dev` flags:
-
-**Note:** On Linux/macOS, you may need to use `sudo` for Docker commands:
-```bash
-sudo ./start build
-sudo ./start --prod up
-```
+Use `python start.py` with `--prod` or `--dev` (default dev). On Linux/macOS you may need `sudo` before the command if Docker requires it.
 
 ```bash
 # Development (default)
-./start build               # Build development images
-./start up                  # Start development services
-./start logs                # View development logs
-./start migrate             # Run migrations
-./start initdata            # Initialize sample data
+python start.py build               # Build development images
+python start.py up                  # Start development services
+python start.py logs                # View development logs
+python start.py migrate             # Run migrations
+python start.py initdata            # Initialize sample data
 
 # Production (add --prod flag)
-./start --prod build        # Pull and build production
-./start --prod up           # Start production services
-./start --prod logs         # View production logs
-./start --prod migrate      # Run migrations (production)
-./start --prod initdata     # Initialize sample data (production)
+python start.py --prod build        # Pull and build production
+python start.py --prod up           # Start production services
+python start.py --prod logs         # View production logs
+python start.py --prod migrate      # Run migrations (production)
+python start.py --prod initdata     # Initialize sample data (production)
 
 # Other commands
-./start help                # Show all commands
-./start setup               # Initial setup (certificates, .env)
-./start down [--prod]       # Stop services
-./start restart [--prod]    # Restart services
-./start makemigrations [--prod] # Create migrations
-./start shell [--prod]      # Open Django shell
-./start clean [--prod]      # Remove containers and volumes
-./start rebuild [--prod]    # Clean rebuild
+python start.py help                # Show all commands
+python start.py setup               # Initial setup (certificates, .env)
+python start.py down [--prod/--dev]       # Stop services
+python start.py restart [--prod/--dev]    # Restart services
+python start.py makemigrations [--prod/--dev] # Create migrations
+python start.py shell [--prod/--dev]      # Open Django shell
+python start.py clean [--prod/--dev]      # Remove containers and volumes
+python start.py rebuild [--prod/--dev]    # Clean rebuild
 ```
 
 ## Project Structure
 
 ```
 Library-Management-System/
-├── src/
-│   ├── LibraryApp/           # Main application
-│   ├── LibraryManagementSystem/  # Django settings
-│   ├── templates/            # HTML templates
-│   ├── static/               # CSS, JS files
-│   ├── init_data.py          # Sample data initialization
-│   └── requirements.txt      # Python dependencies
-├── nginx/
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   └── conf.d/
-│       └── django.conf       # Nginx configuration
-├── certs/                    # SSL certificates
-├── scripts/
-│   └── setup.sh              # Setup script
-├── docker-compose.yml
-├── Dockerfile
-├── Makefile
-└── .env.example
+|-- start.py                  # OS-aware entrypoint
+|-- docker-compose.yml
+|-- docker-compose.prod.yml
+|-- Dockerfile
+|-- certs/                    # SSL certificates
+|-- scripts/
+|   |-- setup.py              # Cross-platform setup
+|   |-- generate.py           # Dev cert generator (OpenSSL required)
+|-- src/
+|   |-- LibraryApp/           # Main application
+|   |-- LibraryManagementSystem/  # Django settings
+|   |-- templates/            # HTML templates
+|   |-- static/               # CSS, JS files
+|   |-- init_data.py          # Sample data initialization
+|   |-- requirements.txt      # Python dependencies
+|-- nginx/
+|   |-- Dockerfile
+|   |-- nginx.conf
+|   |-- conf.d/
+|       |-- django.conf       # Nginx configuration
+|-- Makefile
+|-- .env.example
 ```
 
 ## Sample Data
 
-The `./start initdata` command creates:
+The `python start.py initdata` command creates:
 - 1 Admin user (admin/admin123)
 - 5 System parameters
 - 3 Reader types
@@ -235,29 +235,29 @@ Add to GitHub repository secrets:
 
 ```bash
 # View logs
-./start logs
+python start.py logs
 
 # Restart services
-./start restart
+python start.py restart
 
 # Clean rebuild
-./start rebuild
+python start.py rebuild
 ```
 
 Or use sudo on Linux:
 ```bash
-sudo ./start --prod logs
-sudo ./start --prod restart
+sudo python start.py --prod logs
+sudo python start.py --prod restart
 ```
 
 ### Database Reset
 
 ```bash
-./start clean
-./start build
-./start up
-./start migrate
-./start initdata
+python start.py clean
+python start.py build
+python start.py up
+python start.py migrate
+python start.py initdata
 ```
 
 ### SSL Certificate Issues
@@ -266,14 +266,14 @@ Ensure root CA is installed:
 
 ```bash
 # Linux
-sudo cp certs/CyberFortressRootCA.crt /usr/local/share/ca-certificates/
+sudo cp certs/CyberFortress-RootCA.crt /usr/local/share/ca-certificates/
 sudo update-ca-certificates
 
 # Windows
-certutil -addstore ROOT certs\CyberFortressRootCA.crt
+certutil -addstore ROOT certs\CyberFortress-RootCA.crt
 
 # macOS
-sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain certs/CyberFortressRootCA.crt
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain certs/CyberFortress-RootCA.crt
 ```
 
 ## License
