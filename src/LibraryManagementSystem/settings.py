@@ -34,7 +34,9 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 # CSRF Trusted Origins for HTTPS
 CSRF_TRUSTED_ORIGINS = [
     'https://localhost',
-    'https://library.cyberfortress.local',  
+    'https://library.cyberfortress.local',
+    'https://library.smartxdr.app',
+      
 ]
 
 

@@ -18,14 +18,18 @@ REPO_ROOT = Path(__file__).resolve().parent
 NO_SSL_OVERRIDE = REPO_ROOT / "docker-compose.nossl.yml"
 CERT_WILDCARD = REPO_ROOT / "certs" / "_.cyberfortress.local.crt"
 CERT_KEY = REPO_ROOT / "certs" / "_.cyberfortress.local.key"
+ENV_FILE = REPO_ROOT / ".env"
+CLOUDFLARE_CONFIG = REPO_ROOT / "cloudflared" / "config.yml"
 
 
-def compose_cmd(files: list[Path], use_ssl: bool) -> list[str]:
+def compose_cmd(files: list[Path], use_ssl: bool, use_tunnel: bool) -> list[str]:
     cmd: list[str] = ["docker", "compose"]
     for f in files:
         cmd += ["-f", str(f)]
     if use_ssl:
         cmd += ["--profile", "ssl"]
+    if use_tunnel:
+        cmd += ["--profile", "tunnel"]
     return cmd
 
 
@@ -49,10 +53,11 @@ def color_env_label(environment: str) -> str:
     return f"\033[1m{color}{base}\033[0m"
 
 
-def env_status_lines(environment: str, use_ssl: bool) -> str:
+def env_status_lines(environment: str, use_ssl: bool, use_tunnel: bool) -> str:
     label = color_env_label(environment)
     ssl_note = "on" if use_ssl else "off"
-    return f"{label} SSL/TLS={ssl_note}"
+    tunnel_note = "on" if use_tunnel else "off"
+    return f"{label} SSL/TLS={ssl_note} CloudflareTunnel={tunnel_note}"
 
 
 def env_access_urls(use_ssl: bool) -> str:
@@ -74,10 +79,52 @@ def color_info(text: str) -> str:
         return text
     return f"\033[1m\033[94m{text}\033[0m"  # Bright blue
 
+
+def load_env_file(env_path: Path) -> dict[str, str]:
+    env_vars: dict[str, str] = {}
+    if not env_path.exists():
+        return env_vars
+
+    for line in env_path.read_text().splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+        key, value = stripped.split("=", 1)
+        env_vars[key.strip()] = value.strip().strip('"').strip("'")
+    return env_vars
+
+
+def should_enable_tunnel(env_vars: dict[str, str]) -> tuple[bool, str]:
+    tunnel_id = env_vars.get("CLOUDFLARE_TUNNEL_ID")
+    domain = env_vars.get("TUNNEL_DOMAIN")
+    config_path = Path(env_vars.get("CLOUDFLARE_CONFIG", CLOUDFLARE_CONFIG))
+    credentials_file = env_vars.get(
+        "CLOUDFLARE_CREDENTIALS_FILE",
+        str(config_path.parent / f"{tunnel_id}.json") if tunnel_id else "",
+    )
+
+    if not tunnel_id and not domain:
+        return False, ""
+
+    if not tunnel_id or not domain:
+        return False, "Cloudflare tunnel skipped (CLOUDFLARE_TUNNEL_ID/TUNNEL_DOMAIN missing in .env)."
+
+    missing = []
+    if not config_path.exists():
+        missing.append(str(config_path))
+    if credentials_file and not Path(credentials_file).exists():
+        missing.append(credentials_file)
+
+    if missing:
+        return False, f"Cloudflare tunnel skipped (missing files: {', '.join(missing)})."
+
+    return True, ""
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--prod", action="store_true", help="Use production compose file")
     parser.add_argument("--dev", action="store_true", help="Use development compose file (default)")
+    parser.add_argument("--tunnel", action="store_true", help="Enable Cloudflare tunnel profile")
     parser.add_argument("command", nargs="?", help="Command to run")
     parser.add_argument("rest", nargs=argparse.REMAINDER, help="Extra args for manage.py commands")
     args = parser.parse_args(argv)
@@ -85,9 +132,20 @@ def main(argv: list[str]) -> int:
     compose_file = REPO_ROOT / ("docker-compose.prod.yml" if args.prod else "docker-compose.yml")
     use_ssl = CERT_WILDCARD.exists() and CERT_KEY.exists()
     compose_files = [compose_file] if use_ssl else [compose_file, NO_SSL_OVERRIDE]
-    c = compose_cmd(compose_files, use_ssl)
+    env_vars = load_env_file(ENV_FILE)
+    use_tunnel = False
+    tunnel_note = ""
+    if args.tunnel:
+        use_tunnel, tunnel_note = should_enable_tunnel(env_vars)
+    elif env_vars.get("CLOUDFLARE_TUNNEL_ID") or env_vars.get("TUNNEL_DOMAIN"):
+        tunnel_note = "Cloudflare tunnel disabled (pass --tunnel to enable)."
+
+    if tunnel_note:
+        print(color_warning(tunnel_note))
+
+    c = compose_cmd(compose_files, use_ssl, use_tunnel)
     environment = "prod" if args.prod else "dev"
-    status_line = env_status_lines(environment, use_ssl)
+    status_line = env_status_lines(environment, use_ssl, use_tunnel)
 
     print(status_line)
     print("─" * 50)

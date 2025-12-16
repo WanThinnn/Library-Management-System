@@ -12,9 +12,17 @@
         try {
           const mode = localStorage.getItem('darkMode') || 'auto';
           const html = document.documentElement;
+          const isAdminPanel = window.location.pathname.startsWith('/admin');
+          window.__IS_ADMIN_PANEL = isAdminPanel;
           
           // Remove both classes first to ensure clean state
           html.classList.remove('dark', 'light');
+
+          // Admin panel stays light for consistent UI
+          if (isAdminPanel) {
+            html.classList.add('light');
+            return;
+          }
           
           if (mode === 'dark') {
             html.classList.add('dark');
@@ -536,6 +544,7 @@
       const darkModeToggle = document.getElementById('darkModeToggle');
       const darkModeSubmenu = document.getElementById('darkModeSubmenu');
       const html = document.documentElement;
+      const isAdminPanel = window.__IS_ADMIN_PANEL === true;
 
       // Get saved mode or default to 'auto'
       function getSavedMode() {
@@ -544,6 +553,11 @@
 
       // Apply dark mode based on mode setting
       function applyDarkMode(mode) {
+        if (isAdminPanel) {
+          html.classList.remove('dark');
+          html.classList.add('light');
+          return;
+        }
         // Always remove first to ensure clean state
         html.classList.remove('dark');
         
@@ -570,32 +584,47 @@
       if (darkModeToggle && darkModeSubmenu) {
         let submenuTimeout = null;
         
+        if (isAdminPanel) {
+          darkModeToggle.classList.add('cursor-not-allowed', 'opacity-60');
+          darkModeToggle.title = 'Dark mode is disabled in admin panel';
+        }
+
         darkModeToggle.addEventListener('click', (e) => {
           e.stopPropagation();
-          darkModeSubmenu.classList.toggle('hidden');
+          if (!isAdminPanel) {
+            darkModeSubmenu.classList.toggle('hidden');
+          }
         });
         
         // Show on hover
         darkModeToggle.addEventListener('mouseenter', () => {
-          clearTimeout(submenuTimeout);
-          darkModeSubmenu.classList.remove('hidden');
+          if (!isAdminPanel) {
+            clearTimeout(submenuTimeout);
+            darkModeSubmenu.classList.remove('hidden');
+          }
         });
         
         // Keep submenu open when hovering
         darkModeSubmenu.addEventListener('mouseenter', () => {
-          clearTimeout(submenuTimeout);
+          if (!isAdminPanel) {
+            clearTimeout(submenuTimeout);
+          }
         });
         
         // Hide with delay when leaving
         darkModeToggle.parentElement.addEventListener('mouseleave', () => {
           submenuTimeout = setTimeout(() => {
-            darkModeSubmenu.classList.add('hidden');
+            if (!isAdminPanel) {
+              darkModeSubmenu.classList.add('hidden');
+            }
           }, 300);
         });
 
         // Close submenu when clicking outside
         document.addEventListener('click', () => {
-          darkModeSubmenu.classList.add('hidden');
+          if (!isAdminPanel) {
+            darkModeSubmenu.classList.add('hidden');
+          }
         });
 
         darkModeSubmenu.addEventListener('click', (e) => {
@@ -606,6 +635,9 @@
       // Handle mode selection
       document.querySelectorAll('.dark-mode-option').forEach(btn => {
         btn.addEventListener('click', () => {
+          if (isAdminPanel) {
+            return;
+          }
           const mode = btn.dataset.mode;
           console.log('Dark mode changed to:', mode);
           localStorage.setItem('darkMode', mode);

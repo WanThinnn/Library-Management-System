@@ -35,6 +35,22 @@ services:
       - web
     restart: unless-stopped
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared_tunnel
+    command: tunnel --config /etc/cloudflared/config.yml run ${CLOUDFLARE_TUNNEL_ID}
+    env_file:
+      - .env
+    volumes:
+      - ./cloudflared:/etc/cloudflared:ro
+    depends_on:
+      - web
+    networks:
+      - default
+    restart: unless-stopped
+    profiles:
+      - tunnel
+
 volumes:
   sqlite_volume:
     name: sqlite_volume

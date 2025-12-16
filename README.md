@@ -66,6 +66,20 @@ Add to `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Wind
 127.0.0.1 library.cyberfortress.local
 ```
 
+### Cloudflare Tunnel (optional)
+
+Provide your tunnel details in `.env` and add `--tunnel` to `python start.py ...` to run Cloudflare inside Docker:
+
+```
+CLOUDFLARE_TUNNEL_ID=<tunnel-id>
+TUNNEL_DOMAIN=<public-domain>
+# Optional overrides:
+# CLOUDFLARE_CONFIG=./cloudflared/config.yml
+# CLOUDFLARE_CREDENTIALS_FILE=./cloudflared/<tunnel-id>.json
+```
+
+Place the Cloudflare config and credentials in `cloudflared/`. The tunnel runs only when you pass `--tunnel`; otherwise it stays off (local mode).
+
 
 ## Deployment
 
