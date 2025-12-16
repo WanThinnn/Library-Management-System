@@ -8,6 +8,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('register/', views.register_view, name='register'),
+    path('password-reset/', views.password_reset_view, name='password_reset'),
     
     # Quản lý người dùng (CHỈ QUẢN LÝ)
     path('users/', views.user_list_view, name='user_list'),

@@ -1,136 +1,173 @@
-{% extends 'base.html' %} {% block title %}Đăng ký tài khoản - {{ block.super
-}}{% endblock %} {% block content %}
-<div class="flex justify-center items-center min-h-[60vh] py-12">
-  <div
-    class="max-w-md w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden"
-  >
-    <div class="p-8">
-      <h2 class="text-center text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-        Đăng ký tài khoản
-      </h2>
-      <p class="text-center text-gray-600 dark:text-gray-400 mb-8">Tạo tài khoản Thủ thư mới</p>
+{% extends 'base.html' %}
+{% load static %}
 
-      <form method="post">
-        {% csrf_token %}
+{% block title %}Đăng ký tài khoản - {{ block.super }}{% endblock %}
 
-        <div class="mb-4">
-          <label
-            for="username"
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >Tên đăng nhập <span class="text-red-600">*</span></label
-          >
-          <input
-            type="text"
-            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
-            id="username"
-            name="username"
-            required
-          />
-          <small class="text-gray-500 text-sm mt-1 block"
-            >Chỉ gồm chữ, số và dấu gạch dưới</small
-          >
-        </div>
+{% block content %}
+<div class="relative flex items-center justify-center px-4 py-8" style="min-height: calc(100vh - 4rem); max-height: calc(100vh - 4rem); overflow: hidden;">
+  <!-- Background -->
+  <div class="fixed inset-0 z-0">
+    <img
+      src="{% static 'image/background.jpg' %}"
+      alt="Thư viện"
+      class="w-full h-full object-cover object-center"
+    />
+    <div class="absolute inset-0 bg-gradient-to-br from-gray-900/70 via-gray-800/60 to-gray-900/80"></div>
+  </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label
-              for="last_name"
-              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >Họ</label
-            >
-            <input
-              type="text"
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
-              id="last_name"
-              name="last_name"
-            />
-          </div>
-          <div>
-            <label
-              for="first_name"
-              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >Tên</label
-            >
-            <input
-              type="text"
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
-              id="first_name"
-              name="first_name"
-            />
+  <!-- Register Card -->
+  <div class="relative z-10 w-full max-w-5xl">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+      <div class="grid md:grid-cols-5 gap-0 min-h-[500px]">
+        <!-- Left side - Gradient header (2 columns) -->
+        <div class="md:col-span-2 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 p-10 text-white flex flex-col justify-center">
+          <div class="text-center md:text-left space-y-6">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl mb-2">
+              <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-3xl font-bold mb-3">Đăng ký</h1>
+              <p class="text-blue-100 text-base font-medium">Tạo tài khoản mới</p>
+              <p class="text-blue-200 text-sm mt-2 opacity-90">Tham gia hệ thống thư viện</p>
+            </div>
           </div>
         </div>
 
-        <div class="mb-4">
-          <label
-            for="email"
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >Email <span class="text-red-600">*</span></label
+        <!-- Right side - Form (3 columns) -->
+        <div class="md:col-span-3 p-10 flex flex-col justify-center bg-white dark:bg-gray-800">
+
+        <form method="post" class="space-y-4">
+          {% csrf_token %}
+
+          <div class="space-y-2">
+            <label
+              for="username"
+              class="block text-sm font-semibold text-gray-800 dark:text-gray-200"
+            >
+              Tên đăng nhập <span class="text-red-600">*</span>
+            </label>
+            <input
+              type="text"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400"
+              id="username"
+              name="username"
+              placeholder="Nhập tên đăng nhập"
+              required
+            />
+            <small class="text-gray-500 dark:text-gray-400 text-xs block">Chỉ gồm chữ, số và dấu gạch dưới</small>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label
+                for="last_name"
+                class="block text-sm font-semibold text-gray-800 dark:text-gray-200"
+              >
+                Họ
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400"
+                id="last_name"
+                name="last_name"
+                placeholder="Nhập họ"
+              />
+            </div>
+            <div class="space-y-2">
+              <label
+                for="first_name"
+                class="block text-sm font-semibold text-gray-800 dark:text-gray-200"
+              >
+                Tên
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400"
+                id="first_name"
+                name="first_name"
+                placeholder="Nhập tên"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label
+              for="email"
+              class="block text-sm font-semibold text-gray-800 dark:text-gray-200"
+            >
+              Email <span class="text-red-600">*</span>
+            </label>
+            <input
+              type="email"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400"
+              id="email"
+              name="email"
+              placeholder="example@email.com"
+              required
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label
+              for="password"
+              class="block text-sm font-semibold text-gray-800 dark:text-gray-200"
+            >
+              Mật khẩu <span class="text-red-600">*</span>
+            </label>
+            <input
+              type="password"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400"
+              id="password"
+              name="password"
+              placeholder="Nhập mật khẩu"
+              required
+            />
+            <small class="text-gray-500 dark:text-gray-400 text-xs block">Tối thiểu 8 ký tự</small>
+          </div>
+
+          <div class="space-y-2">
+            <label
+              for="password_confirm"
+              class="block text-sm font-semibold text-gray-800 dark:text-gray-200"
+            >
+              Xác nhận mật khẩu <span class="text-red-600">*</span>
+            </label>
+            <input
+              type="password"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400"
+              id="password_confirm"
+              name="password_confirm"
+              placeholder="Nhập lại mật khẩu"
+              required
+            />
+          </div>
+
+          <div class="p-4 text-sm bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 rounded-lg border border-blue-200 dark:border-blue-800">
+            <strong>Lưu ý:</strong> Tài khoản mới sẽ cần được Quản trị viên kích hoạt trước khi sử dụng.
+          </div>
+
+          <button
+            type="submit"
+            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3.5 px-4 rounded-lg shadow-lg hover:shadow-xl focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800/50 transition-all transform hover:-translate-y-0.5"
           >
-          <input
-            type="email"
-            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
-            id="email"
-            name="email"
-            required
-          />
+            Đăng ký
+          </button>
+        </form>
+
+          <div class="text-center pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              Đã có tài khoản?
+              <a
+                href="{% url 'login' %}"
+                class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition-colors ml-1"
+              >
+                Đăng nhập ngay
+              </a>
+            </p>
+          </div>
         </div>
-
-        <div class="mb-4">
-          <label
-            for="password"
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >Mật khẩu <span class="text-red-600">*</span></label
-          >
-          <input
-            type="password"
-            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
-            id="password"
-            name="password"
-            required
-          />
-          <small class="text-gray-500 text-sm mt-1 block"
-            >Tối thiểu 8 ký tự</small
-          >
-        </div>
-
-        <div class="mb-6">
-          <label
-            for="password_confirm"
-            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >Xác nhận mật khẩu <span class="text-red-600">*</span></label
-          >
-          <input
-            type="password"
-            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
-            id="password_confirm"
-            name="password_confirm"
-            required
-          />
-        </div>
-
-        <div
-          class="p-4 mb-6 text-sm bg-blue-50 dark:bg-blue-900 text-blue-800 rounded-lg border border-blue-200"
-        >
-          <strong>Lưu ý:</strong> Tài khoản mới sẽ cần được Quản trị viên kích
-          hoạt trước khi sử dụng.
-        </div>
-
-        <button
-          type="submit"
-          class="w-full bg-blue-600 dark:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-colors mb-4"
-        >
-          Đăng ký
-        </button>
-      </form>
-
-      <div class="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
-        <p class="text-gray-600 dark:text-gray-400">
-          <a
-            href="{% url 'login' %}"
-            class="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium transition-colors"
-            >Đã có tài khoản? Đăng nhập ngay</a
-          >
-        </p>
       </div>
     </div>
   </div>

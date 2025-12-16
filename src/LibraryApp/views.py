@@ -93,6 +93,17 @@ def logout_view(request):
     return redirect('/')
 
 
+def password_reset_view(request):
+    """
+    Trang quên mật khẩu
+    Hiển thị thông tin liên hệ quản trị viên
+    """
+    context = {
+        'page_title': 'Quên mật khẩu'
+    }
+    return render(request, 'accounts/password_reset.html', context)
+
+
 @login_required
 def user_profile_view(request):
     """

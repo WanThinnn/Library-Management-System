@@ -88,3 +88,24 @@ def user_permissions(request):
                     context[key] = True
     
     return context
+
+
+def site_config(request):
+    """
+    Thêm thông tin cấu hình site vào context.
+    """
+    import os
+    
+    # Kiểm tra xem có chạy trong Docker không (check environment variable)
+    is_docker = os.path.exists('/.dockerenv') or os.getenv('DOCKER_CONTAINER', False)
+    
+    if is_docker:
+        base_url = os.getenv('PUBLIC_URL', 'http://library.smartxdr.app')
+    else:
+        # Local development
+        base_url = os.getenv('LOCAL_URL', 'http://127.0.0.1:8000')
+    
+    return {
+        'base_url': base_url,
+        'is_docker': is_docker,
+    }
