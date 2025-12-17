@@ -93,15 +93,73 @@ def logout_view(request):
     return redirect('/')
 
 
-def password_reset_view(request):
-    """
-    Trang quên mật khẩu
-    Hiển thị thông tin liên hệ quản trị viên
-    """
-    context = {
-        'page_title': 'Quên mật khẩu'
-    }
-    return render(request, 'accounts/password_reset.html', context)
+from django.contrib.auth.views import PasswordResetView
+from django.urls import reverse_lazy
+from django.conf import settings
+from urllib.parse import urlparse
+from .forms import UserEmailPasswordResetForm
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'accounts/password_reset.html'
+    email_template_name = 'accounts/password_reset_email.html'
+    subject_template_name = 'accounts/password_reset_subject.txt'
+    success_url = reverse_lazy('password_reset_done')
+    form_class = UserEmailPasswordResetForm
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = 'Quên mật khẩu'
+        return context
+
+    def form_valid(self, form):
+        # Determine which URL info to use
+        # Logic: 
+        # 1. Start with LOCAL_URL as default
+        # 2. If PUBLIC_URL is defined AND (we are not in DEBUG OR request host matches public domain), use PUBLIC_URL
+        
+        target_url = settings.LOCAL_URL
+        public_url = settings.PUBLIC_URL
+        
+        if public_url:
+            # Parse public url to get domain
+            try:
+                public_parts = urlparse(public_url)
+                request_host = self.request.get_host()
+                
+                # If the current request is coming from the public domain, OR we strictly want to valid public url usage
+                # A simple heuristic: if request host is part of public url, use it.
+                # However, user said: "If tunnel...". Tunnel often means request host IS the public domain.
+                # But sometimes proxy setup is tricky. 
+                # Let's trust the user's intent: If PUBLIC_URL is set, we prefer it if we are accessing via that domain
+                # OR if DEBUG is False (Production/Tunnel mode assumption).
+                
+                if public_parts.netloc in request_host or not settings.DEBUG:
+                    target_url = public_url
+            except:
+                pass
+        
+        # Extract domain and protocol from target_url
+        parsed = urlparse(target_url)
+        domain = parsed.netloc
+        scheme = parsed.scheme
+        use_https = (scheme == 'https')
+        
+        opts = {
+            'use_https': use_https,
+            'token_generator': self.token_generator,
+            'from_email': self.from_email,
+            'email_template_name': self.email_template_name,
+            'subject_template_name': self.subject_template_name,
+            'request': self.request,
+            'html_email_template_name': self.html_email_template_name,
+            'extra_email_context': self.extra_email_context,
+            'domain_override': domain,
+        }
+        form.save(**opts)
+        return super().form_valid(form)
+
+# Rename to match urls.py expectation or update urls.py
+password_reset_view = CustomPasswordResetView.as_view()
 
 
 @login_required

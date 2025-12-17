@@ -32,6 +32,48 @@ class SafeIntegerField(forms.IntegerField):
             raise ValidationError(self.error_messages['invalid'], code='invalid')
 
 
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
+
+class UserEmailPasswordResetForm(PasswordResetForm):
+    """
+    Form quên mật khẩu custom
+    Yêu cầu nhập cả Username và Email để xác thực
+    """
+    username = forms.CharField(
+        label='Tên đăng nhập',
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nhập tên đăng nhập',
+            'autofocus': True
+        })
+    )
+    
+    # Override email field to add class/placeholder
+    email = forms.EmailField(
+        label='Email đăng ký',
+        max_length=254,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'email@example.com'
+        })
+    )
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        username = cleaned_data.get('username')
+        email = cleaned_data.get('email')
+        
+        if username and email:
+            # Kiểm tra xem có user nào khớp cả username và email không
+            exists = User.objects.filter(username=username, email=email, is_active=True).exists()
+            if not exists:
+                raise ValidationError(
+                    "Thông tin tên đăng nhập và email không khớp, hoặc tài khoản không tồn tại."
+                )
+        return cleaned_data
+
+
 class LibraryLoginForm(AuthenticationForm):
     """
     Form đăng nhập cho hệ thống thư viện

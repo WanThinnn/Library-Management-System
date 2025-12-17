@@ -35,15 +35,15 @@
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
         <!-- Avatar Section -->
         <div class="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-6 text-center">
-          <div class="w-20 h-20 bg-white dark:bg-gray-800/20 backdrop-blur rounded-full flex items-center justify-center text-3xl font-bold text-white mx-auto mb-3 shadow-lg">
+          <div class="w-20 h-20 bg-white dark:bg-gray-800/20 backdrop-blur rounded-full flex items-center justify-center text-3xl font-bold text-blue-600 dark:text-white mx-auto mb-3 shadow-lg">
             {{ profile_user.username|slice:":1"|upper }}
           </div>
           <h2 class="text-lg font-bold text-white">{{ profile_user.username }}</h2>
           <div class="flex justify-center gap-2 mt-2">
             {% if profile_user.is_superuser %}
-              <span class="bg-white dark:bg-gray-800/20 text-white text-xs font-medium px-3 py-1 rounded-full">Admin</span>
+              <span class="bg-white dark:bg-gray-800/20 text-blue-600 dark:text-white text-xs font-medium px-3 py-1 rounded-full">Admin</span>
             {% elif profile_user.is_staff %}
-              <span class="bg-white dark:bg-gray-800/20 text-white text-xs font-medium px-3 py-1 rounded-full">Staff</span>
+              <span class="bg-white dark:bg-gray-800/20 text-blue-600 dark:text-white text-xs font-medium px-3 py-1 rounded-full">Staff</span>
             {% endif %}
           </div>
         </div>

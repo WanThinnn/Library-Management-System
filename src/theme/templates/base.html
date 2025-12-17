@@ -467,6 +467,7 @@
         </div>
       </div>
     </nav>
+    {% block body_content %}
     <div class="pt-24 pb-12 flex-grow">
       <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         {% if messages %}
@@ -485,6 +486,7 @@
         {% block content %}{% endblock %}
       </div>
     </div>
+    {% endblock %}
     <script>
       // Mobile navbar toggle
       document

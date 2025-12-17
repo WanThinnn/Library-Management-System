@@ -200,6 +200,10 @@ LOGOUT_REDIRECT_URL = '/auth/login/'
 # Password reset timeout (in seconds)
 PASSWORD_RESET_TIMEOUT = 3600  # 1 hour
 
+# Application URLs
+LOCAL_URL = os.getenv('LOCAL_URL', 'http://127.0.0.1:8000')
+PUBLIC_URL = os.getenv('PUBLIC_URL', None)
+
 # Security settings for production
 if not DEBUG:
     SECURE_SSL_REDIRECT = False  # Nginx handles SSL
