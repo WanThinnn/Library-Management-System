@@ -156,7 +156,7 @@ class CustomPasswordResetView(PasswordResetView):
             'domain_override': domain,
         }
         form.save(**opts)
-        return super().form_valid(form)
+        return redirect(self.get_success_url())
 
 # Rename to match urls.py expectation or update urls.py
 password_reset_view = CustomPasswordResetView.as_view()
@@ -1894,12 +1894,21 @@ def user_edit_view(request, user_id):
     
     Cho phép:
     - Thay đổi thông tin cơ bản
-    - Thay đổi vai trò
+    - Thay đổi vai trò (UserGroup)
     - Khóa/Mở khóa tài khoản
     - Reset mật khẩu
     """
+    from .models import LibraryUser
     user = get_object_or_404(User, id=user_id)
     
+    # Lấy thông tin mở rộng LibraryUser (nếu có)
+    try:
+        library_user = LibraryUser.objects.get(user=user)
+        current_group_id = library_user.user_group.id if library_user.user_group else None
+    except LibraryUser.DoesNotExist:
+        library_user = None
+        current_group_id = None
+
     if request.method == 'POST':
         action = request.POST.get('action', 'update')
         
@@ -1907,7 +1916,7 @@ def user_edit_view(request, user_id):
             email = request.POST.get('email', '').strip()
             first_name = request.POST.get('first_name', '').strip()
             last_name = request.POST.get('last_name', '').strip()
-            role = request.POST.get('role', 'staff')
+            user_group_id = request.POST.get('user_group')
             is_active = request.POST.get('is_active') == 'on'
             
             # Validation email
@@ -1921,13 +1930,39 @@ def user_edit_view(request, user_id):
                         user.last_name = last_name
                         user.is_active = is_active
                         
-                        # Cập nhật vai trò
-                        if role == 'manager':
-                            user.is_staff = True
-                            user.is_superuser = True
-                        else:
-                            user.is_staff = True
-                            user.is_superuser = False
+                        # Cập nhật vai trò nếu có thay đổi
+                        if user_group_id:
+                            try:
+                                user_group = UserGroup.objects.get(id=user_group_id)
+                                role_name = user_group.user_group_name
+                                
+                                # Cập nhật User flags
+                                if role_name == 'Quản lý':
+                                    user.is_staff = True
+                                    user.is_superuser = True
+                                else:
+                                    user.is_staff = True
+                                    user.is_superuser = False
+                                
+                                # Cập nhật LibraryUser
+                                if not library_user:
+                                    # Nếu chưa có LibraryUser thì tạo mới
+                                    from datetime import date
+                                    library_user = LibraryUser.objects.create(
+                                        user=user,
+                                        full_name=f"{first_name} {last_name}".strip() or user.username,
+                                        date_of_birth=date(1990, 1, 1), # Default
+                                        position=role_name,
+                                        user_group=user_group,
+                                        email=email or ''
+                                    )
+                                else:
+                                    library_user.user_group = user_group
+                                    library_user.position = role_name
+                                    library_user.save()
+                                    
+                            except UserGroup.DoesNotExist:
+                                pass # Giữ nguyên nếu ID không hợp lệ
                         
                         user.save()
                         
@@ -1954,12 +1989,19 @@ def user_edit_view(request, user_id):
                 except Exception as e:
                     messages.error(request, f'Có lỗi xảy ra: {str(e)}')
     
-    # Xác định vai trò hiện tại
-    current_role = 'manager' if user.is_superuser else 'staff'
+    # Lấy danh sách user groups
+    user_groups = UserGroup.objects.all().order_by('user_group_name')
+    
+    # Xác định vai trò hiện tại để hiển thị nếu không tìm thấy LibraryUser
+    current_role_display = 'Quản lý' if user.is_superuser else ('Thủ thư' if user.is_staff else 'Người dùng')
+    if library_user and library_user.user_group:
+        current_role_display = library_user.user_group.user_group_name
     
     context = {
         'edit_user': user,
-        'current_role': current_role,
+        'user_groups': user_groups,
+        'current_group_id': current_group_id,
+        'current_role': current_role_display,
         'page_title': f'Chỉnh sửa người dùng: {user.username}'
     }
     

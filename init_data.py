@@ -444,11 +444,11 @@ def create_superuser():
         admin = User.objects.create_superuser(
             username='admin',
             email='admin@library.local',
-            password='admin123',
+            password='Admin1234!@#$',
             first_name='Admin',
             last_name='System'
         )
-        print(f"Đã tạo superuser: admin / admin123")
+        print(f"Đã tạo superuser: admin / Admin1234!@#$")
         return admin
     except Exception as e:
         print(f"Lỗi tạo superuser: {e}")
@@ -643,7 +643,7 @@ def init_library_users():
         if created:
             print("\n[*] Tao tai khoan LibraryUser:")
             print(f"   [OK] {lib_admin.full_name} - {lib_admin.position}")
-            print(f"        Username: admin / Password: admin123")
+            print(f"        Username: admin / Password: Admin1234!@#$")
     
     # Tạo thêm thủ thư mẫu
     thu_thu_group = UserGroup.objects.filter(user_group_name='Thủ thư').first()
@@ -661,7 +661,7 @@ def init_library_users():
         )
         
         if created:
-            user.set_password('thuthu123')
+            user.set_password('Thuthu1234!@#$')
             user.save()
         
         # Tạo LibraryUser
@@ -681,7 +681,7 @@ def init_library_users():
         
         if created:
             print(f"   [OK] {lib_user.full_name} - {lib_user.position}")
-            print(f"        Username: thuthu01 / Password: thuthu123")
+            print(f"        Username: thuthu01 / Password: Thuthu1234!@#$")
 
 
 def main():
@@ -729,11 +729,11 @@ def main():
         print("\nThông tin đăng nhập:")
         print("   Quản lý:")
         print("      Username: admin")
-        print("      Password: admin123")
+        print("      Password: Admin1234!@#$")
         print("      Quyền: Toàn quyền tất cả chức năng")
         print("\n   Thủ thư:")
         print("      Username: thuthu01")
-        print("      Password: thuthu123")
+        print("      Password: Thuthu1234!@#$")
         print("      Quyền: Xử lý nghiệp vụ (không xóa, không thay đổi quy định)")
         print("\nBước tiếp theo:")
         print("   1. Truy cập: https://library.cyberfortress.local/")
