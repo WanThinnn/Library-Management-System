@@ -12,6 +12,7 @@ build/
 .eggs/
 *.pyc
 LibraryApp/__pycache__/
+LibraryManagementSystem/__pycache__/
 
 # Virtual environment
 env/
