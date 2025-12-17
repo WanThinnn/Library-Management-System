@@ -1,11 +1,12 @@
 # Build Tailwind assets separately to keep runtime image slim
 FROM node:20-alpine AS tailwind-builder
-WORKDIR /app/theme/static_src
+WORKDIR /app
 
-COPY src/theme/static_src/package*.json ./
+# Copy the entire source code so Tailwind can scan templates
+COPY src/ ./src/
+
+WORKDIR /app/src/theme/static_src
 RUN npm ci
-
-COPY src/theme/static_src/ ./
 RUN npm run build
 
 # Final runtime image
@@ -28,7 +29,7 @@ RUN pip install --upgrade pip && \
     pip install gunicorn
 
 COPY src/ /app/
-COPY --from=tailwind-builder /app/theme/static/css/dist /app/theme/static/css/dist
+COPY --from=tailwind-builder /app/src/theme/static/css/dist /app/theme/static/css/dist
 
 RUN mkdir -p /app/data /app/staticfiles
 

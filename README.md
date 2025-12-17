@@ -41,6 +41,7 @@ To access the application via `https://library.cyberfortress.local` without brow
 ### 1. Update Hosts File
 
 Map the local domain to your localhost IP (`127.0.0.1`).
+*Note: if you are using Local DNS, please replace `127.0.0.1` with your local IP, such as `192.168.1.100`.*
 
 **Windows:**
 
