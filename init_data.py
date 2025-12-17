@@ -650,11 +650,11 @@ def init_library_users():
         lib_admin, created = LibraryUser.objects.get_or_create(
             user=admin_user,
             defaults={
-                'full_name': 'Nguyễn Văn Quản Lý',
+                'full_name': 'Trần Lê Trọng Phú',
                 'date_of_birth': datetime(1985, 1, 15).date(),
                 'position': 'Quản lý thư viện',
                 'user_group': quan_ly_group,
-                'phone_number': '0900000000',
+                'phone_number': '0943943349',
                 'email': 'admin@library.local',
                 'address': 'Thư viện trường',
                 'is_active': True
@@ -675,8 +675,8 @@ def init_library_users():
             username='thuthu01',
             defaults={
                 'email': 'thuthu01@library.local',
-                'first_name': 'Thủ',
-                'last_name': 'Thư 01',
+                'first_name': 'Thanh',
+                'last_name': 'Nguyễn',
                 'is_staff': True
             }
         )
@@ -689,11 +689,11 @@ def init_library_users():
         lib_user, created = LibraryUser.objects.get_or_create(
             user=user,
             defaults={
-                'full_name': 'Trần Thị Thu Thư',
+                'full_name': 'Nguyễn Ngọc Minh Thanh',
                 'date_of_birth': datetime(1995, 5, 20).date(),
                 'position': 'Thủ thư',
                 'user_group': thu_thu_group,
-                'phone_number': '0911111111',
+                'phone_number': '0942924942',
                 'email': 'thuthu01@library.local',
                 'address': 'TP.HCM',
                 'is_active': True

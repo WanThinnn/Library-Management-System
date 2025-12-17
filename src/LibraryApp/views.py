@@ -1771,7 +1771,7 @@ def parameter_update_view(request):
 
 # ==================== QUẢN LÝ NGƯỜI DÙNG ====================
 
-@manager_required
+@permission_required('Quản lý người dùng', 'view')
 def user_list_view(request):
     """
     Danh sách người dùng - Chỉ dành cho Quản lý
@@ -1797,7 +1797,7 @@ def user_list_view(request):
     return render(request, 'app/users/user_list.html', context)
 
 
-@manager_required
+@permission_required('Quản lý người dùng', 'add')
 def user_create_view(request):
     """
     Tạo người dùng mới - Chỉ dành cho Quản lý
@@ -1900,7 +1900,7 @@ def user_create_view(request):
     return render(request, 'app/users/user_form.html', context)
 
 
-@manager_required
+@permission_required('Quản lý người dùng', 'edit')
 def user_edit_view(request, user_id):
     """
     Chỉnh sửa thông tin người dùng - Chỉ dành cho Quản lý
@@ -2021,7 +2021,7 @@ def user_edit_view(request, user_id):
     return render(request, 'app/users/user_form.html', context)
 
 
-@manager_required
+@permission_required('Quản lý người dùng', 'delete')
 def user_delete_view(request, user_id):
     """
     Xóa người dùng - Chỉ dành cho Quản lý
