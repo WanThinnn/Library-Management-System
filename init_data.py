@@ -569,19 +569,20 @@ def init_permissions():
         },
         'Thủ thư': {
             # Xử lý nghiệp vụ hàng ngày, không có quyền xóa và thay đổi quy định
-            'Quản lý độc giả': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Lập thẻ độc giả': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Tra cứu sách': {'view': True, 'add': False, 'edit': False, 'delete': False},
-            'Lập phiếu nhập sách': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Quản lý kho sách': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Lập phiếu mượn sách': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Lập phiếu trả sách': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Quản lý mượn/trả': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Lập phiếu thu tiền phạt': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Quản lý phiếu thu': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Báo cáo mượn sách theo thể loại': {'view': True, 'add': False, 'edit': False, 'delete': False},
-            'Báo cáo sách trả trễ': {'view': True, 'add': False, 'edit': False, 'delete': False},
-            # Thủ thư KHÔNG có quyền quản lý người dùng và thay đổi quy định
+            'Quản lý độc giả': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Lập thẻ độc giả': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Tra cứu sách': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Lập phiếu nhập sách': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Quản lý kho sách': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Lập phiếu mượn sách': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Lập phiếu trả sách': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Quản lý mượn/trả': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Lập phiếu thu tiền phạt': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Quản lý phiếu thu': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Báo cáo mượn sách theo thể loại': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Báo cáo sách trả trễ': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Thay đổi quy định' : {'view': True, 'add': False, 'edit': False, 'delete': False},
+            
         }
     }
     

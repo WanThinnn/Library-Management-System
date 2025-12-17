@@ -315,7 +315,7 @@ def reader_list_view(request):
 
 # ==================== YC2: TIẾP NHẬN SÁCH MỚI ====================
 
-@permission_required('Nhập sách', 'add')
+@permission_required('Lập phiếu nhập sách', 'add')
 def book_import_view(request):
     """
     View tiếp nhận sách mới - YC2
@@ -443,7 +443,7 @@ def book_import_view(request):
     return render(request, 'app/books/book_import.html', context)
 
 
-@permission_required('Nhập sách', 'view')
+@permission_required('Lập phiếu nhập sách', 'view')
 def book_import_detail_view(request, import_id):
     """
     Xem chi tiết phiếu nhập sách
@@ -460,7 +460,7 @@ def book_import_detail_view(request, import_id):
     return render(request, 'app/books/book_import_detail.html', context)
 
 
-@permission_required('Nhập sách', 'view')
+@permission_required('Lập phiếu nhập sách', 'view')
 def book_import_list_view(request):
     """
     Danh sách phiếu nhập sách
@@ -547,7 +547,7 @@ def book_search_view(request):
 
 # ==================== BORROW BOOK (YC4) ====================
 
-@permission_required('Mượn sách', 'add')
+@permission_required('Lập phiếu mượn sách', 'add')
 def borrow_book_view(request):
     """
     Cho mượn sách - YC4
@@ -640,7 +640,7 @@ def borrow_book_view(request):
     return render(request, 'app/borrowing/borrow_book.html', context)
 
 
-@permission_required('Mượn sách', 'view')
+@permission_required('Quản lý mượn/trả', 'view')
 def borrow_book_detail_view(request, receipt_id):
     """
     Xem chi tiết phiếu mượn sách
@@ -655,7 +655,7 @@ def borrow_book_detail_view(request, receipt_id):
     return render(request, 'app/borrowing/borrow_book_detail.html', context)
 
 
-@permission_required('Mượn sách', 'view')
+@permission_required('Quản lý mượn/trả', 'view')
 def borrow_book_list_view(request):
     """
     Danh sách phiếu mượn sách
@@ -724,7 +724,7 @@ def api_readers_list(request):
     return JsonResponse({'success': True, 'data': data})
 
 
-@permission_required('Quản lý sách', 'view')
+@permission_required('Quản lý kho sách', 'view')
 @require_http_methods(["GET"])
 def api_books_list(request):
     """
@@ -759,7 +759,7 @@ def api_books_list(request):
     return JsonResponse({'success': True, 'data': data})
 
 
-@permission_required('Mượn sách', 'view')
+@permission_required('Quản lý mượn/trả', 'view')
 @require_http_methods(["GET"])
 def api_borrowing_readers(request):
     """

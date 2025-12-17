@@ -57,28 +57,28 @@ def user_permissions(request):
             context['can_add_readers'] = library_user.has_permission('Lập thẻ độc giả', 'add')
             
             # Sách
-            context['can_view_books'] = library_user.has_permission('Quản lý sách', 'view')
-            context['can_add_books'] = library_user.has_permission('Nhập sách', 'add')
+            context['can_view_books'] = library_user.has_permission('Quản lý kho sách', 'view')
+            context['can_add_books'] = library_user.has_permission('Lập phiếu nhập sách', 'add')
             
             # Mượn sách
-            context['can_view_borrow'] = library_user.has_permission('Mượn sách', 'view')
-            context['can_add_borrow'] = library_user.has_permission('Mượn sách', 'add')
+            context['can_view_borrow'] = library_user.has_permission('Quản lý mượn/trả', 'view')
+            context['can_add_borrow'] = library_user.has_permission('Lập phiếu mượn sách', 'add')
             
             # Trả sách
-            context['can_view_return'] = library_user.has_permission('Trả sách', 'view')
-            context['can_add_return'] = library_user.has_permission('Trả sách', 'add')
+            context['can_view_return'] = library_user.has_permission('Quản lý mượn/trả', 'view')
+            context['can_add_return'] = library_user.has_permission('Lập phiếu trả sách', 'add')
             
             # Phiếu thu
-            context['can_view_receipt'] = library_user.has_permission('Thu tiền phạt', 'view')
-            context['can_add_receipt'] = library_user.has_permission('Thu tiền phạt', 'add')
+            context['can_view_receipt'] = library_user.has_permission('Quản lý phiếu thu', 'view')
+            context['can_add_receipt'] = library_user.has_permission('Lập phiếu thu tiền phạt', 'add')
             
             # Báo cáo
-            context['can_view_reports'] = library_user.has_permission('Báo cáo', 'view')
+            context['can_view_reports'] = library_user.has_permission('Báo cáo mượn sách theo thể loại', 'view') or library_user.has_permission('Báo cáo sách trả trễ', 'view')
             
             # Cài đặt hệ thống (chỉ manager)
-            context['can_view_settings'] = library_user.has_permission('Cài đặt hệ thống', 'view')
+            context['can_view_settings'] = library_user.has_permission('Thay đổi quy định', 'view')
             context['can_view_users'] = library_user.has_permission('Quản lý người dùng', 'view')
-            context['can_view_permissions'] = library_user.has_permission('Quản lý quyền', 'view')
+            # context['can_view_permissions'] = library_user.has_permission('Quản lý quyền', 'view') # Removed as not in init_data
         else:
             # Staff không có LibraryUser - fallback cho phép view tất cả
             for key in context:
