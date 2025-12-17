@@ -55,6 +55,7 @@ def user_permissions(request):
             # Độc giả
             context['can_view_readers'] = library_user.has_permission('Quản lý độc giả', 'view') or library_user.has_permission('Lập thẻ độc giả', 'view')
             context['can_add_readers'] = library_user.has_permission('Lập thẻ độc giả', 'add')
+            context['can_change_rules'] = library_user.has_permission('Thay đổi quy định', 'edit')
             
             # Sách
             context['can_view_books'] = library_user.has_permission('Quản lý kho sách', 'view')

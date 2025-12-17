@@ -572,6 +572,7 @@ def borrow_book_view(request):
                     # Tính ngày phải trả (tối đa 4 ngày)
                     from datetime import datetime, timedelta
                     borrow_datetime = datetime.combine(borrow_date, datetime.min.time())
+                    borrow_datetime = timezone.make_aware(borrow_datetime)
                     due_date = borrow_datetime + timedelta(days=params.max_borrow_days)
                     
                     # Tạo phiếu mượn cho từng sách
@@ -823,7 +824,7 @@ from .models import BorrowReturnReceipt, Parameter, Reader
 from .forms import ReturnBookForm
 
 
-@permission_required('Trả sách', 'add')
+@permission_required('Lập phiếu trả sách', 'add')
 def return_book_view(request):
     """
     Trang nhận trả sách - YC5
@@ -878,7 +879,7 @@ def return_book_view(request):
     return render(request, 'app/borrowing/return_book.html', context)
 
 
-@permission_required('Trả sách', 'view')
+@permission_required('Lập phiếu trả sách', 'view')
 def return_book_detail_view(request, receipt_id):
     """
     Xem chi tiết phiếu trả sách - YC5
@@ -903,7 +904,7 @@ def return_book_detail_view(request, receipt_id):
     return render(request, 'app/borrowing/return_book_detail.html', context)
 
 
-@permission_required('Trả sách', 'view')
+@permission_required('Lập phiếu trả sách', 'view')
 def return_book_list_view(request):
     """
     Danh sách phiếu trả sách - YC5
@@ -968,7 +969,7 @@ def return_book_list_view(request):
 
 
 @login_required
-@permission_required('Trả sách', 'view')
+@permission_required('Lập phiếu trả sách', 'view')
 @require_http_methods(["GET"])
 def api_unreturned_receipts(request):
     """
@@ -1068,7 +1069,7 @@ def api_reader_borrowed_books(request, reader_id):
 
 # ==================== PAYMENT MANAGEMENT (YC6) ====================
 
-@permission_required('Thu tiền phạt', 'view')
+@permission_required('Lập phiếu thu tiền phạt', 'add')
 def receipt_form_view(request):
     """
     Lập phiếu thu tiền phạt - YC6 (BM6)
@@ -1093,7 +1094,7 @@ def receipt_form_view(request):
     if request.method == 'POST':
         # Kiểm tra quyền 'add' cho lập phiếu thu
         from .decorators import check_permission
-        if not check_permission(request.user, 'Thu tiền phạt', 'add'):
+        if not check_permission(request.user, 'Lập phiếu thu tiền phạt', 'add'):
             messages.error(request, 'Bạn không có quyền thêm phiếu thu tiền.')
             return redirect('receipt_list')
         
@@ -1145,7 +1146,7 @@ def receipt_form_view(request):
     return render(request, 'app/receipts/receipt_form.html', context)
 
 
-@permission_required('Thu tiền phạt', 'view')
+@permission_required('Quản lý phiếu thu', 'view')
 def receipt_list_view(request):
     """
     Danh sách phiếu thu tiền
@@ -1193,7 +1194,7 @@ def receipt_list_view(request):
     return render(request, 'app/receipts/receipt_list.html', context)
 
 
-@permission_required('Thu tiền phạt', 'view')
+@permission_required('Quản lý phiếu thu', 'view')
 def receipt_detail_view(request, receipt_id):
     """
     Chi tiết phiếu thu tiền
@@ -1209,7 +1210,7 @@ def receipt_detail_view(request, receipt_id):
 
 
 @login_required
-@permission_required('Quản lý đọc giả', 'view')
+@permission_required('Quản lý độc giả', 'view')
 @require_http_methods(["GET"])
 def api_reader_debt(request, reader_id):
     """
@@ -1234,7 +1235,7 @@ def api_reader_debt(request, reader_id):
 
 # ==================== REPORTS - YC7 ====================
 
-@permission_required('Báo cáo', 'view')
+@permission_required('Báo cáo mượn sách theo thể loại', 'view')
 def report_borrow_by_category_view(request):
     """
     YC7 - BM7.1: Báo cáo thống kê tình hình mượn sách theo thể loại
@@ -1301,7 +1302,7 @@ def report_borrow_by_category_view(request):
     return render(request, 'app/reports/report_borrow_by_category.html', context)
 
 
-@permission_required('Báo cáo', 'view')
+@permission_required('Báo cáo sách trả trễ', 'view')
 def report_overdue_books_view(request):
     """
     YC7 - BM7.2: Báo cáo thống kê sách trả trễ
@@ -1349,7 +1350,7 @@ def report_overdue_books_view(request):
     return render(request, 'app/reports/report_overdue_books.html', context)
 
 
-@permission_required('Báo cáo', 'view')
+@permission_required('Báo cáo mượn sách theo thể loại', 'view')
 def report_borrow_by_category_excel(request):
     """
     Export báo cáo mượn sách theo thể loại ra file Excel
@@ -1439,7 +1440,7 @@ def report_borrow_by_category_excel(request):
     return response
 
 
-@permission_required('Báo cáo', 'view')
+@permission_required('Báo cáo sách trả trễ', 'view')
 def report_overdue_books_excel(request):
     """
     Export báo cáo sách trả trễ ra file Excel
@@ -1518,7 +1519,7 @@ def report_overdue_books_excel(request):
     return response
 
 
-@permission_required('Báo cáo', 'view')
+@permission_required('Báo cáo mượn sách theo thể loại', 'view')
 def report_borrow_situation_view(request):
     """
     Báo cáo tình hình mượn sách theo khoảng thời gian
@@ -1704,7 +1705,7 @@ def report_borrow_situation_excel(request):
 
 # ==================== SYSTEM PARAMETERS - YC8 ====================
 
-@permission_required('Cài đặt hệ thống', 'view')
+@permission_required('Thay đổi quy định', 'view')
 def parameter_update_view(request):
     """
     YC8 - Thay đổi quy định hệ thống
@@ -1722,7 +1723,7 @@ def parameter_update_view(request):
     if request.method == 'POST':
         # Kiểm tra quyền edit cho POST request
         from .decorators import check_permission
-        if not check_permission(request.user, 'Cài đặt hệ thống', 'edit'):
+        if not check_permission(request.user, 'Thay đổi quy định', 'edit'):
             messages.error(request, 'Bạn không có quyền sửa "Cài đặt hệ thống".')
             return redirect('parameter_update')
         

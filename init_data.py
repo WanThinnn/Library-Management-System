@@ -582,6 +582,7 @@ def init_permissions():
             'Báo cáo mượn sách theo thể loại': {'view': True, 'add': True, 'edit': True, 'delete': True},
             'Báo cáo sách trả trễ': {'view': True, 'add': True, 'edit': True, 'delete': True},
             'Thay đổi quy định' : {'view': True, 'add': False, 'edit': False, 'delete': False},
+            # 'Cài'
             
         }
     }

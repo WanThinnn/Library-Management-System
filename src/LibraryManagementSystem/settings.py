@@ -213,7 +213,7 @@ PUBLIC_URL = os.getenv('PUBLIC_URL', None)
 
 # Security settings for production
 if not DEBUG:
-    SECURE_SSL_REDIRECT = False  # Nginx handles SSL
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False') == 'True'
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
