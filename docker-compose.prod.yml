@@ -1,5 +1,6 @@
 services:
   web:
+    build: .
     image: wanthinnn/library-management-system:latest
     container_name: library-web
     env_file:
