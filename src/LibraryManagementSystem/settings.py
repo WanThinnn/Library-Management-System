@@ -199,6 +199,11 @@ EMAIL_HOST_PASSWORD = os.getenv('MAIL_SERVER_PWD')
 DEFAULT_FROM_EMAIL = os.getenv('MAIL_SERVER_USER')
 # AUTH_USER_MODEL = 'LibraryApp.User'
 
+AUTHENTICATION_BACKENDS = [
+    'LibraryApp.backends.CaseInsensitiveModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 # Authentication settings
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
