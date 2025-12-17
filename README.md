@@ -33,6 +33,88 @@ A comprehensive library management system built with Django, featuring book cata
 - Git
 - Python 3.10+ (for local scripts)
 
+
+## Local DNS & SSL Configuration
+
+To access the application via `https://library.cyberfortress.local` without browser warnings, you need to configure your hosts file and trust the generated Root CA.
+
+### 1. Update Hosts File
+
+Map the local domain to your localhost IP (`127.0.0.1`).
+
+**Windows:**
+
+1. Open **PowerShell** as Administrator.
+2. Edit the hosts file, enter this command: `notepad C:\Windows\System32\drivers\etc\hosts` or open `C:\Windows\System32\drivers\etc\hosts` with Notepad as Administrator.
+3. Add the following line to the end of the file:
+```bash
+127.0.0.1 library.cyberfortress.local
+```
+
+4. Save and close.
+
+**macOS / Linux:**
+
+1. Open Terminal.
+2. Edit the hosts file:
+```bash
+sudo nano /etc/hosts
+
+```
+
+
+3. Add the following line to the end:
+```bash
+127.0.0.1 library.cyberfortress.local
+
+```
+
+
+4. Press `Ctrl+O` (Save), `Enter`, then `Ctrl+X` (Exit).
+
+### 2. Trust the Root Certificate
+
+The system generates a CA certificate at `certs/CyberFortress-RootCA.crt`. You need to add this to your system's Trusted Root store.
+
+**Windows:**
+
+1. Navigate to the `certs/` folder in the project.
+2. Double-click `CyberFortress-RootCA.crt`.
+3. Click **Install Certificate...**
+4. Select **Current User** or **Local Machine** -> **Next**.
+5. Select **Place all certificates in the following store**.
+6. Click **Browse...** and select **Trusted Root Certification Authorities**.
+7. Click **OK** -> **Next** -> **Finish**.
+8. Click **Yes** on the security warning dialog.
+
+**macOS:**
+
+1. Open **Keychain Access** (search via Spotlight).
+2. Drag and drop `certs/CyberFortress-RootCA.crt` into the **System** keychain.
+3. Double-click the imported certificate ("CyberFortress Root CA").
+4. Expand the **Trust** section.
+5. Set "When using this certificate" to **Always Trust**.
+6. Close the window and enter your password to confirm.
+
+**Linux (Ubuntu/Debian):**
+
+1. Copy the certificate to the system folder:
+```bash
+sudo cp certs/CyberFortress-RootCA.crt /usr/local/share/ca-certificates/CyberFortress-RootCA.crt
+
+```
+
+
+2. Update the CA store:
+```bash
+sudo update-ca-certificates
+
+```
+
+
+*Note: If you use Firefox, you may need to import the certificate manually in Firefox Settings > Privacy & Security > Certificates > View Certificates.*
+
+
 ## Quick Start
 
 The project includes a helper script `start.py` to manage the environment.
