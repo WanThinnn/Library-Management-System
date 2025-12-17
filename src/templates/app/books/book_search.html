@@ -84,8 +84,19 @@
                     <td class="px-4 py-3 text-sm">
                         <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-800 dark:text-gray-200 font-mono text-xs">{{ book.id }}</code>
                     </td>
-                    <td class="px-4 py-3 text-sm">
+                    {% comment %} <td class="px-4 py-3 text-sm">
                         <strong class="text-gray-900 dark:text-gray-100">{{ book.book_title.book_title }}</strong>
+                        {% if book.book_title.isbn %}
+                        <br>
+                        <small class="text-gray-500">ISBN: {{ book.book_title.isbn }}</small>
+                        {% endif %}
+                    </td> {% endcomment %}
+                    <td class="px-4 py-3 text-sm">
+                        <a href="{% url 'book_detail' book.id %}" class="group">
+                            <strong class="text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:underline transition-colors">
+                                {{ book.book_title.book_title }}
+                            </strong>
+                        </a>
                         {% if book.book_title.isbn %}
                         <br>
                         <small class="text-gray-500">ISBN: {{ book.book_title.isbn }}</small>
@@ -105,7 +116,7 @@
                     </td>
                     <td class="px-4 py-3 text-sm">
                         {% if book.remaining_quantity > 0 %}
-                            <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Còn sách</span>
+                            <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full inline-flex items-center gap-1 justify-center whitespace-nowrap">Còn sách</span>
                         {% else %}
                             <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Hết sách</span>
                         {% endif %}

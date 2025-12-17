@@ -35,7 +35,7 @@
                     <div>
                         <p class="text-gray-700 dark:text-gray-300"><strong>Người lập:</strong> {{ receipt.created_by }}</p>
                         <p class="text-gray-700 dark:text-gray-300"><strong>Tổng tiền:</strong> 
-                            <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">{{ receipt.total_amount|floatformat:0 }}đ</span>
+                            <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full inline-flex items-center gap-1 justify-center whitespace-nowrap">{{ receipt.total_amount|floatformat:0 }}đ</span>
                         </p>
                     </div>
                 </div>

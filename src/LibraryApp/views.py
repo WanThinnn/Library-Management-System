@@ -1025,7 +1025,7 @@ def api_unreturned_receipts(request):
 
 
 @login_required
-@permission_required('Mượn sách', 'view')
+@permission_required('Quản lý mượn/trả', 'view')
 @require_http_methods(["GET"])
 def api_reader_borrowed_books(request, reader_id):
     """
@@ -2122,7 +2122,7 @@ def register_view(request):
 
 # ==================== BOOK DETAIL & EDIT ====================
 
-@permission_required('Quản lý sách', 'view')
+@permission_required('Quản lý kho sách', 'view')
 def book_detail_view(request, book_id):
     """
     Xem chi tiết sách
@@ -2145,7 +2145,7 @@ def book_detail_view(request, book_id):
     return render(request, 'app/books/book_detail.html', context)
 
 
-@permission_required('Quản lý sách', 'edit')
+@permission_required('Quản lý kho sách', 'edit')
 def book_edit_view(request, book_id):
     """
     Chỉnh sửa thông tin sách

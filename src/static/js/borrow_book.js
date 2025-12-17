@@ -143,7 +143,7 @@ function selectReader(id, name, email) {
             </button>
         </div>
     `;
-    
+
     // Hide reader list
     document.getElementById('readerList').innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-4"><em>Đã chọn độc giả</em></div>';
 
@@ -278,7 +278,7 @@ function showBorrowingDetail(readerId, readerName, readerEmail, books) {
                 <td class="px-4 py-2 text-sm whitespace-nowrap">${book.borrow_date}</td>
                 <td class="px-4 py-2 text-sm whitespace-nowrap">${book.due_date}</td>
                 <td class="px-4 py-2 text-sm whitespace-nowrap">
-                    ${isOverdue ? '<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Quá hạn</span>' : '<span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Còn hạn</span>'}
+                    ${isOverdue ? '<span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Quá hạn</span>' : '<span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full inline-flex items-center gap-1 justify-center whitespace-nowrap">Còn hạn</span>'}
                 </td>
             </tr>
         `;
