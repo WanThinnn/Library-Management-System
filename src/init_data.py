@@ -756,7 +756,7 @@ def main():
         print("      Password: Thuthu1234!@#$")
         print("      Quyền: Xử lý nghiệp vụ (không xóa, không thay đổi quy định)")
         print("\nBước tiếp theo:")
-        print("   1. Truy cập: https://library.cyberfortress.local/")
+        print("   1. Truy cập: https://library.cyberfortress.local/ hoặc http://localhost:8000")
         print("   2. Đăng nhập với tài khoản admin hoặc thuthu01")
         print("   3. Thử nghiệm các chức năng:")
         print("      - Quản lý độc giả")

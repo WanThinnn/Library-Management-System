@@ -1,0 +1,61 @@
+🪄 Quick Link
+Cú pháp Quick Link
+Cú pháp đầy đủ của Quick Link bao gồm 6 thành phần.
+
+https://img.vietqr.io/image/<BANK_ID>-<ACCOUNT_NO>-<TEMPLATE>.png?amount=<AMOUNT>&addInfo=<DESCRIPTION>&accountName=<ACCOUNT_NAME>
+
+Ví dụ:
+
+https://img.vietqr.io/image/vietinbank-113366668888-compact2.jpg?amount=790000&addInfo=dong%20qop%20quy%20vac%20xin&accountName=Quy%20Vac%20Xin%20Covid
+
+Live Demo
+Ngân hàng
+
+(970415) VietinBank
+Số tài khoản
+113366668888
+Template
+
+compact
+Tạo Quicklink
+Quy ước chi tiết
+1. <BANK_ID>
+<BANK_ID> có thể là:
+
+Mã BIN ngân hàng, được quy định bởi ngân hàng nhà nước
+Tên thường gọi phổ biến / tên viết tắt quy ước bởi NAPAS của ngân hàng
+Ví dụ ngân hàng Vietinbank có mã BIN là 970415, và thường được gọi là Vietinbank , Napas quy ước tên viết tắt là ICB thì chúng ta có thể sử dụng BANK_ID là 970415 hoặc Vietinbank hoặc ICB đều được.
+
+Tra cứu danh sách BIN(bin)/ tên thường gọi (short_name) / tên viết tắt (code) của các ngân hàng bằng API danh sách ngân hàng
+
+2. <ACCOUNT_NO>
+Số tài khoản người nhận tại ngân hàng thụ hưởng.
+
+Số tài khoản người nhận quy ước bao gồm chữ hoặc số, tối đa 19 kí tự.
+
+Mục số tài khoản còn hỗ trợ biệt danh tài khoản (Alias Name) hoặc Số tài khoản định danh (Virtual Account Number)
+
+3. <TEMPLATE>
+<TEMPLATE> quy định ID của template. Template là hình thức trình bày của file ảnh chứa mã VietQR.
+
+Các template của VietQR kế thừa từ 3 theme gốc là:
+
+Theme	Size	ý nghĩa
+compact2	540x640	Bao gồm : Mã QR, các logo , thông tin chuyển khoản
+compact	540x540	QR kèm logo VietQR, Napas, ngân hàng
+qr_only	480x480	Trả về ảnh QR đơn giản, chỉ bao gồm QR
+print	600x776	Bao gồm : Mã QR, các logo và đầy đủ thông tin chuyển khoản
+Để sử dụng Quick Link trong các dự án chính thức, bạn sẽ cần phải tạo một template mới cho riêng mình , kế thừa từ các theme gốc này
+
+4. <AMOUNT>
+<AMOUNT> quy định số tiền chuyển khoản
+
+Số tiền chuyển khoản phải là một số dương và tối đa 13 chữ số.
+
+5. <DESCRIPTION>
+<DESCRIPTION> quy định nội dung chuyển khoản.
+
+Nội dung chuyển khoản bao gồm tối đa 50 chữ cái, không bao gồm các kí tự đặc biệt.
+
+6. <ACCOUNT_NAME>
+<ACCOUNT_NAME> quy định tên người thụ hưởng hiển thị lên file ảnh VietQR. Trường này không nằm trong tiêu chuẩn tạo mã VietQR.
