@@ -81,7 +81,7 @@ MIDDLEWARE = [
 
 if DEBUG:
     # Add django_browser_reload only in DEBUG mode
-    INSTALLED_APPS += ["django_browser_reload"]
+    INSTALLED_APPS += ["django_browser_reload", "sslserver"]
 
 
 ROOT_URLCONF = 'LibraryManagementSystem.urls'
