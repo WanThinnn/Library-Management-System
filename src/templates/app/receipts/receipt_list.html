@@ -67,6 +67,11 @@
         <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded mt-4">
             Tìm thấy <strong>{{ total_results }}</strong> phiếu thu
         </div>
+        {% else %}
+        <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded mt-4">
+            <strong>Không tìm thấy phiếu thu phù hợp với tiêu chí tìm kiếm.</strong>
+            <p class="mt-2">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'receipt_list' %}" class="underline">xóa lọc</a>.</p>
+        </div>
         {% endif %}
     </div>
 </div>
@@ -161,15 +166,15 @@
 {% endif %}
 
 {% elif request.GET %}
-<!-- No results -->
+{% comment %} <!-- No results -->
 <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded">
     <strong>Không tìm thấy phiếu thu phù hợp với tiêu chí tìm kiếm.</strong>
     <p class="mt-2">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'receipt_list' %}" class="underline">xóa lọc</a>.</p>
 </div>
-{% else %}
+{% else %} {% endcomment %}
 <!-- Start search -->
-<div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded mt-4">
+{% comment %} <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded mt-4">
     <strong>Nhập tiêu chí tìm kiếm ở trên để bắt đầu.</strong>
-</div>
+</div> {% endcomment %}
 {% endif %}
 {% endblock %}

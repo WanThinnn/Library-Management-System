@@ -55,7 +55,7 @@
             </div>
 
         </form>
-                    <!-- Kết quả tìm kiếm -->
+            <!-- Kết quả tìm kiếm -->
             {% if total_results > 0 %}
             <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded mb-2 mt-4">
                 Tìm thấy <strong>{{ total_results }}</strong> kết quả
@@ -194,10 +194,10 @@
     <strong>Không tìm thấy phiếu trả sách phù hợp với tiêu chí tìm kiếm.</strong>
     <p class="mt-2">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'return_book_list' %}" class="underline hover:text-yellow-900">xóa lọc</a>.</p>
 </div>
-{% else %}
+{% comment %} {% else %}
 <!-- Chưa tìm kiếm -->
 <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded mt-4" >
      <strong>Nhập tiêu chí tìm kiếm ở trên để bắt đầu.</strong>
-</div>
+</div> {% endcomment %}
 {% endif %}
 {% endblock %}
