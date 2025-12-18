@@ -126,21 +126,16 @@
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >{{ form.authors.label }}</label
         >
-        <div
-          class="border border-gray-300 dark:border-gray-600 rounded-lg p-3 max-h-40 overflow-y-auto bg-gray-50 dark:bg-gray-700 mb-2"
-        >
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            {% for widget in form.authors %}
-            <div class="flex items-center text-sm">{{ widget }}</div>
-            {% endfor %}
-          </div>
+        <!-- Original select (hidden via JS after init) -->
+        <div id="author-wrapper-fallback">
+            {{ form.authors }} 
         </div>
         
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >{{ form.new_authors.label }}</label
-        >
-        {{ form.new_authors }}
-        <p class="text-xs text-gray-500 mt-1">Nhập tên các tác giả mới chưa có trong danh sách, phân cách bằng dấu phẩy.</p>
+        <!-- Helper for New Authors (Merged) -->
+        <div id="div_id_new_authors" class="hidden">
+            {{ form.new_authors }}
+        </div>
+        <!-- We keep id_new_authors in DOM but type=hidden via JS -->
 
         {% if form.authors.errors %}
         <p class="text-red-500 text-sm mt-1">
@@ -156,12 +151,19 @@
         >
         {{ form.description }}
       </div>
+      
+      </div> <!-- End of first P-6 -->
+    
+    </div>
 
-      <!-- Divider -->
-      <hr class="my-6" />
-      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
-        Thông tin nhập kho
-      </h3>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 mb-6 overflow-hidden">
+      <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
+        <h3 class="font-semibold text-lg">
+          Thông tin nhập kho
+        </h3>
+      </div>
+    
+      <div class="p-6">
 
       <!-- Row: Quantity, Price, Date -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -207,19 +209,20 @@
         >
         {{ form.notes }}
       </div>
-
-      <!-- Buttons -->
-      <div class="flex gap-3 justify-center">
-        <button
-          type="submit"
-          class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+    </div>
+    </div>
+    <!-- Buttons -->
+    <div class="flex gap-3 justify-center">
+      <button
+        type="submit"
+        class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
           onclick="ensureValues()"
         >
           Lưu phiếu nhập
         </button>
         <a
           href="{% url 'book_import_list' %}"
-          class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
         >
           Xem danh sách
         </a>
@@ -236,16 +239,213 @@
   </div>
 </div>
 
-<script>
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+  <style>
+      /* Fix Tom Select Dark Mode */
+      .ts-control {
+          border-radius: 0.5rem;
+          padding: 0.5rem;
+      }
+      .dark .ts-control {
+          background-color: #374151;
+          border-color: #4b5563;
+          color: #f3f4f6;
+      }
+      .dark .ts-control input {
+          color: #f3f4f6;
+      }
+      .dark .ts-dropdown {
+          background-color: #374151;
+          color: #f3f4f6;
+          border-color: #4b5563;
+      }
+      .dark .ts-dropdown .active {
+          background-color: #4b5563;
+          color: #fff;
+      }
+      .dark .ts-dropdown .option:hover {
+          background-color: #4b5563;
+      }
+  </style>
+
+  <script>
   function ensureValues() {
+    // Basic validations
     const quantityField = document.querySelector('input[name="quantity"]');
-    if (!quantityField.value || parseInt(quantityField.value) < 1) {
-      quantityField.value = 1;
+    if (!quantityField || !quantityField.value || parseInt(quantityField.value) < 1) {
+      if(quantityField) quantityField.value = 1;
     }
     const unitPriceField = document.querySelector('input[name="unit_price"]');
-    if (!unitPriceField.value || parseInt(unitPriceField.value) < 0) {
-      unitPriceField.value = 0;
+    if (!unitPriceField || !unitPriceField.value || parseInt(unitPriceField.value) < 0) {
+        if(unitPriceField) unitPriceField.value = 0;
     }
+    
+    // Sync Tom Select values to hidden fields
+    syncAuthors();
   }
-</script>
+  
+  function syncAuthors() {
+      if (!window.tomSelectInstance) return;
+      
+      const values = window.tomSelectInstance.getValue(); // Array of strings (IDs or New Names)
+      const existingIds = [];
+      const newNames = [];
+      
+      values.forEach(val => {
+          if (val.startsWith('new_')) {
+              // It's a new author: "new_Name"
+              newNames.push(val.substring(4)); // Remove 'new_' prefix
+          } else if (!isNaN(val)) {
+              existingIds.push(val);
+          } else {
+              // Treated as new name just in case
+               newNames.push(val);
+          }
+      });
+      
+      // Update hidden inputs
+      const originalContainer = document.getElementById('id_authors'); 
+      const newAuthorsInput = document.getElementById('id_new_authors');
+      
+      if (originalContainer) {
+          if (originalContainer.tagName === 'SELECT') {
+               // Handle SELECT element
+              Array.from(originalContainer.options).forEach(opt => opt.selected = false);
+              existingIds.forEach(id => {
+                  for (let i = 0; i < originalContainer.options.length; i++) {
+                      if (originalContainer.options[i].value == id) {
+                          originalContainer.options[i].selected = true;
+                          break;
+                      }
+                  }
+              });
+          } else {
+              // Handle Checkboxes
+               const checkboxes = originalContainer.querySelectorAll('input[type="checkbox"]');
+               checkboxes.forEach(cb => {
+                   cb.checked = existingIds.includes(cb.value);
+               });
+               
+               // Fallback: search by name if ID container didn't work purely
+               if (checkboxes.length === 0) {
+                   const inputs = document.getElementsByName('authors');
+                   Array.from(inputs).forEach(input => {
+                       if(input.type === 'checkbox') {
+                           input.checked = existingIds.includes(input.value);
+                       }
+                   });
+               }
+          }
+      }
+      
+      if (newAuthorsInput) {
+          newAuthorsInput.value = newNames.join(',');
+      }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+      // Initialize Tom Select for Authors
+      const authorSettings = {
+          plugins: ['remove_button', 'checkbox_options'],
+          create: true,
+          createOnBlur: true,
+          persist: false,
+          maxItems: null,
+          valueField: 'value',
+          labelField: 'text',
+          searchField: 'text',
+          placeholder: 'Chọn hoặc nhập tên tác giả mới...',
+          render: {
+              option_create: function(data, escape) {
+                  return '<div class="create">Thêm tác giả mới <strong>' + escape(data.input) + '</strong>...</div>';
+              }
+          },
+          onOptionAdd: function(value, data) {
+              // If created, ensure we track it correctly
+          }
+      };
+      
+      const options = [];
+      const items = [];
+      const originalContainer = document.getElementById('id_authors');
+      
+      if (originalContainer) {
+          // Check if it's a SELECT tag or a container of checkboxes
+          if (originalContainer.tagName === 'SELECT') {
+              Array.from(originalContainer.options).forEach(opt => {
+                 options.push({value: opt.value, text: opt.text});
+                 if (opt.selected) items.push(opt.value);
+              });
+              originalContainer.classList.add('hidden');
+          } else {
+              // It's likely a list of checkboxes (CheckboxSelectMultiple)
+              // Django typically renders this as ID_authors -> wrapper
+              // Inputs are name="authors"
+              const checkboxes = originalContainer.querySelectorAll('input[type="checkbox"]');
+              if (checkboxes.length > 0) {
+                  checkboxes.forEach(cb => {
+                      const label = originalContainer.querySelector('label[for="' + cb.id + '"]');
+                      const text = label ? label.innerText.trim() : cb.value;
+                      options.push({value: cb.value, text: text});
+                      if (cb.checked) items.push(cb.value);
+                  });
+              } else {
+                 // Try to find inputs by name if ID targeting failed or different structure
+                 const inputs = document.getElementsByName('authors');
+                  Array.from(inputs).forEach(input => {
+                      // Skip if it's the hidden field we might have created or something else
+                      if(input.type !== 'checkbox') return;
+                      
+                      // Find label text
+                      let text = input.value;
+                      if (input.id) {
+                          const label = document.querySelector('label[for="' + input.id + '"]');
+                          if (label) text = label.innerText.trim();
+                      } else if (input.parentNode.tagName === 'LABEL') {
+                          text = input.parentNode.innerText.trim();
+                      }
+                      
+                      options.push({value: input.value, text: text});
+                      if (input.checked) items.push(input.value);
+                  });
+              }
+              // Hide the checkbox container
+              originalContainer.classList.add('hidden');
+          }
+          
+          // Create dummy input for Tom Select
+          const tsInput = document.createElement('input');
+          tsInput.id = 'tom-select-authors';
+          
+          // Insert after the label, before the original container
+          const label = document.querySelector('label[for="id_authors"]') || originalContainer.previousElementSibling;
+          if (label) {
+              label.parentNode.insertBefore(tsInput, originalContainer);
+          } else {
+              originalContainer.parentNode.insertBefore(tsInput, originalContainer);
+          }
+          
+          // Init Tom Select
+          window.tomSelectInstance = new TomSelect(tsInput, {
+              ...authorSettings,
+              options: options,
+              items: items,
+              create: function(input) {
+                  return {
+                      value: 'new_' + input,
+                      text: input
+                  }
+              }
+          });
+          
+          // Hide the "New Authors" text input as it's merged
+          const newAuthorsRow = document.getElementById('div_id_new_authors');
+          if (newAuthorsRow) newAuthorsRow.classList.add('hidden');
+          const newAuthorsInput = document.getElementById('id_new_authors');
+          if (newAuthorsInput) newAuthorsInput.type = 'hidden';
+      }
+  });
+  </script>
 {% endblock %}

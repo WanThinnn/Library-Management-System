@@ -683,8 +683,9 @@ def borrow_book_list_view(request):
     Danh sách phiếu mượn sách
     """
     from django.db.models import Q
+    from django.utils import timezone
     
-    # Mặc định: chỉ hiện phiếu mượn chưa trả
+    # Mặc định sort
     receipts = BorrowReturnReceipt.objects.filter(return_date__isnull=True).order_by('-borrow_date')
     
     # Filter theo trạng thái
@@ -692,17 +693,35 @@ def borrow_book_list_view(request):
     if status == 'all':
         receipts = BorrowReturnReceipt.objects.all().order_by('-borrow_date')
     elif status == 'overdue':
-        from django.utils import timezone
         receipts = receipts.filter(due_date__lt=timezone.now())
     
-    # Filter theo độc giả
+    # Search
+    search = request.GET.get('search', '')
+    if search:
+        receipts = receipts.filter(
+            Q(reader__reader_name__icontains=search) |
+            Q(book_item__book__book_title__book_title__icontains=search) |
+            Q(reader__email__icontains=search) |
+            Q(id__icontains=search)
+        )
+    
+    # Filter theo độc giả (giữ lại logic cũ phòng khi dùng)
     reader_id = request.GET.get('reader_id')
     if reader_id:
         receipts = receipts.filter(reader_id=reader_id)
+        
+    # Phân trang
+    from django.core.paginator import Paginator
+    paginator = Paginator(receipts, 20)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
     
     context = {
-        'receipts': receipts,
+        'page_obj': page_obj,
+        'receipts': page_obj.object_list,
         'current_status': status,
+        'search': search,
+        'total_results': paginator.count,
         'page_title': 'Danh sách phiếu mượn sách'
     }
     
