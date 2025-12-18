@@ -712,20 +712,20 @@ class BookImportForm(forms.Form):
         from datetime import date
         current_year = date.today().year
         
-        if publish_year < 1900:
+        if publish_year < params.establishment_year:
             raise ValidationError({
-                'publish_year': "Năm xuất bản không được nhỏ hơn 1900"
+                'publish_year': f"Năm xuất bản không được nhỏ hơn năm thành lập ({params.establishment_year})"
             })
         if publish_year > current_year:
             raise ValidationError({
                 'publish_year': "Năm xuất bản không được lớn hơn năm hiện tại"
             })
         
-        min_year = current_year - params.book_return_period
-        if publish_year < min_year:
-            raise ValidationError({
-                'publish_year': f'Chỉ nhận sách xuất bản từ năm {min_year} trở đi'
-            })
+        # min_year = current_year - params.book_return_period
+        # if publish_year < min_year:
+        #     raise ValidationError({
+        #         'publish_year': f'Chỉ nhận sách xuất bản từ năm {min_year} trở đi'
+        #     })
         cleaned_data['publish_year'] = publish_year
         
         # Kiểm tra tác giả: Phải có ít nhất 1 tác giả (có sẵn hoặc mới)

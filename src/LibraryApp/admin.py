@@ -43,7 +43,7 @@ class ParameterAdmin(admin.ModelAdmin):
             'fields': ('card_validity_period',)
         }),
         ('Quy định về sách', {
-            'fields': ('book_return_period', 'max_borrowed_books', 'max_borrow_days')
+            'fields': ('establishment_year', 'book_return_period', 'max_borrowed_books', 'max_borrow_days')
         }),
         ('Quy định về tiền phạt', {
             'fields': ('fine_rate',)

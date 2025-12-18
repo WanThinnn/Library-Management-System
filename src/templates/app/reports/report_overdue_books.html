@@ -31,22 +31,30 @@
                 <button type="submit" class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Xem báo cáo
                 </button>
+                <!-- Nút in và xuất -->
+                <div class="flex gap-2 justify-center">
+                    <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        In báo cáo
+                    </button>
+                    <a href="{% url 'report_overdue_books_excel' %}?report_date={{ report_date|date:'Y-m-d' }}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Xuất Excel
+                </a>
             </div>
+            
         </form>
+        </div>
     </div>
 </div>
-
 <!-- Báo cáo BM7.2 -->
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 overflow-hidden">
     <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
-        <h5 class="font-semibold">Báo Cáo Thống Kê Sách Trả Trễ</h5>
-        <p class="text-sm mt-1">Ngày: <strong>{{ report_date|date:'d/m/Y' }}</strong></p>
+        <h5 class="font-semibold">Báo Cáo Thống Kê Sách Trả Trễ - Ngày: <strong>{{ report_date|date:'d/m/Y' }}</strong></h5>
     </div>
     <div class="p-4">
         {% if report_data %}
-            <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded mb-4">
+            {% comment %} <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded mb-4">
                 Có <strong>{{ report_data|length }}</strong> sách đang bị trả trễ
-            </div>
+            </div> {% endcomment %}
 
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -60,7 +68,7 @@
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         {% for item in report_data %}
-                        <tr class="hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
+                        <tr class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
                             <td class="px-4 py-3 text-sm text-center text-gray-900 dark:text-gray-100">{{ item.stt }}</td>
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ item.book_title }}</td>
                             <td class="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">{{ item.borrow_date|date:'d/m/Y H:i' }}</td>
@@ -73,15 +81,7 @@
                 </table>
             </div>
 
-            <!-- Nút in và xuất -->
-            <div class="mt-4 flex gap-2 justify-center">
-                <button onclick="window.print()" class="bg-green-600 hover:bg-cyan-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    In báo cáo
-                </button>
-                <a href="{% url 'report_overdue_books_excel' %}?report_date={{ report_date|date:'Y-m-d' }}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    Xuất Excel
-                </a>
-            </div>
+
         {% else %}
             <div class="bg-green-50 dark:bg-green-900 border-l-4 border-green-500 text-green-700 p-4 rounded">
                 Không có sách trả trễ tính đến ngày {{ report_date|date:'d/m/Y' }}

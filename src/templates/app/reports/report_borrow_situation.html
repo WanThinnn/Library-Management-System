@@ -41,10 +41,9 @@
                    class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Xuất Excel
                 </a>
-                <a onclick="window.print()" 
-                   class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     In báo cáo
-                </a>
+                </button>
                 <!-- Nút in -->
                 {% comment %} <div class="mt-4 flex gap-2 justify-center">
                     <button onclick="window.print()" class="bg-green-600 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
@@ -71,12 +70,12 @@
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 overflow-hidden">
     <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
         <h5 class="font-semibold">Chi tiết thống kê</h5>
-        <p class="text-sm mt-1">Tổng số lượt mượn: <strong>{{ total_borrows }}</strong></p>
+        {% comment %} <p class="text-sm mt-1">Tổng số lượt mượn: <strong>{{ total_borrows }}</strong></p> {% endcomment %}
     </div>
     <div class="p-4">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-blue-500 text-white">
+                <thead class="bg-blue-600 dark:bg-blue-700 text-white">
                     <tr>
                         <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">STT</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Tên Thể Loại</th>
@@ -86,7 +85,7 @@
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {% for item in report_data %}
-                    <tr class="hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
+                    <tr class="bg-gray-100 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
                         <td class="px-4 py-3 text-sm text-center text-gray-900 dark:text-gray-100">{{ item.stt }}</td>
                         <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ item.category_name }}</td>
                         <td class="px-4 py-3 text-sm text-center">

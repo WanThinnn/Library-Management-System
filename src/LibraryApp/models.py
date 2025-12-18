@@ -112,6 +112,13 @@ class Parameter(models.Model):
         default=True
     )
     
+    # Quy định về năm
+    establishment_year = models.PositiveIntegerField(
+        verbose_name='Năm thành lập',
+        default=2000,
+        validators=[MinValueValidator(1900), MaxValueValidator(2100)]
+    )
+    
     # Timestamp
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -528,11 +535,11 @@ class Book(models.Model):
             params = Parameter.objects.first()
             if params:
                 from datetime import date
-                current_year = date.today().year
-                min_year = current_year - params.book_return_period
-                if self.publish_year < min_year:
+                # current_year = date.today().year
+                # min_year = current_year - params.book_return_period
+                if self.publish_year < params.establishment_year:
                     raise ValidationError({
-                        'publish_year': f'Chỉ nhận sách xuất bản từ năm {min_year} trở đi'
+                        'publish_year': f'Năm xuất bản phải từ {params.establishment_year} trở đi'
                     })
         except:
             pass

@@ -54,6 +54,7 @@ def init_parameters():
             
             # Quy định về sách
             'book_return_period': 8,  # năm (chỉ nhận sách xuất bản trong 8 năm gần đây)
+            'establishment_year': 2000, # Năm thành lập (chỉ nhận sách từ năm này)
             
             # Quy định về mượn sách
             'max_borrowed_books': 5,
