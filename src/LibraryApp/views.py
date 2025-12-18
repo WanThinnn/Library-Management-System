@@ -601,8 +601,8 @@ def borrow_book_view(request):
                     for book_id in book_ids:
                         book = books[book_id]
                         
-                        # Lấy cuốn sách còn sẵn
-                        book_item = BookItem.objects.filter(book=book, is_borrowed=False).first()
+                        # Lấy cuốn sách còn sẵn (lock row to prevent race condition)
+                        book_item = BookItem.objects.select_for_update().filter(book=book, is_borrowed=False).first()
                         if not book_item:
                             messages.error(request, f'Không tìm thấy cuốn "{book.book_title.book_title}" còn sẵn.')
                             return redirect('borrow_book')
@@ -797,9 +797,16 @@ def api_borrowing_readers(request):
         latest_due=Max('due_date')
     ).order_by('-latest_due')
     
+    records = list(borrowing_records[:100])  # Giới hạn 100 kết quả
+    reader_ids = [r['reader_id'] for r in records]
+    readers_map = Reader.objects.filter(id__in=reader_ids).in_bulk()
+    
     data = []
-    for record in borrowing_records[:100]:  # Giới hạn 100 kết quả
-        reader = Reader.objects.get(id=record['reader_id'])
+    for record in records:
+        if record['reader_id'] not in readers_map:
+            continue
+            
+        reader = readers_map[record['reader_id']]
         
         # Lấy danh sách sách đang mượn
         borrows = BorrowReturnReceipt.objects.filter(
@@ -1283,7 +1290,7 @@ def report_borrow_by_category_view(request):
     borrow_receipts = BorrowReturnReceipt.objects.filter(
         borrow_date__gte=first_day,
         borrow_date__lte=last_day
-    )
+    ).select_related('book_item__book__book_title__category')
     
     # Đếm số lượt mượn theo thể loại (D4)
     category_stats = {}
