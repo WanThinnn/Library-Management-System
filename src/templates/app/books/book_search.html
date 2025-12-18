@@ -26,27 +26,48 @@
     </div>
     <div class="p-4">
         <form method="get">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                <div>
+            <div class="flex flex-col lg:flex-row gap-4 items-end">
+                <!-- Search Input - Grows to fill space -->
+                <div class="flex-grow w-full lg:w-auto">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Từ khóa
+                    </label>
                     {{ form.search_text }}
                 </div>
-                <div>
+                
+                <!-- Category - Fixed min width -->
+                <div class="w-full lg:w-48">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ form.category.label }}
+                    </label>
                     {{ form.category }}
                 </div>
-                <div>
+                
+                <!-- Author - Fixed min width -->
+                <div class="w-full lg:w-48">
+                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ form.author.label }}
+                    </label>
                     {{ form.author }}
                 </div>
-                <div>
+                
+                <!-- Status - Fixed min width -->
+                <div class="w-full lg:w-56">
+                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ form.status.label }}
+                    </label>
                     {{ form.status }}
                 </div>
-            </div>
-            <div class="flex flex-wrap gap-2 items-center">
-                <button type="submit" class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
-                    Tìm kiếm
-                </button>
-                <a href="{% url 'book_search' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
-                    Xóa lọc
-                </a>
+                
+                <!-- Buttons -->
+                <div class="flex gap-2 w-full lg:w-auto mt-2 lg:mt-0">
+                    <button type="submit" class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2 whitespace-nowrap">
+                        Tìm kiếm
+                    </button>
+                    <a href="{% url 'book_search' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2 whitespace-nowrap">
+                        Xóa lọc
+                    </a>
+                </div>
             </div>
             <!-- Results -->
             {% if total_results > 0 %}
