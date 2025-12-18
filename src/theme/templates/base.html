@@ -53,9 +53,11 @@
       >
         <a
           href="{% url 'home' %}"
-          class="flex items-center space-x-3 rtl:space-x-reverse"
-          ><span class="text-3xl"></span>
+          class="flex items-center space-x-1 rtl:space-x-reverse"
+          >
+          <span class="text-4xl">📚</span>
           <div class="flex flex-col leading-tight">
+            
             <span
               class="self-center text-2xl font-bold whitespace-nowrap text-blue-700 dark:text-blue-400"
               >Quản lý Thư viện</span
@@ -123,7 +125,7 @@
                 </svg>
               </button>
               <div
-                class="z-10 hidden font-normal bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full left-0 mt-1 border border-gray-100 dark:border-gray-700"
+                class="z-10 hidden font-normal bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full left-1/2 -translate-x-1/2 mt-1 border border-gray-100 dark:border-gray-700"
               >
                 <ul
                   class="py-2 text-gray-700 dark:text-gray-300"
@@ -261,7 +263,7 @@
                 </svg>
               </button>
               <div
-                class="z-10 hidden font-normal bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full left-0 mt-1 border border-gray-100 dark:border-gray-700"
+                class="z-10 hidden font-normal bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full left-1/2 -translate-x-1/2 mt-1 border border-gray-100 dark:border-gray-700"
               >
                 <ul class="py-2 text-gray-700 dark:text-gray-300">
                   {% if can_view_receipt or can_add_receipt %}
@@ -347,7 +349,7 @@
                 </svg>
               </button>
               <div
-                class="z-10 hidden font-normal bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full md:right-0 md:left-auto mt-1 border border-gray-100 dark:border-gray-700"
+                class="z-10 hidden font-normal bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-lg shadow w-48 group-hover:block peer-focus:block hover:block absolute top-full left-1/2 -translate-x-1/2 mt-1 border border-gray-100 dark:border-gray-700"
               >
                 <ul class="py-2 text-gray-700 dark:text-gray-300">
                   {% if can_view_settings %}
@@ -406,7 +408,7 @@
                 >{% endif %}
               </button>
               <div
-                class="dropdown-menu z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-52 absolute top-full md:right-0 md:left-auto mt-1 border border-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-600"
+                class="dropdown-menu z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-52 absolute top-full left-1/2 -translate-x-1/2 mt-1 border border-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-600"
               >
                 <ul class="py-2 text-gray-700 dark:text-gray-200">
                   <li>
@@ -424,7 +426,7 @@
                       <span id="darkModeText">Giao diện</span>
                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     </button>
-                    <div id="darkModeSubmenu" class="hidden absolute left-full top-0 ml-1 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-lg py-1 w-36">
+                    <div id="darkModeSubmenu" class="hidden absolute right-full top-0 mr-1 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-lg py-1 w-36">
                       <button data-mode="auto" class="dark-mode-option w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
                         <span class="w-4 text-center" id="check-auto"></span> Tự động
                       </button>
