@@ -341,7 +341,9 @@ def book_import_view(request):
                     # Lấy dữ liệu từ form
                     book_title_name = form.cleaned_data['book_title']
                     category = form.cleaned_data['category']
-                    authors = form.cleaned_data['authors']
+                    authors = list(form.cleaned_data['authors']) # Convert to list to append new ones
+                    new_authors_str = form.cleaned_data.get('new_authors', '')
+                    
                     publish_year = form.cleaned_data['publish_year']
                     publisher = form.cleaned_data['publisher']
                     isbn = form.cleaned_data.get('isbn', '')
@@ -353,6 +355,17 @@ def book_import_view(request):
                     notes = form.cleaned_data.get('notes', '')
                     import_date = form.cleaned_data['import_date']
                     
+                    # Xử lý tác giả mới
+                    if new_authors_str:
+                        new_author_names = [name.strip() for name in new_authors_str.split(',') if name.strip()]
+                        for name in new_author_names:
+                            # Tìm hoặc tạo tác giả mới (không phân biệt hoa thường để tránh trùng lặp)
+                            # Tuy nhiên, models.Author không có constraint unique=True cho author_name
+                            # Nên ta dùng get_or_create đơn giản
+                            author, _ = Author.objects.get_or_create(author_name=name)
+                            if author not in authors:
+                                authors.append(author)
+                    
                     # Kiểm tra hoặc tạo BookTitle
                     book_title, created = BookTitle.objects.get_or_create(
                         book_title=book_title_name,
@@ -360,9 +373,17 @@ def book_import_view(request):
                         defaults={'description': description}
                     )
                     
-                    # Thêm tác giả cho BookTitle (chỉ nếu vừa tạo)
-                    if created:
-                        for author in authors:
+                    # Thêm tác giả cho BookTitle (cả cũ và mới)
+                    # Nếu BookTitle đã tồn tại, ta vẫn nên kiểm tra xem có cần bổ sung tác giả không?
+                    # Logic hiện tại: chỉ thêm nếu created=True. 
+                    # Nếu BookTitle đã có, ta có thể muốn update thêm tác giả nếu chưa có?
+                    # Để an toàn và nhất quán với yêu cầu, ta sẽ add thêm tác giả vào BookTitle nếu chưa có logic đó.
+                    # Nhưng code cũ chỉ thêm khi created. Ta sẽ giữ nguyên logic đó hoặc cải tiến.
+                    # Quyết định: Cập nhật connection tác giả cho BookTitle dù mới hay cũ
+                    
+                    current_authors = book_title.authors.all()
+                    for author in authors:
+                        if author not in current_authors:
                             AuthorDetail.objects.create(
                                 author=author,
                                 book_title=book_title
@@ -551,7 +572,7 @@ def book_search_view(request):
 def borrow_book_view(request):
     """
     Cho mượn sách - YC4
-    Validate theo QĐ4: thẻ còn hạn, không quá hạn, sách chưa mượn, không quá 5 quyển
+    Validate theo thẻ còn hạn, không quá hạn, sách chưa mượn, không quá 5 quyển
     Hỗ trợ mượn nhiều sách cùng lúc
     """
     params = Parameter.objects.first()
@@ -952,7 +973,7 @@ def return_book_list_view(request):
     # Tính tiền phạt cho mỗi receipt
     for receipt in page_obj.object_list:
         if hasattr(receipt, 'is_overdue') and receipt.is_overdue:
-            receipt.fine_amount = receipt.days_overdue * 1000  # QĐ5: 1000đ/ngày
+            receipt.fine_amount = receipt.days_overdue * 1000  # 1000đ/ngày
         else:
             receipt.fine_amount = 0
     
@@ -1711,11 +1732,11 @@ def parameter_update_view(request):
     YC8 - Thay đổi quy định hệ thống
     
     Cho phép thay đổi:
-    - QĐ1: Tuổi độc giả, thời hạn thẻ
-    - QĐ2: Khoảng cách năm xuất bản
-    - QĐ4: Số sách mượn tối đa, số ngày mượn
-    - QĐ5: Đơn giá phạt
-    - QĐ6: Quy định kiểm tra số tiền thu
+    - Tuổi độc giả, thời hạn thẻ
+    - Khoảng cách năm xuất bản
+    - Số sách mượn tối đa, số ngày mượn
+    - Đơn giá phạt
+    - Quy định kiểm tra số tiền thu
     """
     # Lấy hoặc tạo bản ghi Parameter duy nhất
     parameter, created = Parameter.objects.get_or_create(id=1)

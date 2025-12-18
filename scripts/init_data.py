@@ -47,22 +47,22 @@ def init_parameters():
     param, created = Parameter.objects.get_or_create(
         id=1,
         defaults={
-            # QĐ1: Quy định về độc giả
+            # Quy định về độc giả
             'min_age': 18,
             'max_age': 55,
             'card_validity_period': 6,  # tháng
             
-            # QĐ2: Quy định về sách
+            # Quy định về sách
             'book_return_period': 8,  # năm (chỉ nhận sách xuất bản trong 8 năm gần đây)
             
-            # QĐ4: Quy định về mượn sách
+            # Quy định về mượn sách
             'max_borrowed_books': 5,
             'max_borrow_days': 30,  # ngày
             
-            # QĐ5: Quy định về tiền phạt
+            # Quy định về tiền phạt
             'fine_rate': 1000,  # 1000đ/ngày trả trễ
             
-            # QĐ6: Quy định về thu tiền
+            # Quy định về thu tiền
             'enable_receipt_amount_validation': True,
         }
     )

@@ -104,7 +104,7 @@ class LibraryLoginForm(AuthenticationForm):
 class ReaderForm(forms.ModelForm):
     """
     Form lập thẻ độc giả - YC1
-    Validate theo QĐ1: tuổi từ min_age đến max_age, loại độc giả hợp lệ
+    Validate theo tuổi từ min_age đến max_age, loại độc giả hợp lệ
     """
     
     class Meta:
@@ -229,7 +229,7 @@ class ReaderForm(forms.ModelForm):
 class BorrowBookForm(forms.Form):
     """
     Form cho mượn sách - YC4
-    Validate theo QĐ4: thẻ còn hạn, không quá hạn, sách chưa mượn, không quá 5 quyển
+    Validate theo thẻ còn hạn, không quá hạn, sách chưa mượn, không quá 5 quyển
     Hỗ trợ mượn nhiều sách cùng lúc (miễn không vượt giới hạn)
     """
     
@@ -520,7 +520,7 @@ class ReaderTypeForm(forms.ModelForm):
 class BookImportForm(forms.Form):
     """
     Form tiếp nhận sách mới - YC2
-    Validate theo QĐ2: Chỉ nhận sách xuất bản trong vòng 8 năm, 
+    Validate theo Chỉ nhận sách xuất bản trong vòng 8 năm, 
     thể loại và tác giả phải hợp lệ
     """
     
@@ -544,10 +544,19 @@ class BookImportForm(forms.Form):
     )
     
     authors = forms.ModelMultipleChoiceField(
-        label='Tác giả (có thể chọn nhiều)',
+        label='Tác giả có sẵn',
         queryset=Author.objects.all(),
         widget=forms.CheckboxSelectMultiple(),
-        required=True
+        required=False
+    )
+    
+    new_authors = forms.CharField(
+        label='Tác giả mới (nhập tên, phân cách bằng dấu phẩy)',
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'VD: Nguyễn Văn A, Tran Thi B'
+        })
     )
     
     publish_year = forms.IntegerField(
@@ -719,11 +728,16 @@ class BookImportForm(forms.Form):
             })
         cleaned_data['publish_year'] = publish_year
         
-        # Kiểm tra tác giả
+        # Kiểm tra tác giả: Phải có ít nhất 1 tác giả (có sẵn hoặc mới)
         authors = cleaned_data.get('authors')
-        if not authors:
+        new_authors = cleaned_data.get('new_authors')
+        
+        has_existing = authors and len(authors) > 0
+        has_new = new_authors and len(new_authors.strip()) > 0
+        
+        if not has_existing and not has_new:
             raise ValidationError({
-                'authors': 'Vui lòng chọn ít nhất 1 tác giả'
+                'authors': 'Vui lòng chọn hoặc nhập ít nhất 1 tác giả'
             })
         
         # Kiểm tra thể loại
@@ -831,7 +845,7 @@ class ReturnBookForm(forms.Form):
 class ReceiptForm(forms.Form):
     """
     Form lập phiếu thu tiền phạt - YC6
-    Validate theo QĐ6: Số tiền thu không được vượt quá tổng nợ
+    Validate theo Số tiền thu không được vượt quá tổng nợ
     """
     reader_id = forms.IntegerField(
         label='Chọn độc giả',
@@ -897,7 +911,7 @@ class ReceiptForm(forms.Form):
         return collected_amount
     
     def clean(self):
-        """Kiểm tra theo QĐ6: số tiền không được vượt quá nợ"""
+        """Kiểm tra theo số tiền không được vượt quá nợ"""
         cleaned_data = super().clean()
         
         reader_id = cleaned_data.get('reader_id')
@@ -909,7 +923,7 @@ class ReceiptForm(forms.Form):
         try:
             reader = Reader.objects.get(id=reader_id)
             
-            # QĐ6: Kiểm tra số tiền thu không được vượt quá tổng nợ
+            # Kiểm tra số tiền thu không được vượt quá tổng nợ
             if collected_amount > reader.total_debt:
                 raise ValidationError({
                     'collected_amount': (
@@ -955,11 +969,11 @@ class ParameterForm(forms.ModelForm):
     Form thay đổi các tham số hệ thống - YC8
     
     Bao gồm:
-    - QĐ1: Tuổi độc giả, thời hạn thẻ
-    - QĐ2: Khoảng cách năm xuất bản
-    - QĐ4: Số sách mượn tối đa, số ngày mượn
-    - QĐ5: Đơn giá phạt
-    - QĐ6: Quy định kiểm tra số tiền thu
+    - Tuổi độc giả, thời hạn thẻ
+    - Khoảng cách năm xuất bản
+    - Số sách mượn tối đa, số ngày mượn
+    - Đơn giá phạt
+    - Quy định kiểm tra số tiền thu
     """
     
     class Meta:

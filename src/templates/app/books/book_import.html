@@ -124,10 +124,10 @@
       <!-- Authors -->
       <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >{{ form.authors.label }} <span class="text-red-500">*</span></label
+          >{{ form.authors.label }}</label
         >
         <div
-          class="border border-gray-300 dark:border-gray-600 rounded-lg p-3 max-h-40 overflow-y-auto bg-gray-50 dark:bg-gray-700"
+          class="border border-gray-300 dark:border-gray-600 rounded-lg p-3 max-h-40 overflow-y-auto bg-gray-50 dark:bg-gray-700 mb-2"
         >
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {% for widget in form.authors %}
@@ -135,6 +135,13 @@
             {% endfor %}
           </div>
         </div>
+        
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >{{ form.new_authors.label }}</label
+        >
+        {{ form.new_authors }}
+        <p class="text-xs text-gray-500 mt-1">Nhập tên các tác giả mới chưa có trong danh sách, phân cách bằng dấu phẩy.</p>
+
         {% if form.authors.errors %}
         <p class="text-red-500 text-sm mt-1">
           {% for e in form.authors.errors %}{{ e }}{% endfor %}
