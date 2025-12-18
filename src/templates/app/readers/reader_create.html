@@ -85,8 +85,50 @@
                     <p class="text-gray-500 text-xs mt-1">Từ {{ params.min_age }} - {{ params.max_age }} tuổi</p>
                 </div>
                 
-                <!-- Email (full width) -->
-                <div class="md:col-span-2">
+                <!-- Địa chỉ -->
+                <div class="mb-4 md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Địa chỉ (trước sáp nhập)<span class="text-red-500">*</span>
+                    </label>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
+                        <div>
+                            <select id="province" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="">-- Chọn Tỉnh/Thành --</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <select id="district" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white" disabled>
+                                <option value="">-- Chọn Quận/Huyện --</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <select id="ward" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white" disabled>
+                                <option value="">-- Chọn Phường/Xã --</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <input type="text" id="street_detail" placeholder="Số nhà, tên đường..." 
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                        </div>
+                    </div>
+
+                    
+
+                    <div class="hidden">
+                        {{ form.address }} 
+                    </div>
+                    
+                    {% if form.address.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.address.errors }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Email-->
+                <div>
                     <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ form.email.label }}
                         <span class="text-red-500">*</span>
@@ -94,18 +136,6 @@
                     {{ form.email }}
                     {% if form.email.errors %}
                     <p class="text-red-500 text-sm mt-1">{{ form.email.errors }}</p>
-                    {% endif %}
-                </div>
-                
-                <!-- Địa chỉ (full width) -->
-                <div class="md:col-span-2">
-                    <label for="{{ form.address.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ form.address.label }}
-                        <span class="text-red-500">*</span>
-                    </label>
-                    {{ form.address }}
-                    {% if form.address.errors %}
-                    <p class="text-red-500 text-sm mt-1">{{ form.address.errors }}</p>
                     {% endif %}
                 </div>
                 
@@ -120,7 +150,103 @@
                     <p class="text-red-500 text-sm mt-1">{{ form.card_creation_date.errors }}</p>
                     {% endif %}
                 </div>
-            </div>
+
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const provinceSelect = document.getElementById('province');
+                            const districtSelect = document.getElementById('district');
+                            const wardSelect = document.getElementById('ward');
+                            const streetInput = document.getElementById('street_detail');
+                            
+                            // Lấy ID của input gốc do Django render (thường là id_address)
+                            // Nếu bạn custom widget thì check lại ID nhé
+                            const originalAddressInput = document.getElementById('{{ form.address.id_for_label }}'); 
+
+                            // 1. Lấy danh sách Tỉnh/Thành
+                            fetch('https://esgoo.net/api-tinhthanh/1/0.htm')
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.error === 0) {
+                                        data.data.forEach(item => {
+                                            const option = new Option(item.full_name, item.id);
+                                            provinceSelect.add(option);
+                                        });
+                                    }
+                                });
+
+                            // 2. Xử lý khi chọn Tỉnh -> Load Quận
+                            provinceSelect.addEventListener('change', function() {
+                                districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+                                wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+                                districtSelect.disabled = true;
+                                wardSelect.disabled = true;
+
+                                if (this.value) {
+                                    fetch(`https://esgoo.net/api-tinhthanh/2/${this.value}.htm`)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.error === 0) {
+                                                data.data.forEach(item => {
+                                                    const option = new Option(item.full_name, item.id);
+                                                    districtSelect.add(option);
+                                                });
+                                                districtSelect.disabled = false;
+                                            }
+                                        });
+                                }
+                                updateFullAddress();
+                            });
+
+                            // 3. Xử lý khi chọn Quận -> Load Phường
+                            districtSelect.addEventListener('change', function() {
+                                wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+                                wardSelect.disabled = true;
+
+                                if (this.value) {
+                                    fetch(`https://esgoo.net/api-tinhthanh/3/${this.value}.htm`)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.error === 0) {
+                                                data.data.forEach(item => {
+                                                    const option = new Option(item.full_name, item.id);
+                                                    wardSelect.add(option);
+                                                });
+                                                wardSelect.disabled = false;
+                                            }
+                                        });
+                                }
+                                updateFullAddress();
+                            });
+
+                            // 4. Cập nhật khi chọn Phường hoặc nhập đường
+                            wardSelect.addEventListener('change', updateFullAddress);
+                            streetInput.addEventListener('input', updateFullAddress);
+
+                            // Hàm ghép chuỗi địa chỉ để lưu vào input gốc
+                            function updateFullAddress() {
+                                const provinceText = provinceSelect.options[provinceSelect.selectedIndex]?.text || '';
+                                const districtText = districtSelect.options[districtSelect.selectedIndex]?.text || '';
+                                const wardText = wardSelect.options[wardSelect.selectedIndex]?.text || '';
+                                const streetText = streetInput.value.trim();
+
+                                // Logic ghép chuỗi: Số nhà, Phường, Quận, Tỉnh
+                                // Chỉ ghép khi các trường đã được chọn
+                                let fullAddress = '';
+                                
+                                if (streetText) fullAddress += `${streetText}, `;
+                                if (wardSelect.value) fullAddress += `${wardText}, `;
+                                if (districtSelect.value) fullAddress += `${districtText}, `;
+                                if (provinceSelect.value) fullAddress += `${provinceText}`;
+
+                                // Gán vào input gốc của Django form
+                                originalAddressInput.value = fullAddress;
+                            }
+                        });
+                    </script>
+                                
+
+                </div>
             
             <!-- Buttons -->
             <div class="mt-6 flex flex-wrap gap-3 justify-center">
