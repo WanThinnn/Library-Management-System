@@ -492,6 +492,27 @@ def book_import_list_view(request):
     month = request.GET.get('month')
     year = request.GET.get('year')
     
+    # Validate Inputs
+    try:
+        if year:
+            year_int = int(year)
+            import datetime
+            current_year = datetime.datetime.now().year
+            if not (2000 <= year_int <= current_year):
+                messages.warning(request, f'Năm "{year}" không hợp lệ. Vui lòng nhập năm từ 2000 đến {current_year}.')
+                year = None
+    except ValueError:
+        messages.warning(request, f'Năm "{year}" không hợp lệ. Vui lòng nhập số.')
+        year = None
+
+    try:
+        if month:
+            month_int = int(month)
+            if not (1 <= month_int <= 12):
+                month = None
+    except ValueError:
+        month = None
+    
     if month and year:
         receipts = receipts.filter(
             import_date__month=month,

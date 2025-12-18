@@ -51,8 +51,13 @@
         </form>
         
         {% if readers %}
-        <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded mt-4">
+        <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 rounded p-4 mt-4">
             Tìm thấy <strong>{{ readers.count }}</strong> độc giả
+        </div>
+        {% else %}
+        <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded mt-4">
+            <strong>Không tìm thấy độc giả phù hợp với tiêu chí tìm kiếm.</strong>
+            <p class="mt-2">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'reader_list' %}" class="text-yellow-800 dark:text-yellow-200 underline hover:text-yellow-900">xóa lọc</a>.</p>
         </div>
         {% endif %}
     </div>
@@ -117,12 +122,6 @@
             </tbody>
         </table>
     </div>
-</div>
-{% else %}
-<div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-6 rounded text-center">
-    <div class="text-4xl mb-3"></div>
-    <h5 class="font-semibold mb-2">Chưa có độc giả nào</h5>
-    <p class="text-sm">Bắt đầu bằng cách click nút "Lập thẻ mới"</p>
 </div>
 {% endif %}
 {% endblock %}
