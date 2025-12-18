@@ -715,7 +715,7 @@ class BookImportForm(forms.Form):
         min_year = current_year - params.book_return_period
         if publish_year < min_year:
             raise ValidationError({
-                'publish_year': f'Chỉ nhận sách xuất bản từ năm {min_year} trở đi (QĐ2)'
+                'publish_year': f'Chỉ nhận sách xuất bản từ năm {min_year} trở đi'
             })
         cleaned_data['publish_year'] = publish_year
         

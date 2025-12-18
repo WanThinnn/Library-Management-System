@@ -464,8 +464,8 @@ def create_superuser():
             username='admin',
             email='admin@library.local',
             password='Admin1234!@#$',
-            first_name='Admin',
-            last_name='System'
+            first_name='Phú',
+            last_name='Trần'
         )
         print(f"Đã tạo superuser: admin / Admin1234!@#$")
         return admin
@@ -569,19 +569,21 @@ def init_permissions():
         },
         'Thủ thư': {
             # Xử lý nghiệp vụ hàng ngày, không có quyền xóa và thay đổi quy định
-            'Quản lý độc giả': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Lập thẻ độc giả': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Tra cứu sách': {'view': True, 'add': False, 'edit': False, 'delete': False},
-            'Lập phiếu nhập sách': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Quản lý kho sách': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Lập phiếu mượn sách': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Lập phiếu trả sách': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Quản lý mượn/trả': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Lập phiếu thu tiền phạt': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Quản lý phiếu thu': {'view': True, 'add': True, 'edit': True, 'delete': False},
-            'Báo cáo mượn sách theo thể loại': {'view': True, 'add': False, 'edit': False, 'delete': False},
-            'Báo cáo sách trả trễ': {'view': True, 'add': False, 'edit': False, 'delete': False},
-            # Thủ thư KHÔNG có quyền quản lý người dùng và thay đổi quy định
+            'Quản lý độc giả': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Lập thẻ độc giả': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Tra cứu sách': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Lập phiếu nhập sách': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Quản lý kho sách': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Lập phiếu mượn sách': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Lập phiếu trả sách': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Quản lý mượn/trả': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Lập phiếu thu tiền phạt': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Quản lý phiếu thu': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Báo cáo mượn sách theo thể loại': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Báo cáo sách trả trễ': {'view': True, 'add': True, 'edit': True, 'delete': True},
+            'Thay đổi quy định' : {'view': True, 'add': False, 'edit': False, 'delete': False},
+            # 'Cài'
+            
         }
     }
     
@@ -648,11 +650,11 @@ def init_library_users():
         lib_admin, created = LibraryUser.objects.get_or_create(
             user=admin_user,
             defaults={
-                'full_name': 'Nguyễn Văn Quản Lý',
+                'full_name': 'Trần Lê Trọng Phú',
                 'date_of_birth': datetime(1985, 1, 15).date(),
                 'position': 'Quản lý thư viện',
                 'user_group': quan_ly_group,
-                'phone_number': '0900000000',
+                'phone_number': '0943943349',
                 'email': 'admin@library.local',
                 'address': 'Thư viện trường',
                 'is_active': True
@@ -673,8 +675,8 @@ def init_library_users():
             username='thuthu01',
             defaults={
                 'email': 'thuthu01@library.local',
-                'first_name': 'Thủ',
-                'last_name': 'Thư 01',
+                'first_name': 'Thanh',
+                'last_name': 'Nguyễn',
                 'is_staff': True
             }
         )
@@ -687,11 +689,11 @@ def init_library_users():
         lib_user, created = LibraryUser.objects.get_or_create(
             user=user,
             defaults={
-                'full_name': 'Trần Thị Thu Thư',
+                'full_name': 'Nguyễn Ngọc Minh Thanh',
                 'date_of_birth': datetime(1995, 5, 20).date(),
                 'position': 'Thủ thư',
                 'user_group': thu_thu_group,
-                'phone_number': '0911111111',
+                'phone_number': '0942924942',
                 'email': 'thuthu01@library.local',
                 'address': 'TP.HCM',
                 'is_active': True
@@ -756,7 +758,7 @@ def main():
         print("      Password: Thuthu1234!@#$")
         print("      Quyền: Xử lý nghiệp vụ (không xóa, không thay đổi quy định)")
         print("\nBước tiếp theo:")
-        print("   1. Truy cập: https://library.cyberfortress.local/ hoặc http://localhost:8000")
+        print("   1. Truy cập: https://library.cyberfortress.local/")
         print("   2. Đăng nhập với tài khoản admin hoặc thuthu01")
         print("   3. Thử nghiệm các chức năng:")
         print("      - Quản lý độc giả")

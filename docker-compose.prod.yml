@@ -8,14 +8,14 @@ services:
     volumes:
       - sqlite_volume:/app/data
       - static_volume:/app/staticfiles
-      - ./gunicorn.conf.py:/app/gunicorn.conf.py:ro
-      - ./init_data.py:/app/init_data.py:ro
+      - ./scripts/gunicorn.conf.py:/app/gunicorn.conf.py:ro
+      - ./scripts/init_data.py:/app/init_data.py:ro
       - ./src/LibraryApp/migrations:/app/LibraryApp/migrations
     expose:
       - "8000"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/" ]
       interval: 30s
       timeout: 10s
       retries: 3

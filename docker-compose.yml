@@ -10,10 +10,10 @@ services:
              gunicorn LibraryManagementSystem.wsgi:application -c gunicorn.conf.py"
     volumes:
       - ./src:/app
-      - ./gunicorn.conf.py:/app/gunicorn.conf.py:ro
+      - ./scripts/gunicorn.conf.py:/app/gunicorn.conf.py:ro
       - static_volume:/app/staticfiles
       - sqlite_volume:/app/data
-      - ./init_data.py:/app/init_data.py:ro
+      - ./scripts/init_data.py:/app/init_data.py:ro
       - ./src/LibraryApp/migrations:/app/LibraryApp/migrations
 
     expose:
@@ -67,6 +67,7 @@ services:
 volumes:
   static_volume:
   sqlite_volume:
+
 
 networks:
   app-network:
