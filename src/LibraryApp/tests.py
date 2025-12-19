@@ -1,3 +1,94 @@
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.contrib.auth.models import User
+from django.urls import reverse
+from .models import LibraryUser, UserGroup
 
-# Create your tests here.
+class LoginTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.login_url = reverse('login')
+        
+        # Create User Group
+        self.group = UserGroup.objects.create(user_group_name='Test Group')
+        
+        # Create User and LibraryUser
+        self.user = User.objects.create_user(username='testuser', password='password123', email='test@example.com', is_staff=True)
+        self.lib_user = LibraryUser.objects.create(
+            user=self.user,
+            full_name='Test User',
+            date_of_birth='2000-01-01',
+            user_group=self.group
+        )
+    
+    def test_inactive_user_login(self):
+        self.user.is_active = False
+        self.user.save()
+        
+        response = self.client.post(self.login_url, {
+            'username': 'testuser',
+            'password': 'password123'
+        })
+        
+        # Check message
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertIn('Tài khoản chưa được kích hoạt', str(messages[0]))
+    
+    def test_wrong_password_counting(self):
+        # 1st fail
+        response = self.client.post(self.login_url, {
+            'username': 'testuser',
+            'password': 'wrongpassword'
+        })
+        self.lib_user.refresh_from_db()
+        self.assertEqual(self.lib_user.failed_login_attempts, 1)
+        
+        # Check form errors instead of messages
+        form_errors = response.context['form'].non_field_errors()
+        self.assertTrue(len(form_errors) > 0)
+        error_msg = str(form_errors[0])
+        self.assertIn('mật khẩu', error_msg)
+        self.assertIn('4 lần thử', error_msg)
+        
+    def test_lockout(self):
+        # Fail 5 times
+        for i in range(5):
+            self.client.post(self.login_url, {
+                'username': 'testuser',
+                'password': 'wrongpassword'
+            })
+            
+        self.lib_user.refresh_from_db()
+        self.assertEqual(self.lib_user.failed_login_attempts, 5)
+        
+        # 6th attempt (even with correct password)
+        response = self.client.post(self.login_url, {
+            'username': 'testuser',
+            'password': 'password123'
+        })
+        
+        form_errors = response.context['form'].non_field_errors()
+        self.assertTrue(len(form_errors) > 0)
+        self.assertIn('Tài khoản đã bị khoá', str(form_errors[0]))
+        
+        # Ensure still locked and not logged in
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_successful_login_resets_counter(self):
+        # Fail once
+        self.client.post(self.login_url, {
+            'username': 'testuser',
+            'password': 'wrongpassword'
+        })
+        self.lib_user.refresh_from_db()
+        self.assertEqual(self.lib_user.failed_login_attempts, 1)
+        
+        # Success
+        response = self.client.post(self.login_url, {
+            'username': 'testuser',
+            'password': 'password123'
+        }, follow=True)
+        
+        self.lib_user.refresh_from_db()
+        self.assertEqual(self.lib_user.failed_login_attempts, 0)
+        self.assertTrue(response.context['user'].is_authenticated)

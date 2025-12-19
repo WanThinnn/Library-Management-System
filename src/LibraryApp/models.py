@@ -1218,6 +1218,13 @@ class LibraryUser(models.Model):
         verbose_name='Chức vụ',
         help_text='VD: Thủ thư trưởng, Thủ thư, Nhân viên...'
     )
+    
+    # Tracking login attempts
+    failed_login_attempts = models.IntegerField(
+        default=0,
+        verbose_name='Số lần đăng nhập sai'
+    )
+    
     user_group = models.ForeignKey(
         UserGroup,
         on_delete=models.PROTECT,

@@ -675,7 +675,7 @@ class LibraryUserAdmin(admin.ModelAdmin):
             'fields': ('position', 'user_group')
         }),
         ('Trạng thái', {
-            'fields': ('is_active',)
+            'fields': ('is_active', 'failed_login_attempts')
         }),
         ('Thông tin hệ thống', {
             'fields': ('created_at', 'updated_at'),
