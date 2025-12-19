@@ -236,6 +236,12 @@ def user_profile_view(request):
         last_name = request.POST.get('last_name', '').strip()
         email = request.POST.get('email', '').strip()
         
+        # New fields
+        phone_number = request.POST.get('phone_number', '').strip()
+        address = request.POST.get('address', '').strip()
+        dob_str = request.POST.get('date_of_birth')
+        position = request.POST.get('position', '').strip()
+        
         # Validate email
         if email and User.objects.filter(email=email).exclude(id=user.id).exists():
             messages.error(request, 'Email đã được sử dụng bởi người dùng khác.')
@@ -245,6 +251,31 @@ def user_profile_view(request):
             if email:
                 user.email = email
             user.save()
+            
+            # Update LibraryUser
+            from .models import LibraryUser
+            from django.utils import timezone
+            
+            try:
+                library_user = user.library_user
+                
+                library_user.full_name = f"{first_name} {last_name}".strip() or user.username
+                library_user.phone_number = phone_number
+                library_user.address = address
+                
+                if dob_str:
+                    try:
+                        library_user.date_of_birth = timezone.datetime.strptime(dob_str, '%Y-%m-%d').date()
+                    except ValueError:
+                        pass
+                
+                if user.is_superuser and position: # Only admin can edit position
+                    library_user.position = position
+                    
+                library_user.save()
+            except LibraryUser.DoesNotExist:
+                pass # Should not happen for library users
+                
             messages.success(request, 'Cập nhật thông tin thành công!')
         
         # Đổi mật khẩu nếu có
@@ -1965,7 +1996,6 @@ def user_create_view(request):
         else:
             try:
                 # Validate password strength
-                # Check password with a temporary user object for similarity checks
                 temp_user = User(username=username, email=email)
                 validate_password(password, user=temp_user)
                 
@@ -1973,6 +2003,20 @@ def user_create_view(request):
                     # Lấy UserGroup đã chọn
                     user_group = UserGroup.objects.get(id=user_group_id)
                     role_name = user_group.user_group_name
+                    
+                    # Lấy thông tin mở rộng
+                    phone_number = request.POST.get('phone_number', '').strip()
+                    address = request.POST.get('address', '').strip()
+                    position = request.POST.get('position', '').strip() or role_name
+                    dob_str = request.POST.get('date_of_birth')
+                    
+                    try:
+                        if dob_str:
+                            date_of_birth = timezone.datetime.strptime(dob_str, '%Y-%m-%d').date()
+                        else:
+                            date_of_birth = date(1990, 1, 1)
+                    except ValueError:
+                        date_of_birth = date(1990, 1, 1)
                     
                     # Tạo user mới
                     user = User.objects.create_user(
@@ -1984,7 +2028,6 @@ def user_create_view(request):
                     )
                     
                     # Gán vai trò dựa trên UserGroup
-                    # "Quản lý" = superuser, còn lại = staff
                     if role_name == 'Quản lý':
                         user.is_staff = True
                         user.is_superuser = True
@@ -1992,27 +2035,28 @@ def user_create_view(request):
                         user.is_staff = True
                         user.is_superuser = False
                         
-                        # Tạo LibraryUser liên kết với UserGroup
-                        LibraryUser.objects.create(
-                            user=user,
-                            full_name=f"{first_name} {last_name}".strip() or username,
-                            date_of_birth=date(1990, 1, 1),
-                            position=role_name,
-                            user_group=user_group,
-                            email=email or '',
-                            is_active=True
-                        )
+                    # Tạo LibraryUser liên kết với UserGroup
+                    LibraryUser.objects.create(
+                        user=user,
+                        full_name=f"{first_name} {last_name}".strip() or username,
+                        date_of_birth=date_of_birth,
+                        position=position,
+                        user_group=user_group,
+                        phone_number=phone_number,
+                        address=address,
+                        email=email or '',
+                        is_active=True
+                    )
                     
                     user.save()
                     
                     messages.success(
                         request,
-                        f'Đã tạo tài khoản "{username}" với vai trò "{role_name}" thành công!'
+                        f'Đã tạo tài khoản "{username}" thành công!'
                     )
                     return redirect('user_list')
                     
             except ValidationError as e:
-                # Validation error from validate_password - Join lists into a single string
                 error_msg = ' '.join(e.messages)
                 messages.error(request, error_msg)
             except UserGroup.DoesNotExist:
@@ -2063,6 +2107,22 @@ def user_edit_view(request, user_id):
             user_group_id = request.POST.get('user_group')
             is_active = request.POST.get('is_active') == 'on'
             
+            # Thông tin mở rộng
+            phone_number = request.POST.get('phone_number', '').strip()
+            address = request.POST.get('address', '').strip()
+            position = request.POST.get('position', '').strip()
+            dob_str = request.POST.get('date_of_birth')
+            
+            from django.utils import timezone
+            from datetime import date
+            try:
+                if dob_str:
+                    date_of_birth = timezone.datetime.strptime(dob_str, '%Y-%m-%d').date()
+                else:
+                    date_of_birth = date(1990, 1, 1)
+            except ValueError:
+                date_of_birth = date(1990, 1, 1)
+            
             # Validation email
             if email and User.objects.filter(email=email).exclude(id=user_id).exists():
                 messages.error(request, f'Email "{email}" đã được sử dụng bởi tài khoản khác.')
@@ -2090,24 +2150,38 @@ def user_edit_view(request, user_id):
                                 
                                 # Cập nhật LibraryUser
                                 if not library_user:
-                                    # Nếu chưa có LibraryUser thì tạo mới
-                                    from datetime import date
                                     library_user = LibraryUser.objects.create(
                                         user=user,
                                         full_name=f"{first_name} {last_name}".strip() or user.username,
-                                        date_of_birth=date(1990, 1, 1), # Default
-                                        position=role_name,
+                                        date_of_birth=date_of_birth,
+                                        position=position or role_name,
                                         user_group=user_group,
+                                        phone_number=phone_number,
+                                        address=address,
                                         email=email or ''
                                     )
                                 else:
+                                    library_user.full_name = f"{first_name} {last_name}".strip() or user.username
                                     library_user.user_group = user_group
-                                    library_user.position = role_name
-                                    library_user.is_active = is_active  # Đồng bộ is_active
+                                    library_user.position = position or role_name
+                                    library_user.date_of_birth = date_of_birth
+                                    library_user.phone_number = phone_number
+                                    library_user.address = address
+                                    library_user.is_active = is_active
                                     library_user.save()
                                     
                             except UserGroup.DoesNotExist:
                                 pass # Giữ nguyên nếu ID không hợp lệ
+                        else:
+                            # Cập nhật thông tin LibraryUser kể cả khi không đổi role
+                            if library_user:
+                                library_user.full_name = f"{first_name} {last_name}".strip() or user.username
+                                library_user.position = position if position else library_user.position
+                                library_user.date_of_birth = date_of_birth
+                                library_user.phone_number = phone_number
+                                library_user.address = address
+                                library_user.is_active = is_active
+                                library_user.save()
                         
                         user.save()
                         
