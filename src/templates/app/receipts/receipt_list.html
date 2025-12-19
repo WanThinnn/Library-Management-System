@@ -49,14 +49,14 @@
                 >
             </div>
             <div class="md:col-span-4 flex flex-wrap gap-2">
-                <button type="submit" class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <button type="submit" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Tìm kiếm
                 </button>
-                <a href="{% url 'receipt_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <a href="{% url 'receipt_list' %}" class="hover:scale-105 duration-200 transition-transform bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Xóa lọc
                 </a>
                 {% if can_add_receipt %}
-                <a href="{% url 'receipt_form' %}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <a href="{% url 'receipt_form' %}" class="hover:scale-105 duration-200 transition-transform bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Lập phiếu thu
                 </a>
                 {% endif %}
@@ -95,14 +95,17 @@
                 {% for receipt in receipts %}
                 <tr class="hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
                     <td class="px-4 py-3 text-sm">
-                        <strong class="text-gray-900 dark:text-gray-100">#{{ receipt.id }}</strong>
+                        {% comment %} <strong class="text-gray-900 dark:text-gray-100"></strong> {% endcomment %}
+                        <a href="{% url 'receipt_detail' receipt.id %}" class="text-black hover:underline font-medium dark:text-blue-50">
+                            # {{ receipt.id }}
+                        </a>
                     </td>
                     <td class="px-4 py-3 text-sm">
-                        <a href="{% url 'reader_detail' receipt.reader.id %}" class="text-blue-600 hover:underline font-medium">
+                        <a href="{% url 'reader_detail' receipt.reader.id %}" class="text-black hover:underline font-medium dark:text-blue-50">
                             {{ receipt.reader.reader_name }}
                         </a>
                         <br>
-                        <small class="text-gray-500">{{ receipt.reader.email }}</small>
+                        <small class="text-gray-500 dark:text-gray-300">{{ receipt.reader.email }}</small>
                     </td>
                     <td class="px-4 py-3 text-sm">
                         <strong class="text-green-600">
@@ -115,7 +118,7 @@
                     <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                         {{ receipt.created_date|date:"d/m/Y H:i" }}
                     </td>
-                    <td class="px-4 py-3 text-sm">
+                    <td class="px-4 py-3 text-sm hover:scale-101 duration-200 transition-transform ">
                         <a href="{% url 'receipt_detail' receipt.id %}" class="bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-medium py-1 px-3 rounded-lg transition-colors">
                             Xem
                         </a>

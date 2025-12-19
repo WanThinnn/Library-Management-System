@@ -546,7 +546,7 @@ class BookImportForm(forms.Form):
     authors = forms.ModelMultipleChoiceField(
         label='Tác giả có sẵn',
         queryset=Author.objects.all(),
-        widget=forms.CheckboxSelectMultiple(),
+        widget=forms.SelectMultiple(attrs={'class': 'hidden'}),
         required=False
     )
     
@@ -752,6 +752,20 @@ class BookImportForm(forms.Form):
     def clean(self):
         """Gọi hàm kiểm tra dữ liệu nhập sách"""
         return self.validate_book_import_data()
+
+
+class BookImportExcelForm(forms.Form):
+    """
+    Form nhập sách từ Excel
+    """
+    excel_file = forms.FileField(
+        label='Chọn file Excel (.xlsx)',
+        help_text='File phải có định dạng chuẩn: Tên sách, Thể loại, Tác giả, Năm XB, NXB, Số lượng, Đơn giá, Ngày nhập',
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': '.xlsx, .xls'
+        })
+    )
 
 
 class ReturnBookForm(forms.Form):

@@ -215,16 +215,22 @@
     <div class="flex gap-3 justify-center">
       <button
         type="submit"
-        class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-          onclick="ensureValues()"
+        class="hover:scale-105 duration-200 transition-transform  bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+
         >
           Lưu phiếu nhập
         </button>
         <a
           href="{% url 'book_import_list' %}"
-          class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          class="hover:scale-105 duration-200 transition-transform bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
         >
           Xem danh sách
+        </a>
+        <a
+          href="{% url 'book_import_excel' %}"
+          class="hover:scale-105 duration-200 transition-all bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg"
+        >
+          Nhập từ Excel
         </a>
         {% comment %}
         <a
@@ -271,82 +277,9 @@
   </style>
 
   <script>
-  function ensureValues() {
-    // Basic validations
-    const quantityField = document.querySelector('input[name="quantity"]');
-    if (!quantityField || !quantityField.value || parseInt(quantityField.value) < 1) {
-      if(quantityField) quantityField.value = 1;
-    }
-    const unitPriceField = document.querySelector('input[name="unit_price"]');
-    if (!unitPriceField || !unitPriceField.value || parseInt(unitPriceField.value) < 0) {
-        if(unitPriceField) unitPriceField.value = 0;
-    }
-    
-    // Sync Tom Select values to hidden fields
-    syncAuthors();
-  }
-  
-  function syncAuthors() {
-      if (!window.tomSelectInstance) return;
-      
-      const values = window.tomSelectInstance.getValue(); // Array of strings (IDs or New Names)
-      const existingIds = [];
-      const newNames = [];
-      
-      values.forEach(val => {
-          if (val.startsWith('new_')) {
-              // It's a new author: "new_Name"
-              newNames.push(val.substring(4)); // Remove 'new_' prefix
-          } else if (!isNaN(val)) {
-              existingIds.push(val);
-          } else {
-              // Treated as new name just in case
-               newNames.push(val);
-          }
-      });
-      
-      // Update hidden inputs
-      const originalContainer = document.getElementById('id_authors'); 
-      const newAuthorsInput = document.getElementById('id_new_authors');
-      
-      if (originalContainer) {
-          if (originalContainer.tagName === 'SELECT') {
-               // Handle SELECT element
-              Array.from(originalContainer.options).forEach(opt => opt.selected = false);
-              existingIds.forEach(id => {
-                  for (let i = 0; i < originalContainer.options.length; i++) {
-                      if (originalContainer.options[i].value == id) {
-                          originalContainer.options[i].selected = true;
-                          break;
-                      }
-                  }
-              });
-          } else {
-              // Handle Checkboxes
-               const checkboxes = originalContainer.querySelectorAll('input[type="checkbox"]');
-               checkboxes.forEach(cb => {
-                   cb.checked = existingIds.includes(cb.value);
-               });
-               
-               // Fallback: search by name if ID container didn't work purely
-               if (checkboxes.length === 0) {
-                   const inputs = document.getElementsByName('authors');
-                   Array.from(inputs).forEach(input => {
-                       if(input.type === 'checkbox') {
-                           input.checked = existingIds.includes(input.value);
-                       }
-                   });
-               }
-          }
-      }
-      
-      if (newAuthorsInput) {
-          newAuthorsInput.value = newNames.join(',');
-      }
-  }
 
   document.addEventListener('DOMContentLoaded', function() {
-      // Initialize Tom Select for Authors
+      // Initialize Tom Select
       const authorSettings = {
           plugins: ['remove_button', 'checkbox_options'],
           create: true,
@@ -362,27 +295,30 @@
                   return '<div class="create">Thêm tác giả mới <strong>' + escape(data.input) + '</strong>...</div>';
               }
           },
-          onOptionAdd: function(value, data) {
-              // If created, ensure we track it correctly
+          create: function(input) {
+              return {
+                  value: 'new_' + input,
+                  text: input
+              }
           }
       };
       
       const options = [];
       const items = [];
       const originalContainer = document.getElementById('id_authors');
+      let tomSelectInstance = null;
       
       if (originalContainer) {
-          // Check if it's a SELECT tag or a container of checkboxes
+          // If it's a SELECT (SelectMultiple), extract options
           if (originalContainer.tagName === 'SELECT') {
               Array.from(originalContainer.options).forEach(opt => {
                  options.push({value: opt.value, text: opt.text});
                  if (opt.selected) items.push(opt.value);
               });
+              // Hide original but don't disable it
               originalContainer.classList.add('hidden');
           } else {
-              // It's likely a list of checkboxes (CheckboxSelectMultiple)
-              // Django typically renders this as ID_authors -> wrapper
-              // Inputs are name="authors"
+              // Fallback for checkboxes if ever reverted
               const checkboxes = originalContainer.querySelectorAll('input[type="checkbox"]');
               if (checkboxes.length > 0) {
                   checkboxes.forEach(cb => {
@@ -392,13 +328,10 @@
                       if (cb.checked) items.push(cb.value);
                   });
               } else {
-                 // Try to find inputs by name if ID targeting failed or different structure
-                 const inputs = document.getElementsByName('authors');
+                  // Last resort: search globally if ID container failed
+                  const inputs = document.getElementsByName('authors');
                   Array.from(inputs).forEach(input => {
-                      // Skip if it's the hidden field we might have created or something else
                       if(input.type !== 'checkbox') return;
-                      
-                      // Find label text
                       let text = input.value;
                       if (input.id) {
                           const label = document.querySelector('label[for="' + input.id + '"]');
@@ -406,12 +339,10 @@
                       } else if (input.parentNode.tagName === 'LABEL') {
                           text = input.parentNode.innerText.trim();
                       }
-                      
                       options.push({value: input.value, text: text});
                       if (input.checked) items.push(input.value);
                   });
               }
-              // Hide the checkbox container
               originalContainer.classList.add('hidden');
           }
           
@@ -419,7 +350,7 @@
           const tsInput = document.createElement('input');
           tsInput.id = 'tom-select-authors';
           
-          // Insert after the label, before the original container
+          // Insert after label or before original container
           const label = document.querySelector('label[for="id_authors"]') || originalContainer.previousElementSibling;
           if (label) {
               label.parentNode.insertBefore(tsInput, originalContainer);
@@ -428,24 +359,90 @@
           }
           
           // Init Tom Select
-          window.tomSelectInstance = new TomSelect(tsInput, {
+          tomSelectInstance = new TomSelect(tsInput, {
               ...authorSettings,
               options: options,
-              items: items,
-              create: function(input) {
-                  return {
-                      value: 'new_' + input,
-                      text: input
-                  }
-              }
+              items: items
           });
           
-          // Hide the "New Authors" text input as it's merged
+          // Hide redundant New Authors field
           const newAuthorsRow = document.getElementById('div_id_new_authors');
           if (newAuthorsRow) newAuthorsRow.classList.add('hidden');
           const newAuthorsInput = document.getElementById('id_new_authors');
           if (newAuthorsInput) newAuthorsInput.type = 'hidden';
       }
+
+      // HANDLE FORM SUMBIT
+      const form = document.querySelector('form');
+      if (form) {
+          form.addEventListener('submit', function(e) {
+              // Basic Validation for Quantity/Price
+              const quantityField = document.querySelector('input[name="quantity"]');
+              if (quantityField && (!quantityField.value || parseInt(quantityField.value) < 1)) {
+                  quantityField.value = 1;
+              }
+              const unitPriceField = document.querySelector('input[name="unit_price"]');
+              if (unitPriceField && (!unitPriceField.value || parseInt(unitPriceField.value) < 0)) {
+                  unitPriceField.value = 0;
+              }
+
+              // SYNC AUTHORS
+              if (tomSelectInstance && originalContainer) {
+                  const values = tomSelectInstance.getValue(); // IDs or "new_Name"
+                  const existingIds = [];
+                  const newNames = [];
+                  
+                  // Separate existing IDs vs New Names
+                  values.forEach(val => {
+                      if (String(val).startsWith('new_')) {
+                          newNames.push(val.substring(4));
+                      } else {
+                          // Allow loose check for IDs
+                          existingIds.push(val); 
+                      }
+                  });
+                  
+                  // Sync to hidden SELECT
+                  if (originalContainer.tagName === 'SELECT') {
+                      // Reset selection
+                      Array.from(originalContainer.options).forEach(opt => opt.selected = false);
+                      
+                      // Select matching IDs
+                      existingIds.forEach(id => {
+                          for (let i = 0; i < originalContainer.options.length; i++) {
+                              if (originalContainer.options[i].value == id) {
+                                  originalContainer.options[i].selected = true;
+                                  break;
+                              }
+                          }
+                      });
+                  } else {
+                      // Fallback Sync for checkboxes
+                      const checkboxes = originalContainer.querySelectorAll('input[type="checkbox"]');
+                      checkboxes.forEach(cb => {
+                          cb.checked = existingIds.includes(cb.value);
+                      });
+                       // Double check by name if container query failed
+                       if (checkboxes.length === 0) {
+                           const inputs = document.getElementsByName('authors');
+                           Array.from(inputs).forEach(input => {
+                               if(input.type === 'checkbox') {
+                                   input.checked = existingIds.includes(input.value);
+                               }
+                           });
+                       }
+                  }
+                  
+                  // Sync New Names
+                  const newAuthorsInput = document.getElementById('id_new_authors');
+                  if (newAuthorsInput) {
+                      newAuthorsInput.value = newNames.join(',');
+                  }
+              }
+              // Normal submit proceeds now
+          });
+      }
   });
+
   </script>
 {% endblock %}

@@ -35,6 +35,7 @@ urlpatterns = [
     
     # YC2: Tiếp nhận sách mới
     path('book/import/', views.book_import_view, name='book_import'),
+    path('book/import/excel/', views.book_import_excel_view, name='book_import_excel'),
     path('book/import/<int:import_id>/', views.book_import_detail_view, name='book_import_detail'),
     path('books/import/', views.book_import_list_view, name='book_import_list'),
     

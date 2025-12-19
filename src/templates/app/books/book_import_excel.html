@@ -1,0 +1,95 @@
+{% extends 'base.html' %} 
+{% block title %}{{ page_title }}{% endblock %} 
+
+{% block content %}
+<div class="mx-auto px-5">
+  <!-- Header -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 mb-6">
+    <div class="p-6">
+      <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">{{ page_title }}</h1>
+      <p class="text-gray-500">Nhập sách hàng loạt từ file Excel</p>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
+    <div class="bg-green-600 text-white px-4 py-3">
+      <h5 class="font-semibold">Upload File Excel</h5>
+    </div>
+    
+    <div class="p-6">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div class="{% if message.tags == 'success' %}bg-green-100 text-green-700 border-l-4 border-green-500{% elif message.tags == 'error' %}bg-red-100 text-red-700 border-l-4 border-red-500{% else %}bg-yellow-100 text-yellow-700 border-l-4 border-yellow-500{% endif %} p-4 mb-2 rounded">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {{ form.excel_file.label }}
+            </label>
+            {{ form.excel_file }}
+            {% if form.excel_file.help_text %}
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                {{ form.excel_file.help_text }}
+            </p>
+            {% endif %}
+            {% if form.excel_file.errors %}
+            <p class="text-red-500 text-sm mt-1">
+                {% for error in form.excel_file.errors %}
+                {{ error }}
+                {% endfor %}
+            </p>
+            {% endif %}
+        </div>
+
+        <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800 mb-6">
+            <h6 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">Cấu trúc file mẫu:</h6>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th class="px-6 py-3">Tên sách</th>
+                            <th class="px-6 py-3">Thể loại</th>
+                            <th class="px-6 py-3">Tác giả</th>
+                            <th class="px-6 py-3">Năm XB</th>
+                            <th class="px-6 py-3">NXB</th>
+                            <th class="px-6 py-3">Số lượng</th>
+                            <th class="px-6 py-3">Đơn giá</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">Đắc Nhân Tâm</td>
+                            <td class="px-6 py-4">Tâm lý</td>
+                            <td class="px-6 py-4">Dale Carnegie</td>
+                            <td class="px-6 py-4">2023</td>
+                            <td class="px-6 py-4">NXB Trẻ</td>
+                            <td class="px-6 py-4">10</td>
+                            <td class="px-6 py-4">80000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="flex gap-4 justify-center">
+            <button type="submit" class="hover:scale-105 duration-200 transition-transform bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg shadow-lg">
+                Tiến hành nhập
+            </button>
+            <a href="{% url 'book_import' %}" class="hover:scale-105 duration-200 transition-transform bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-lg shadow-lg">
+                Quay lại
+            </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

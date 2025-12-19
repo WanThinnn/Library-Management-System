@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import Count, Q
 from datetime import datetime, timedelta
 from .models import BankAccount, Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt, Category, UserGroup, Function, Permission
-from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm, ParameterForm, BookEditForm, ReaderTypeForm, UserGroupForm, FunctionForm
+from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookImportExcelForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm, ParameterForm, BookEditForm, ReaderTypeForm, UserGroupForm, FunctionForm
 from .decorators import manager_required, staff_required, permission_required
 
 
@@ -554,6 +554,156 @@ def book_import_view(request):
     return render(request, 'app/books/book_import.html', context)
 
 
+@permission_required('Lập phiếu nhập sách', 'add')
+def book_import_excel_view(request):
+    """
+    View nhập sách từ Excel
+    """
+    if request.method == 'POST':
+        form = BookImportExcelForm(request.POST, request.FILES)
+        if form.is_valid():
+            excel_file = request.FILES['excel_file']
+            try:
+                import pandas as pd
+                df = pd.read_excel(excel_file)
+                
+                # Normalize columns to lower case/strip
+                df.columns = df.columns.astype(str).str.lower().str.strip()
+                
+                # Expected columns mapping
+                # Tên sách | Thể loại | Tác giả | Năm XB | NXB | Số lượng | Đơn giá | Ngày nhập | ISBN | Phiên bản | Ngôn ngữ | Mô tả
+                
+                success_count = 0
+                error_count = 0
+                errors = []
+                
+                with transaction.atomic():
+                    # Create one receipt for the whole batch? Or one per row?
+                    # Let's create one receipt for the whole import file
+                    from django.utils import timezone
+                    
+                    # Assume import date is today if not specified or mixed. 
+                    # If file has 'Ngày nhập', use it. But receipt has one date.
+                    # Strategy: One receipt per import session (now).
+                    receipt = BookImportReceipt.objects.create(
+                        import_date=timezone.now(),
+                        created_by=request.user.username,
+                        notes=f"Nhập khẩu lô hàng từ file {excel_file.name}"
+                    )
+                    
+                    for index, row in df.iterrows():
+                        try:
+                            # 1. Parse Data
+                            book_title_name = str(row.get('tên sách', '')).strip()
+                            if not book_title_name or pd.isna(row.get('tên sách')):
+                                continue # Skip empty rows
+                                
+                            category_name = str(row.get('thể loại', '')).strip()
+                            author_names_str = str(row.get('tác giả', '')).strip()
+                            
+                            publish_year = row.get('năm xb', 2025)
+                            publisher = str(row.get('nxb', '')).strip()
+                            
+                            quantity = row.get('số lượng', 1)
+                            unit_price = row.get('đơn giá', 0)
+                            
+                            # Optional fields
+                            isbn = str(row.get('isbn', '')).strip()
+                            if isbn == 'nan': isbn = ''
+                            
+                            edition = str(row.get('phiên bản', '')).strip()
+                            if edition == 'nan': edition = ''
+                                
+                            language = str(row.get('ngôn ngữ', 'Tiếng Việt')).strip()
+                            if language == 'nan': language = 'Tiếng Việt'
+                            
+                            description = str(row.get('mô tả', '')).strip()
+                            if description == 'nan': description = ''
+                            
+                            # Clean numbers
+                            try: publish_year = int(publish_year)
+                            except: publish_year = 2025
+                            
+                            try: quantity = int(quantity)
+                            except: quantity = 1
+                            if quantity < 1: quantity = 1
+                            
+                            try: unit_price = int(unit_price)
+                            except: unit_price = 0
+                            
+                            # 2. Get/Create Category
+                            category, _ = Category.objects.get_or_create(category_name=category_name)
+                            
+                            # 3. Get/Create BookTitle
+                            book_title, created = BookTitle.objects.get_or_create(
+                                book_title=book_title_name,
+                                category=category,
+                                defaults={'description': description}
+                            )
+                            
+                            # 4. Handle Authors
+                            author_names = [name.strip() for name in author_names_str.split(',') if name.strip()]
+                            current_authors = book_title.authors.all()
+                            
+                            for name in author_names:
+                                author, _ = Author.objects.get_or_create(author_name=name)
+                                if author not in current_authors:
+                                    AuthorDetail.objects.create(author=author, book_title=book_title)
+                            
+                            # 5. Get/Create Book
+                            book, book_created = Book.objects.get_or_create(
+                                book_title=book_title,
+                                publish_year=publish_year,
+                                publisher=publisher,
+                                isbn=isbn if isbn else None,
+                                defaults={
+                                    'quantity': quantity,
+                                    'remaining_quantity': quantity,
+                                    'unit_price': unit_price,
+                                    'edition': edition,
+                                    'language': language
+                                }
+                            )
+                            
+                            if not book_created:
+                                book.quantity += quantity
+                                book.remaining_quantity += quantity
+                                book.save(update_fields=['quantity', 'remaining_quantity'])
+                            
+                            # 6. Create Import Detail
+                            BookImportDetail.objects.create(
+                                receipt=receipt,
+                                book=book,
+                                quantity=quantity,
+                                unit_price=unit_price
+                            )
+                            
+                            success_count += 1
+                            
+                        except Exception as e:
+                            error_count += 1
+                            errors.append(f"Dòng {index+2}: {str(e)}")
+                
+                messages.success(request, f"Đã nhập thành công {success_count} dòng. Lỗi {error_count} dòng.")
+                if errors:
+                    for err in errors[:5]: # Show first 5 errors
+                        messages.warning(request, err)
+                        
+                return redirect('book_import_list')
+                
+            except ImportError:
+                messages.error(request, "Hệ thống thiếu thư viện 'pandas' hoặc 'openpyxl'. Vui lòng liên hệ Admin.")
+            except Exception as e:
+                messages.error(request, f"Lỗi xử lý file: {str(e)}")
+    else:
+        form = BookImportExcelForm()
+    
+    return render(request, 'app/books/book_import_excel.html', {
+        'form': form,
+        'page_title': 'Nhập sách từ Excel'
+    })
+
+
 @permission_required('Lập phiếu nhập sách', 'view')
 def book_import_detail_view(request, import_id):
     """
@@ -1083,14 +1233,16 @@ def return_book_list_view(request):
     
     # Lọc theo loại
     if filter_type == 'overdue':
-        from django.db.models import Q
+        from django.db.models import Q, F as DjangoF
+        # Quá hạn: ngày trả > ngày phải trả (tính theo ngày)
         receipts = receipts.filter(
-            due_date__date__lt=models.F('return_date__date')
+            return_date__date__gt=DjangoF('due_date__date')
         )
     elif filter_type == 'ontime':
         from django.db.models import Q, F as DjangoF
-        receipts = receipts.exclude(
-            due_date__date__lt=DjangoF('return_date__date')
+        # Đúng hạn: ngày trả <= ngày phải trả (tính theo ngày)
+        receipts = receipts.filter(
+            return_date__date__lte=DjangoF('due_date__date')
         )
     
     # Tìm kiếm theo tên độc giả hoặc tên sách
