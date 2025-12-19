@@ -76,8 +76,18 @@ document.addEventListener('DOMContentLoaded', function () {
         updateSubmitButton();
     });
 
+    const activeClasses = ['bg-blue-600', 'text-white', 'border-blue-600'];
+
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function () {
+            // Reset all buttons to inactive state
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                activeClasses.forEach(c => b.classList.remove(c));
+            });
+
+            // Set this button as active
+            activeClasses.forEach(c => this.classList.add(c));
+
             currentFilter = this.dataset.filter;
             loadReturnHistory(currentFilter);
         });

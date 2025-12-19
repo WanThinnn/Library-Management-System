@@ -766,14 +766,18 @@ def borrow_book_list_view(request):
     from django.utils import timezone
     
     # Mặc định sort
-    receipts = BorrowReturnReceipt.objects.filter(return_date__isnull=True).order_by('-borrow_date')
+    receipts = BorrowReturnReceipt.objects.all().order_by('-borrow_date')
     
-    # Filter theo trạng thái
-    status = request.GET.get('status', 'unreturned')
-    if status == 'all':
-        receipts = BorrowReturnReceipt.objects.all().order_by('-borrow_date')
+    # Filter theo trạng thái (nhận cả 'filter' và 'status' param)
+    status = request.GET.get('filter') or request.GET.get('status', 'all')
+    
+    if status == 'unreturned':
+        receipts = receipts.filter(return_date__isnull=True)
     elif status == 'overdue':
-        receipts = receipts.filter(due_date__lt=timezone.now())
+        receipts = receipts.filter(return_date__isnull=True, due_date__lt=timezone.now())
+    elif status == 'returned':
+        receipts = receipts.filter(return_date__isnull=False)
+    # 'all' = no filter, show all
     
     # Search
     search = request.GET.get('search', '')
@@ -1446,18 +1450,18 @@ def report_overdue_books_view(request):
     else:
         report_date = timezone.now()
     
-    # Lấy danh sách phiếu mượn chưa trả và quá hạn (D3)
-    # return_date = NULL và due_date < report_date
+    # Lấy danh sách phiếu mượn đã trả trễ
+    # return_date > due_date (đã trả nhưng trả trễ hơn hạn)
     overdue_receipts = BorrowReturnReceipt.objects.filter(
-        return_date__isnull=True,  # Chưa trả
-        due_date__lt=report_date   # Quá hạn
+        return_date__isnull=False,  # Đã trả
+        return_date__gt=models.F('due_date')  # Trả sau hạn
     ).select_related('book_item__book__book_title')
     
     # Tạo danh sách thống kê (D4)
     report_data = []
     for idx, receipt in enumerate(overdue_receipts, start=1):
-        # Tính số ngày trễ
-        overdue_days = (report_date.date() - receipt.due_date.date()).days
+        # Tính số ngày trễ = return_date - due_date
+        overdue_days = (receipt.return_date.date() - receipt.due_date.date()).days
         
         book_title = receipt.book_item.book.book_title.book_title if receipt.book_item else "N/A"
         
@@ -2099,6 +2103,7 @@ def user_edit_view(request, user_id):
                                 else:
                                     library_user.user_group = user_group
                                     library_user.position = role_name
+                                    library_user.is_active = is_active  # Đồng bộ is_active
                                     library_user.save()
                                     
                             except UserGroup.DoesNotExist:

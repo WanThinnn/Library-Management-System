@@ -392,8 +392,20 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById(config.borrowDateInputId)?.addEventListener('change', checkFormValid);
 
     // Tab 3: Filter
+    const activeClasses = ['bg-blue-600', 'text-white', 'border-blue-600'];
+    const inactiveClasses = ['bg-transparent', 'text-gray-700', 'dark:text-gray-300'];
+
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function () {
+            // Reset all buttons to inactive state
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                activeClasses.forEach(c => b.classList.remove(c));
+                // Don't add inactive classes, just remove active ones
+            });
+
+            // Set this button as active
+            activeClasses.forEach(c => this.classList.add(c));
+
             currentFilter = this.dataset.filter;
             loadBorrowHistory(currentFilter);
         });
