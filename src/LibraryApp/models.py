@@ -716,9 +716,15 @@ class BookImportDetail(models.Model):
         # Only update book quantity if this is a NEW import detail
         # (avoid double-counting if updating existing detail)
         if is_new:
-            # Cập nhật số lượng sách trong kho
-            self.book.quantity += self.quantity
-            self.book.remaining_quantity += self.quantity
+            # Check if book was just created (has initial quantity=1 from validator)
+            if hasattr(self.book, '_just_created') and self.book._just_created:
+                # Book was just created, set quantity instead of adding
+                self.book.quantity = self.quantity
+                self.book.remaining_quantity = self.quantity
+            else:
+                # Book already existed, add to existing quantity
+                self.book.quantity += self.quantity
+                self.book.remaining_quantity += self.quantity
             self.book.save(update_fields=['quantity', 'remaining_quantity'])
             
             # Tạo các BookItem tương ứng (only for new imports)

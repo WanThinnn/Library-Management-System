@@ -55,7 +55,7 @@
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-blue-600 dark:bg-blue-700 text-white">
+                    <thead class="bg-blue-500 dark:bg-blue-700 text-white">
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Tựa sách</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Thể loại</th>
@@ -69,11 +69,16 @@
                         {% for detail in import_details %}
                             <tr class="hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
                                 <td class="px-4 py-3 text-sm">
-                                    <strong class="text-gray-900 dark:text-gray-100">{{ detail.book.book_title.book_title }}</strong>
+                                    {% comment %} <strong class="text-gray-900 dark:text-gray-100">{{ detail.book.book_title.book_title }}</strong> {% endcomment %}
+                                    <a href="{% url 'book_detail' detail.book.id %}" class="group">
+                                        <strong class="text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:underline transition-colors">
+                                            {{ detail.book.book_title.book_title }}
+                                        </strong>
+                                    </a>
                                     <br>
-                                    <small class="text-gray-500">
+                                    {% comment %} <small class="text-gray-500">
                                         {{ detail.book.book_title.category.category_name }}
-                                    </small>
+                                    </small> {% endcomment %}
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ detail.book.book_title.category.category_name }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ detail.book.publish_year }}</td>

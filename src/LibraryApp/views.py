@@ -512,18 +512,21 @@ def book_import_view(request):
                         # Book exists with same details → will update quantity via BookImportDetail
                     else:
                         # No exact match → create new Book record
-                        # Start with import quantity to pass validation (Book.quantity has MinValueValidator(1))
+                        # Set quantity=1 initially (min validator requirement)
+                        # BookImportDetail.save() will handle the actual quantity update
                         book = Book.objects.create(
                             book_title=book_title,
                             publish_year=publish_year,
                             publisher=publisher,
                             isbn=isbn if isbn else None,
-                            quantity=quantity,
-                            remaining_quantity=quantity,
+                            quantity=1,
+                            remaining_quantity=1,
                             unit_price=unit_price,
                             edition=edition,
                             language=language
                         )
+                        # Mark as just created so we know to set quantity properly
+                        book._just_created = True
                     # Note: BookImportDetail.save() handles quantity increment
                     # and BookItem creation automatically
                     
@@ -694,18 +697,21 @@ def book_import_excel_view(request):
                                 book = existing_books.first()
                             else:
                                 # Create new Book record for different version
-                                # Start with import quantity to pass validation
+                                # Set quantity=1 initially (min validator requirement)
+                                # BookImportDetail.save() will handle the actual quantity update
                                 book = Book.objects.create(
                                     book_title=book_title,
                                     publish_year=publish_year,
                                     publisher=publisher,
                                     isbn=isbn if isbn else None,
-                                    quantity=quantity,
-                                    remaining_quantity=quantity,
+                                    quantity=1,
+                                    remaining_quantity=1,
                                     unit_price=unit_price,
                                     edition=edition,
                                     language=language
                                 )
+                                # Mark as just created so we know to set quantity properly
+                                book._just_created = True
                             
                             # Note: BookImportDetail.save() handles quantity increment
                             # and BookItem creation automatically
