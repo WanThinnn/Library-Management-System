@@ -725,7 +725,10 @@ class BookImportDetail(models.Model):
                 # Book already existed, add to existing quantity
                 self.book.quantity += self.quantity
                 self.book.remaining_quantity += self.quantity
-            self.book.save(update_fields=['quantity', 'remaining_quantity'])
+            
+            # Always update to latest unit price
+            self.book.unit_price = self.unit_price
+            self.book.save(update_fields=['quantity', 'remaining_quantity', 'unit_price'])
             
             # Tạo các BookItem tương ứng (only for new imports)
             from django.db import transaction

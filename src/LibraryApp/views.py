@@ -501,10 +501,17 @@ def book_import_view(request):
                         publisher=publisher
                     )
                     
-                    # Check if any existing book has matching ISBN (if provided)
+                    # Check ISBN and Edition - both must match for same book
                     book = None
                     if isbn:
                         existing_books = existing_books.filter(isbn=isbn)
+                    
+                    # Different edition = different book (e.g., "Tái bản lần 1" vs "Tái bản lần 2")
+                    if edition:
+                        existing_books = existing_books.filter(edition=edition)
+                    else:
+                        # Only match books with no edition specified
+                        existing_books = existing_books.filter(edition__isnull=True) | existing_books.filter(edition='')
                     
                     # If we found exact matches, use the first one (update quantity)
                     if existing_books.exists():
@@ -687,10 +694,16 @@ def book_import_excel_view(request):
                                 publisher=publisher
                             )
                             
-                            # Check ISBN if provided
+                            # Check ISBN and Edition
                             book = None
                             if isbn:
                                 existing_books = existing_books.filter(isbn=isbn)
+                            
+                            # Different edition = different book
+                            if edition:
+                                existing_books = existing_books.filter(edition=edition)
+                            else:
+                                existing_books = existing_books.filter(edition__isnull=True) | existing_books.filter(edition='')
                             
                             if existing_books.exists():
                                 # Book exists with same details → update quantity
