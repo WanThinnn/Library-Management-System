@@ -394,12 +394,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Tab 3: Filter
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function () {
-            document.querySelectorAll('.filter-btn').forEach(b => {
-                b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
-                b.classList.add('border-gray-300', 'text-gray-700');
-            });
-            this.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
-            this.classList.remove('border-gray-300', 'text-gray-700');
             currentFilter = this.dataset.filter;
             loadBorrowHistory(currentFilter);
         });
