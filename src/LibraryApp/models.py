@@ -707,22 +707,40 @@ class BookImportDetail(models.Model):
     def save(self, *args, **kwargs):
         # Tự động tính thành tiền
         self.amount = self.quantity * self.unit_price
+        
+        # Check if this is a new import detail (not updating existing one)
+        is_new = self.pk is None
+        
         super().save(*args, **kwargs)
         
-        # Cập nhật số lượng sách trong kho
-        self.book.quantity += self.quantity
-        self.book.remaining_quantity += self.quantity
-        self.book.save(update_fields=['quantity', 'remaining_quantity'])
-        
-        # Tạo các BookItem tương ứng
-        for i in range(self.quantity):
-            existing_items = BookItem.objects.filter(book=self.book).count()
-            barcode = f"{self.book.id:04d}-{existing_items + i + 1:03d}"
-            BookItem.objects.create(
-                book=self.book,
-                barcode=barcode,
-                is_borrowed=False
-            )
+        # Only update book quantity if this is a NEW import detail
+        # (avoid double-counting if updating existing detail)
+        if is_new:
+            # Cập nhật số lượng sách trong kho
+            self.book.quantity += self.quantity
+            self.book.remaining_quantity += self.quantity
+            self.book.save(update_fields=['quantity', 'remaining_quantity'])
+            
+            # Tạo các BookItem tương ứng (only for new imports)
+            from django.db import transaction
+            for i in range(self.quantity):
+                with transaction.atomic():
+                    # Query count inside atomic block for each item to avoid race conditions
+                    existing_items = BookItem.objects.filter(book=self.book).count()
+                    # Barcode format: BOOK_ID-SEQUENCE (e.g., 0001-001)
+                    sequence = existing_items + 1
+                    barcode = f"{self.book.id:04d}-{sequence:03d}"
+                    
+                    # Double-check uniqueness before creating
+                    while BookItem.objects.filter(barcode=barcode).exists():
+                        sequence += 1
+                        barcode = f"{self.book.id:04d}-{sequence:03d}"
+                    
+                    BookItem.objects.create(
+                        book=self.book,
+                        barcode=barcode,
+                        is_borrowed=False
+                    )
         
         # Cập nhật tổng tiền phiếu nhập
         self.receipt.save()

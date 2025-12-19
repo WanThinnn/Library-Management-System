@@ -35,19 +35,13 @@
       {% csrf_token %}
 
       <!-- Messages -->
-      {% if messages %} {% for message in messages %}
+      {% comment %} {% if messages %} {% for message in messages %}
       <div
         class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-700{% else %}bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400{% endif %} p-4 rounded mb-4"
       >
         {{ message }}
       </div>
-      {% endfor %} {% endif %} {% if form.non_field_errors %}
-      <div
-        class="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4"
-      >
-        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
-      </div>
-      {% endif %}
+      {% endfor %} {% endif %} {% endcomment %}
 
       <!-- Book Title -->
       <div class="mb-4">
@@ -55,11 +49,7 @@
           >{{ form.book_title.label }}
           <span class="text-red-500">*</span></label
         >
-        {{ form.book_title }} {% if form.book_title.errors %}
-        <p class="text-red-500 text-sm mt-1">
-          {% for e in form.book_title.errors %}{{ e }}{% endfor %}
-        </p>
-        {% endif %}
+        {{ form.book_title }}
       </div>
 
       <!-- Row: Category, Publisher -->
@@ -69,22 +59,14 @@
             >{{ form.category.label }}
             <span class="text-red-500">*</span></label
           >
-          {{ form.category }} {% if form.category.errors %}
-          <p class="text-red-500 text-sm mt-1">
-            {% for e in form.category.errors %}{{ e }}{% endfor %}
-          </p>
-          {% endif %}
+          {{ form.category }}
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >{{ form.publisher.label }}
             <span class="text-red-500">*</span></label
           >
-          {{ form.publisher }} {% if form.publisher.errors %}
-          <p class="text-red-500 text-sm mt-1">
-            {% for e in form.publisher.errors %}{{ e }}{% endfor %}
-          </p>
-          {% endif %}
+          {{ form.publisher }}
         </div>
       </div>
 
@@ -95,11 +77,7 @@
             >{{ form.publish_year.label }}
             <span class="text-red-500">*</span></label
           >
-          {{ form.publish_year }} {% if form.publish_year.errors %}
-          <p class="text-red-500 text-sm mt-1">
-            {% for e in form.publish_year.errors %}{{ e }}{% endfor %}
-          </p>
-          {% endif %}
+          {{ form.publish_year }}
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
@@ -135,13 +113,11 @@
         <div id="div_id_new_authors" class="hidden">
             {{ form.new_authors }}
         </div>
-        <!-- We keep id_new_authors in DOM but type=hidden via JS -->
+        <!-- Hidden inputs for reliable syncing -->
+        <input type="hidden" name="author_ids" id="author_ids_hidden" value="">
+        <input type="hidden" name="new_author_names" id="new_author_names_hidden" value="">
 
-        {% if form.authors.errors %}
-        <p class="text-red-500 text-sm mt-1">
-          {% for e in form.authors.errors %}{{ e }}{% endfor %}
-        </p>
-        {% endif %}
+
       </div>
 
       <!-- Description -->
@@ -172,33 +148,21 @@
             >{{ form.quantity.label }}
             <span class="text-red-500">*</span></label
           >
-          {{ form.quantity }} {% if form.quantity.errors %}
-          <p class="text-red-500 text-sm mt-1">
-            {% for e in form.quantity.errors %}{{ e }}{% endfor %}
-          </p>
-          {% endif %}
+          {{ form.quantity }}
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >{{ form.unit_price.label }}
             <span class="text-red-500">*</span></label
           >
-          {{ form.unit_price }} {% if form.unit_price.errors %}
-          <p class="text-red-500 text-sm mt-1">
-            {% for e in form.unit_price.errors %}{{ e }}{% endfor %}
-          </p>
-          {% endif %}
+          {{ form.unit_price }}
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >{{ form.import_date.label }}
             <span class="text-red-500">*</span></label
           >
-          {{ form.import_date }} {% if form.import_date.errors %}
-          <p class="text-red-500 text-sm mt-1">
-            {% for e in form.import_date.errors %}{{ e }}{% endfor %}
-          </p>
-          {% endif %}
+          {{ form.import_date }}
         </div>
       </div>
 
@@ -278,6 +242,9 @@
   </style>
 
   <script>
+  // Global variable to store Tom Select instance
+  let tomSelectInstance = null;
+  let originalContainer = null;
 
   document.addEventListener('DOMContentLoaded', function() {
       // Initialize Tom Select
@@ -306,8 +273,7 @@
       
       const options = [];
       const items = [];
-      const originalContainer = document.getElementById('id_authors');
-      let tomSelectInstance = null;
+      originalContainer = document.getElementById('id_authors');
       
       if (originalContainer) {
           // If it's a SELECT (SelectMultiple), extract options
@@ -366,11 +332,11 @@
               items: items
           });
           
-          // Hide redundant New Authors field
+          // Hide the visual container but keep the input functional
           const newAuthorsRow = document.getElementById('div_id_new_authors');
           if (newAuthorsRow) newAuthorsRow.classList.add('hidden');
-          const newAuthorsInput = document.getElementById('id_new_authors');
-          if (newAuthorsInput) newAuthorsInput.type = 'hidden';
+          // Keep id_new_authors as text input (not hidden) so it can be submitted
+          // Just hide it visually via parent container
       }
 
       // HANDLE FORM SUMBIT
@@ -379,27 +345,46 @@
           form.addEventListener('submit', function(e) {
               // Basic Validation for Quantity/Price
               const quantityField = document.querySelector('input[name="quantity"]');
-              if (quantityField && (!quantityField.value || parseInt(quantityField.value) < 1)) {
-                  quantityField.value = 1;
+              console.log('DEBUG: Quantity field value before validation:', quantityField ? quantityField.value : 'not found');
+              if (quantityField) {
+                  const qtyValue = quantityField.value.trim();
+                  if (!qtyValue || isNaN(qtyValue) || parseInt(qtyValue) < 1) {
+                      console.log('DEBUG: Setting quantity to 1 (was:', qtyValue, ')');
+                      quantityField.value = '1';
+                  }
               }
               const unitPriceField = document.querySelector('input[name="unit_price"]');
-              if (unitPriceField && (!unitPriceField.value || parseInt(unitPriceField.value) < 0)) {
-                  unitPriceField.value = 0;
+              console.log('DEBUG: Unit price field value before validation:', unitPriceField ? unitPriceField.value : 'not found');
+              if (unitPriceField) {
+                  const priceValue = unitPriceField.value.trim();
+                  if (!priceValue || isNaN(priceValue) || parseInt(priceValue) < 0) {
+                      console.log('DEBUG: Setting unit price to 0 (was:', priceValue, ')');
+                      unitPriceField.value = '0';
+                  }
               }
 
               // SYNC AUTHORS
               if (tomSelectInstance && originalContainer) {
-                  const values = tomSelectInstance.getValue(); // IDs or "new_Name"
+                  let values = tomSelectInstance.getValue(); // IDs or "new_Name"
+                  
+                  // Convert to array if it's not already
+                  if (!Array.isArray(values)) {
+                      values = values ? [values] : [];
+                  }
+                  
                   const existingIds = [];
                   const newNames = [];
                   
+                  console.log('DEBUG: Raw values from Tom Select:', values);
+                  
                   // Separate existing IDs vs New Names
                   values.forEach(val => {
-                      if (String(val).startsWith('new_')) {
-                          newNames.push(val.substring(4));
+                      const valStr = String(val); // Force string comparison
+                      if (valStr.startsWith('new_')) {
+                          newNames.push(valStr.substring(4));
                       } else {
                           // Allow loose check for IDs
-                          existingIds.push(val); 
+                          existingIds.push(valStr); 
                       }
                   });
                   
@@ -411,7 +396,7 @@
                       // Select matching IDs
                       existingIds.forEach(id => {
                           for (let i = 0; i < originalContainer.options.length; i++) {
-                              if (originalContainer.options[i].value == id) {
+                              if (String(originalContainer.options[i].value) === String(id)) {
                                   originalContainer.options[i].selected = true;
                                   break;
                               }
@@ -434,11 +419,18 @@
                        }
                   }
                   
-                  // Sync New Names
+                  // Sync New Names to the actual form field 'new_authors'
                   const newAuthorsInput = document.getElementById('id_new_authors');
                   if (newAuthorsInput) {
-                      newAuthorsInput.value = newNames.join(',');
+                      newAuthorsInput.value = newNames.join(', ');
+                      console.log('DEBUG: Synced new_authors input:', newAuthorsInput.value);
                   }
+                  
+                  // Debug: Check what's being synced
+                  console.log('DEBUG: Existing author IDs:', existingIds);
+                  console.log('DEBUG: New author names:', newNames);
+                  console.log('DEBUG: Original SELECT selected:', 
+                      Array.from(originalContainer.selectedOptions || []).map(o => o.value));
               }
               // Normal submit proceeds now
           });

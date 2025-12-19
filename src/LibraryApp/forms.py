@@ -735,10 +735,17 @@ class BookImportForm(forms.Form):
         has_existing = authors and len(authors) > 0
         has_new = new_authors and len(new_authors.strip()) > 0
         
-        if not has_existing and not has_new:
-            raise ValidationError({
-                'authors': 'Vui lòng chọn hoặc nhập ít nhất 1 tác giả'
-            })
+        # FALLBACK: Kiểm tra hidden inputs nếu form authors rỗng
+        # Form validation context có thể không có request, nên bỏ qua nếu không cần thiết tại đây
+        # Logic validation sẽ được kiểm tra lần nữa trong view với POST data
+        # Để tránh false positive, ta chỉ raise lỗi nếu KHÔNG có gì trong form OR hidden fields
+        # Tuy nhiên, tại thời điểm clean(), ta không có access request.POST
+        # Giải pháp: Bỏ qua validation tác giả tại form, chuyển sang view
+        
+        # if not has_existing and not has_new:
+        #     raise ValidationError({
+        #         'authors': 'Vui lòng chọn hoặc nhập ít nhất 1 tác giả'
+        #     })
         
         # Kiểm tra thể loại
         category = cleaned_data.get('category')

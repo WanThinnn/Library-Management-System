@@ -33,17 +33,19 @@ document.addEventListener('DOMContentLoaded', function() {
 let lastScroll = 0;
 const navbar = document.querySelector('.navbar');
 
-window.addEventListener('scroll', function() {
-  const currentScroll = window.pageYOffset;
-  
-  if (currentScroll > 100) {
-    navbar.classList.add('navbar-scroll');
-  } else {
-    navbar.classList.remove('navbar-scroll');
-  }
-  
-  lastScroll = currentScroll;
-});
+if (navbar) {
+  window.addEventListener('scroll', function() {
+    const currentScroll = window.pageYOffset;
+    
+    if (currentScroll > 100) {
+      navbar.classList.add('navbar-scroll');
+    } else {
+      navbar.classList.remove('navbar-scroll');
+    }
+    
+    lastScroll = currentScroll;
+  });
+}
 
 // ===== ALERT AUTO-DISMISS =====
 document.addEventListener('DOMContentLoaded', function() {

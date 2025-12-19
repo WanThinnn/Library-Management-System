@@ -431,8 +431,22 @@ def book_import_view(request):
                     # Lấy dữ liệu từ form
                     book_title_name = form.cleaned_data['book_title']
                     category = form.cleaned_data['category']
-                    authors = list(form.cleaned_data['authors']) # Convert to list to append new ones
-                    new_authors_str = form.cleaned_data.get('new_authors', '')
+                    
+                    # Lấy tác giả từ form (TomSelect đã sync vào form fields)
+                    authors = list(form.cleaned_data.get('authors', []))
+                    new_authors_str = form.cleaned_data.get('new_authors', '').strip()
+                    
+                    # VALIDATION: Phải có ít nhất 1 tác giả
+                    if not authors and not new_authors_str:
+                        messages.error(request, 'Tác giả: Vui lòng chọn hoặc nhập ít nhất 1 tác giả')
+                        from datetime import date
+                        context = {
+                            'form': form,
+                            'params': params,
+                            'min_year': date.today().year - params.book_return_period,
+                            'page_title': 'Tiếp nhận sách mới'
+                        }
+                        return render(request, 'app/books/book_import.html', context)
                     
                     publish_year = form.cleaned_data['publish_year']
                     publisher = form.cleaned_data['publisher']
@@ -479,26 +493,39 @@ def book_import_view(request):
                                 book_title=book_title
                             )
                     
-                    # Tạo hoặc cập nhật Book
-                    book, book_created = Book.objects.get_or_create(
+                    # Smart duplicate detection:
+                    # Find existing books with same title, publisher, year
+                    existing_books = Book.objects.filter(
                         book_title=book_title,
                         publish_year=publish_year,
-                        publisher=publisher,
-                        isbn=isbn if isbn else None,
-                        defaults={
-                            'quantity': quantity,  # Dùng quantity từ form, không hardcode!
-                            'remaining_quantity': quantity,  # Ban đầu = quantity (chưa mượn)
-                            'unit_price': unit_price,
-                            'edition': edition,
-                            'language': language
-                        }
+                        publisher=publisher
                     )
                     
-                    # Nếu book đã tồn tại, cập nhật số lượng
-                    if not book_created:
-                        book.quantity += quantity
-                        book.remaining_quantity += quantity
-                        book.save(update_fields=['quantity', 'remaining_quantity'])
+                    # Check if any existing book has matching ISBN (if provided)
+                    book = None
+                    if isbn:
+                        existing_books = existing_books.filter(isbn=isbn)
+                    
+                    # If we found exact matches, use the first one (update quantity)
+                    if existing_books.exists():
+                        book = existing_books.first()
+                        # Book exists with same details → will update quantity via BookImportDetail
+                    else:
+                        # No exact match → create new Book record
+                        # Start with import quantity to pass validation (Book.quantity has MinValueValidator(1))
+                        book = Book.objects.create(
+                            book_title=book_title,
+                            publish_year=publish_year,
+                            publisher=publisher,
+                            isbn=isbn if isbn else None,
+                            quantity=quantity,
+                            remaining_quantity=quantity,
+                            unit_price=unit_price,
+                            edition=edition,
+                            language=language
+                        )
+                    # Note: BookImportDetail.save() handles quantity increment
+                    # and BookItem creation automatically
                     
                     # Tạo phiếu nhập
                     receipt = BookImportReceipt.objects.create(
@@ -650,25 +677,39 @@ def book_import_excel_view(request):
                                 if author not in current_authors:
                                     AuthorDetail.objects.create(author=author, book_title=book_title)
                             
-                            # 5. Get/Create Book
-                            book, book_created = Book.objects.get_or_create(
+                            # 5. Smart duplicate detection for Excel import
+                            existing_books = Book.objects.filter(
                                 book_title=book_title,
                                 publish_year=publish_year,
-                                publisher=publisher,
-                                isbn=isbn if isbn else None,
-                                defaults={
-                                    'quantity': quantity,
-                                    'remaining_quantity': quantity,
-                                    'unit_price': unit_price,
-                                    'edition': edition,
-                                    'language': language
-                                }
+                                publisher=publisher
                             )
                             
-                            if not book_created:
-                                book.quantity += quantity
-                                book.remaining_quantity += quantity
-                                book.save(update_fields=['quantity', 'remaining_quantity'])
+                            # Check ISBN if provided
+                            book = None
+                            if isbn:
+                                existing_books = existing_books.filter(isbn=isbn)
+                            
+                            if existing_books.exists():
+                                # Book exists with same details → update quantity
+                                book = existing_books.first()
+                            else:
+                                # Create new Book record for different version
+                                # Start with import quantity to pass validation
+                                book = Book.objects.create(
+                                    book_title=book_title,
+                                    publish_year=publish_year,
+                                    publisher=publisher,
+                                    isbn=isbn if isbn else None,
+                                    quantity=quantity,
+                                    remaining_quantity=quantity,
+                                    unit_price=unit_price,
+                                    edition=edition,
+                                    language=language
+                                )
+                            
+                            # Note: BookImportDetail.save() handles quantity increment
+                            # and BookItem creation automatically
+                            
                             
                             # 6. Create Import Detail
                             BookImportDetail.objects.create(
