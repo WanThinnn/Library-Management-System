@@ -87,10 +87,10 @@
 
                 <!-- Hành động -->
                 <div class="mt-6 flex flex-wrap gap-3">
-                    <a href="{% url 'receipt_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    <a href="{% url 'receipt_list' %}" class="hover:scale-105 duration-200 transition-transform bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         Quay lại danh sách
                     </a>
-                    <a href="{% url 'receipt_form' %}" class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    <a href="{% url 'receipt_form' %}" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         Lập phiếu mới
                     </a>
                 </div>
@@ -142,7 +142,7 @@
                         {{ receipt.reader.total_debt|floatformat:0 }}đ
                     </p>
                 </div>
-                <a href="{% url 'reader_detail' receipt.reader.id %}" class="block w-full bg-cyan-500 hover:bg-cyan-600 text-white text-center font-medium py-2 px-4 rounded-lg transition-colors">
+                <a href="{% url 'reader_detail' receipt.reader.id %}" class="hover:scale-101 duration-200 transition-transform block w-full bg-cyan-500 hover:bg-cyan-600 text-white text-center font-medium py-2 px-4 rounded-lg transition-colors">
                     Xem thông tin đầy đủ
                 </a>
             </div>

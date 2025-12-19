@@ -1232,18 +1232,16 @@ def return_book_list_view(request):
     ).select_related('reader', 'book_item__book__book_title')
     
     # Lọc theo loại
-    if filter_type == 'overdue':
-        from django.db.models import Q, F as DjangoF
-        # Quá hạn: ngày trả > ngày phải trả (tính theo ngày)
-        receipts = receipts.filter(
-            return_date__date__gt=DjangoF('due_date__date')
-        )
-    elif filter_type == 'ontime':
-        from django.db.models import Q, F as DjangoF
-        # Đúng hạn: ngày trả <= ngày phải trả (tính theo ngày)
-        receipts = receipts.filter(
-            return_date__date__lte=DjangoF('due_date__date')
-        )
+    # Lọc theo loại
+    if filter_type != 'all':
+        from django.db.models import F as DjangoF
+        
+        if filter_type == 'overdue':
+             # Quá hạn: ngày trả > ngày phải trả
+            receipts = receipts.filter(return_date__gt=DjangoF('due_date'))
+        elif filter_type in ['ontime', 'returned']:
+             # Đúng hạn: ngày trả <= ngày phải trả
+            receipts = receipts.filter(return_date__lte=DjangoF('due_date'))
     
     # Tìm kiếm theo tên độc giả hoặc tên sách
     if search:
