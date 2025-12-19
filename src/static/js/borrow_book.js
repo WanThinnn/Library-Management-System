@@ -24,15 +24,20 @@ function getConfig() {
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', function () {
-        // Remove active from all tabs
+        // Active classes (Light & Dark)
+        const activeClasses = ['active', 'border-blue-600', 'text-blue-600', 'dark:border-blue-500', 'dark:text-blue-400'];
+        // Inactive classes (Light & Dark)
+        const inactiveClasses = ['border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-200', 'dark:hover:border-gray-600'];
+
+        // Reset all tabs to inactive
         document.querySelectorAll('.tab-btn').forEach(b => {
-            b.classList.remove('active', 'border-blue-600', 'text-blue-600');
-            b.classList.add('border-transparent', 'text-gray-500');
+            b.classList.remove(...activeClasses);
+            b.classList.add(...inactiveClasses);
         });
 
-        // Add active to clicked tab
-        this.classList.add('active', 'border-blue-600', 'text-blue-600');
-        this.classList.remove('border-transparent', 'text-gray-500');
+        // Set clicked tab to active
+        this.classList.remove(...inactiveClasses);
+        this.classList.add(...activeClasses);
 
         // Hide all panes
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));

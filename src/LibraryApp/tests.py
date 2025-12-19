@@ -34,6 +34,15 @@ class LoginTest(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertIn('Tài khoản chưa được kích hoạt', str(messages[0]))
     
+    def test_user_not_found(self):
+        response = self.client.post(self.login_url, {
+            'username': 'nonexistentuser',
+            'password': 'anypassword'
+        })
+        form_errors = response.context['form'].non_field_errors()
+        self.assertEqual(len(form_errors), 1, "Should have exactly 1 error for user not found")
+        self.assertEqual(str(form_errors[0]), 'Tên đăng nhập hoặc mật khẩu không đúng.')
+
     def test_wrong_password_counting(self):
         # 1st fail
         response = self.client.post(self.login_url, {
@@ -47,8 +56,8 @@ class LoginTest(TestCase):
         form_errors = response.context['form'].non_field_errors()
         self.assertTrue(len(form_errors) > 0)
         error_msg = str(form_errors[0])
-        self.assertIn('mật khẩu', error_msg)
-        self.assertIn('4 lần thử', error_msg)
+        # Verify EXACT message content (no generic prefix)
+        self.assertEqual(error_msg, 'Sai mật khẩu. Bạn còn 4 lần thử.')
         
     def test_lockout(self):
         # Fail 5 times

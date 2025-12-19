@@ -35,13 +35,20 @@ function initData() {
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', function () {
+        // Active classes (Light & Dark)
+        const activeClasses = ['active', 'border-blue-600', 'text-blue-600', 'dark:border-blue-500', 'dark:text-blue-400'];
+        // Inactive classes (Light & Dark)
+        const inactiveClasses = ['border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'dark:text-gray-400', 'dark:hover:text-gray-200', 'dark:hover:border-gray-600'];
+
+        // Reset all tabs to inactive
         document.querySelectorAll('.tab-btn').forEach(b => {
-            b.classList.remove('active', 'border-blue-600', 'text-blue-600');
-            b.classList.add('border-transparent', 'text-gray-500');
+            b.classList.remove(...activeClasses);
+            b.classList.add(...inactiveClasses);
         });
 
-        this.classList.add('active', 'border-blue-600', 'text-blue-600');
-        this.classList.remove('border-transparent', 'text-gray-500');
+        // Set clicked tab to active
+        this.classList.remove(...inactiveClasses);
+        this.classList.add(...activeClasses);
 
         document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
 
@@ -194,19 +201,19 @@ function clearReader() {
     selectedBooks = [];
     document.getElementById('readerSearch').value = '';
     document.getElementById('selectedReaderDisplay').classList.add('hidden');
-    
+
     const readerDisplay2 = document.getElementById('selectedReaderDisplay2');
     if (readerDisplay2) {
         readerDisplay2.innerHTML = '<em class="text-gray-400">Chưa chọn</em>';
     }
-    
+
     const booksDisplay = document.getElementById('selectedBooksDisplay');
     if (booksDisplay) {
         booksDisplay.innerHTML = '<em class="text-gray-400">Chưa chọn</em>';
     }
-    
+
     document.getElementById('booksList').innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 p-3"><small>Chọn độc giả để xem sách mượn</small></div>';
-    
+
     loadReaders();
     updateSummary();
 }

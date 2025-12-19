@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.utils import timezone
 from django.db import transaction
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import Count, Q
 from datetime import datetime, timedelta
 from .models import BankAccount, Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt, Category, UserGroup, Function, Permission
@@ -57,29 +57,71 @@ def login_view(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         
-        # Check user existence and status manually
-        user_obj = User.objects.filter(username=username).first()
-        
-        if user_obj:
-            # Check inactive status first
-            if not user_obj.is_active:
-                messages.error(request, 'Tài khoản chưa được kích hoạt. Vui lòng liên hệ Admin.')
+        if username and password:
+            # Case-insensitive lookup
+            user_obj = User.objects.filter(username__iexact=username).first()
+            if not user_obj:
+                 # User not found. Let form validation handle the error generation naturally.
+                 pass
             else:
-                try:
-                    # Logic for LibraryUser (tracking attempts)
-                    lib_user = user_obj.library_user
-                    
-                    # Check lockout
-                    if lib_user.failed_login_attempts >= 5:
-                        form.add_error(None, 'Tài khoản đã bị khoá do đăng nhập sai quá 5 lần. Vui lòng liên hệ Admin hoặc sử dụng chức năng "Quên mật khẩu" để lấy lại mật khẩu.')
-                    else:
-                        # Attempt authentication
-                        user = authenticate(request, username=username, password=password)
+                # Check inactive status first
+                if not user_obj.is_active:
+                    messages.error(request, 'Tài khoản chưa được kích hoạt. Vui lòng liên hệ Admin.')
+                else:
+                    try:
+                        # Logic for LibraryUser (tracking attempts)
+                        lib_user = user_obj.library_user
                         
-                        if user:
-                            # Success -> Reset counter
-                            lib_user.failed_login_attempts = 0
-                            lib_user.save(update_fields=['failed_login_attempts'])
+                        # Check lockout
+                        if lib_user.failed_login_attempts >= 5:
+                            form.add_error(None, 'Tài khoản đã bị khoá do đăng nhập sai quá 5 lần. Vui lòng liên hệ Admin hoặc sử dụng chức năng "Quên mật khẩu" để lấy lại mật khẩu.')
+                        else:
+                            # Attempt authentication with canonical username
+                            user = authenticate(request, username=user_obj.username, password=password)
+                            
+                            if user:
+                                # Success -> Reset counter
+                                lib_user.failed_login_attempts = 0
+                                lib_user.save(update_fields=['failed_login_attempts'])
+                                login(request, user)
+                                
+                                # Welcome message
+                                if user.is_superuser:
+                                    messages.success(request, f'Chào mừng Quản trị viên {user.username}! Bạn có toàn quyền truy cập.')
+                                elif user.is_staff:
+                                    messages.success(request, f'Chào mừng {user.username}!')
+                                else:
+                                    messages.warning(request, 'Tài khoản này không có quyền truy cập hệ thống.')
+                                    logout(request)
+                                    return redirect('login')
+                                
+                                next_url = request.GET.get('next', 'home')
+                                return redirect(next_url)
+                            else:
+                                # Failed password -> Increment counter
+                                lib_user.failed_login_attempts += 1
+                                lib_user.save(update_fields=['failed_login_attempts'])
+                                
+                                remaining = 5 - lib_user.failed_login_attempts
+                                if remaining <= 0:
+                                    form.add_error(None, 'Tài khoản đã bị khoá do đăng nhập sai quá 5 lần. Vui lòng liên hệ Admin hoặc sử dụng chức năng "Quên mật khẩu" để lấy lại mật khẩu.')
+                                else:
+                                    # Trigger validation to ensure errors dict is initialized
+                                    _ = form.errors
+                                    
+                                    from django.utils.safestring import mark_safe
+                                    from django.forms.utils import ErrorList
+                                    
+                                    # Custom message as requested: just "Wrong password..."
+                                    combined_msg = mark_safe(f"Sai mật khẩu. Bạn còn {remaining} lần thử.")
+                                    
+                                    # Overwrite non-field errors to prevent duplication
+                                    form.errors['__all__'] = ErrorList([combined_msg])
+                    
+                    except (AttributeError, User.library_user.RelatedObjectDoesNotExist):
+                        # Fallback for users without LibraryUser (e.g. pure superuser)
+                        if form.is_valid():
+                            user = form.get_user()
                             login(request, user)
                             
                             # Welcome message
@@ -109,26 +151,28 @@ def login_view(request):
                                 from django.utils.safestring import mark_safe
                                 from django.forms.utils import ErrorList
                                 
-                                std_msg = form.error_messages.get('invalid_login', 'Tên đăng nhập hoặc mật khẩu không đúng.')
-                                combined_msg = mark_safe(f"{std_msg}<br>Sai mật khẩu. Bạn còn {remaining} lần thử.")
+                                # Custom message as requested: just "Wrong password..."
+                                combined_msg = mark_safe(f"Sai mật khẩu. Bạn còn {remaining} lần thử.")
                                 
                                 # Overwrite non-field errors to prevent duplication
                                 form.errors['__all__'] = ErrorList([combined_msg])
                 
-                except (AttributeError, User.library_user.RelatedObjectDoesNotExist):
-                    # Fallback for users without LibraryUser (e.g. pure superuser)
-                    if form.is_valid():
-                        user = form.get_user()
-                        login(request, user)
-                        if user.is_superuser:
-                            messages.success(request, f'Chào mừng Quản trị viên {user.username}! Bạn có toàn quyền truy cập.')
-                        
-                        next_url = request.GET.get('next', 'home')
-                        return redirect(next_url)
-                    else:
-                        form.add_error(None, 'Tên đăng nhập hoặc mật khẩu không đúng.')
+                    except (AttributeError, ObjectDoesNotExist):
+                        # Fallback for users without LibraryUser (e.g. pure superuser)
+                        if form.is_valid():
+                            user = form.get_user()
+                            login(request, user)
+                            if user.is_superuser:
+                                messages.success(request, f'Chào mừng Quản trị viên {user.username}! Bạn có toàn quyền truy cập.')
+                            
+                            next_url = request.GET.get('next', 'home')
+                            return redirect(next_url)
+                        else:
+                            # Form validation (triggered by is_valid) already added the error.
+                            pass
         else:
-             form.add_error(None, 'Tên đăng nhập hoặc mật khẩu không đúng.')
+             # User not found. Let form validation handle the error generation naturally.
+             pass
     else:
         form = LibraryLoginForm()
     
