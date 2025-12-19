@@ -37,13 +37,13 @@
                        value="{{ year }}" min="2000" max="2100" required>
             </div>
             <div class="md:col-span-6 flex flex-wrap gap-2">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <button type="submit" class="hover:scale-105 duration-200 transition-transform bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Xem báo cáo
                 </button>
-                <a href="{% url 'report_borrow_by_category_excel' %}?month={{ month }}&year={{ year }}"  class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <a href="{% url 'report_borrow_by_category_excel' %}?month={{ month }}&year={{ year }}"  class="hover:scale-105 duration-200 transition-transform bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Xuất Excel
                 </a>
-                <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <button onclick="window.print()" class="hover:scale-105 duration-200 transition-transform bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     In báo cáo
                 </button>
             </div>

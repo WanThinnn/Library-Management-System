@@ -12,7 +12,7 @@
             </h1>
             <p class="text-gray-500">Quản lý tài khoản người dùng hệ thống</p>
         </div>
-        <a href="{% url 'user_create' %}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+        <a href="{% url 'user_create' %}" class="hover:scale-105 duration-200 transition-transform bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
             Tạo người dùng mới
         </a>
     </div>
@@ -67,13 +67,13 @@
                     <td class="px-4 py-3 text-sm">
                         <div class="flex gap-1">
                             <a href="{% url 'user_edit' item.user.id %}" 
-                               class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white text-xs font-medium py-1 px-2 rounded transition-colors"
+                               class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white text-xs font-medium py-1 px-2 rounded transition-colors"
                                title="Chỉnh sửa">
                                 Sửa
                             </a>
                             {% if item.user.id != request.user.id %}
                             <a href="{% url 'user_delete' item.user.id %}" 
-                               class="bg-red-500 hover:bg-red-600 text-white text-xs font-medium py-1 px-2 rounded transition-colors"
+                               class="hover:scale-105 duration-200 transition-transform bg-red-500 hover:bg-red-600 text-white text-xs font-medium py-1 px-2 rounded transition-colors"
                                title="Xóa"
                                onclick="return confirm('Bạn có chắc muốn xóa người dùng {{ item.user.username }}?')">
                                 Xóa

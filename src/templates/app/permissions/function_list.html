@@ -13,10 +13,10 @@
 
 <!-- Actions -->
 <div class="mb-6 flex flex-wrap gap-3">
-    <a href="{% url 'function_create' %}" class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+    <a href="{% url 'function_create' %}" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
         + Thêm chức năng mới
     </a>
-    <a href="{% url 'user_group_list' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+    <a href="{% url 'user_group_list' %}" class="hover:scale-105 duration-200 transition-transform bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
         Quản lý nhóm người dùng
     </a>
 </div>
@@ -48,10 +48,10 @@
                     <td class="px-4 py-3 text-sm text-gray-500 font-mono">{{ func.url_pattern|default:"-" }}</td>
                     <td class="px-4 py-3 text-sm text-center whitespace-nowrap">
                         <div class="flex justify-center gap-2">
-                            <a href="{% url 'function_edit' func.id %}" class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">
+                            <a href="{% url 'function_edit' func.id %}" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">
                                 Sửa
                             </a>
-                            <a href="{% url 'function_delete' func.id %}" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded transition-colors">
+                            <a href="{% url 'function_delete' func.id %}" class="hover:scale-105 duration-200 transition-transform bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded transition-colors">
                                 Xóa
                             </a>
                         </div>

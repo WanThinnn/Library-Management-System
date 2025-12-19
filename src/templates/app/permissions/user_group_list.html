@@ -13,13 +13,13 @@
 
 <!-- Actions -->
 <div class="mb-6 flex flex-wrap gap-3">
-    <a href="{% url 'user_group_create' %}" class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+    <a href="{% url 'user_group_create' %}" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
         + Thêm nhóm mới
     </a>
-    <a href="{% url 'function_list' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+    <a href="{% url 'function_list' %}" class="hover:scale-105 duration-200 transition-transform bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
         Quản lý chức năng
     </a>
-    <a href="{% url 'user_list' %}" class="bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+    <a href="{% url 'user_list' %}" class="hover:scale-105 duration-200 transition-transform bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
         Quay lại quản lý người dùng
     </a>
 </div>
@@ -51,13 +51,13 @@
                     <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">{{ group.created_at|date:"d/m/Y" }}</td>
                     <td class="px-4 py-3 text-sm text-center whitespace-nowrap">
                         <div class="flex justify-center gap-2">
-                            <a href="{% url 'permission_matrix' group.id %}" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded transition-colors">
+                            <a href="{% url 'permission_matrix' group.id %}" class="hover:scale-105 duration-200 transition-transform bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded transition-colors">
                                 Phân quyền
                             </a>
-                            <a href="{% url 'user_group_edit' group.id %}" class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">
+                            <a href="{% url 'user_group_edit' group.id %}" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">
                                 Sửa
                             </a>
-                            <a href="{% url 'user_group_delete' group.id %}" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded transition-colors">
+                            <a href="{% url 'user_group_delete' group.id %}" class="hover:scale-105 duration-200 transition-transform bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded transition-colors">
                                 Xóa
                             </a>
                         </div>
