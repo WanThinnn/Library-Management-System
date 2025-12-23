@@ -562,7 +562,7 @@ class LateReturnReportAdmin(admin.ModelAdmin):
     
     def late_return_days_display(self, obj):
         if obj.late_return_days > 7:
-            return f'🔴 {obj.late_return_days} ngày'
+            return f'{obj.late_return_days} ngày'
         elif obj.late_return_days > 3:
             return f'{obj.late_return_days} ngày'
         else:

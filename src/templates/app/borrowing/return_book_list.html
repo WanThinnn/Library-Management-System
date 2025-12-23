@@ -5,7 +5,7 @@
 {% block content %}
 
 <!-- Header -->
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 mb-6">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 mb-6">
     <div class="p-6">
         <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {{ page_title }}
@@ -16,7 +16,7 @@
 </div>
 
 <!-- Bộ lọc -->
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 mb-6 overflow-hidden">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 mb-6 overflow-hidden">
     <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
         <h5 class="font-semibold">Tiêu chí tìm kiếm</h5>
     </div>
@@ -41,11 +41,9 @@
                 </select>
             </div>
             <div class="md:col-span-4">
-                <button type="submit" class="hover:scale-105 duration-200 transition-transform  bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <button type="submit" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Tìm kiếm
                 </button>
-            {% comment %} </div>
-            <div class="md:col-span-12 flex flex-wrap gap-2"> {% endcomment %}
                 <a href="{% url 'return_book_list' %}" class="hover:scale-105 duration-200 transition-transform bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
                     Xóa lọc
                 </a>
@@ -55,17 +53,24 @@
             </div>
 
         </form>
-            <!-- Kết quả tìm kiếm -->
-            {% if total_results > 0 %}
-            <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-50 p-4 rounded mb-2 mt-4">
-                Tìm thấy <strong>{{ total_results }}</strong> kết quả
-            </div>
+        
+        <!-- Kết quả tìm kiếm -->
+        {% if total_results >= 1 %}
+        <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-50 p-4 rounded mb-2 mt-4">
+            Tìm thấy <strong>{{ total_results }}</strong> kết quả
+        </div>
+        {% else %}
+        <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded mt-4">
+            <strong>Không tìm thấy phiếu trả sách phù hợp với tiêu chí tìm kiếm.</strong>
+            <p class="mt-2">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'return_book_list' %}" class="underline hover:text-yellow-900">xóa lọc</a>.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 
-
-
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 overflow-hidden">
+<!-- Danh sách phiếu trả -->
+{% if receipts %}
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-blue-600 dark:bg-blue-700 text-white">
@@ -84,8 +89,7 @@
                 {% for receipt in receipts %}
                 <tr class="hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
                     <td class="px-4 py-3 text-sm">
-                        {% comment %} <strong {{ receipt.id }}</strong> {% endcomment %}
-                        <a class="text-gray-900 dark:text-gray-100 hover:underline hover:text-blue-600" href="{% url 'reader_detail' receipt.reader.id %}"># {{ receipt.id }}</a>
+                        <a class="text-gray-900 dark:text-gray-100 hover:underline hover:text-blue-600" href="{% url 'return_book_detail' receipt.id %}"><strong># {{ receipt.id }}</strong></a>
                     </td>
                     <td class="px-4 py-3 text-sm">
                         <a href="{% url 'reader_detail' receipt.reader.id %}" class="dark:text-white hover:underline hover:text-blue-600">
@@ -148,12 +152,12 @@
     <ul class="flex items-center gap-1">
         {% if page_obj.has_previous %}
         <li>
-            <a class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+            <a class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
                 « Đầu tiên
             </a>
         </li>
         <li>
-            <a class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+            <a class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
                 ‹ Trước
             </a>
         </li>
@@ -166,7 +170,7 @@
             </li>
             {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
             <li>
-                <a class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                <a class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
                     {{ num }}
                 </a>
             </li>
@@ -175,12 +179,12 @@
 
         {% if page_obj.has_next %}
         <li>
-            <a class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+            <a class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
                 Tiếp ›
             </a>
         </li>
         <li>
-            <a class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+            <a class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
                 Cuối »
             </a>
         </li>
@@ -188,17 +192,6 @@
     </ul>
 </nav>
 {% endif %}
-
-{% elif request.GET %}
-<!-- Không có kết quả -->
-<div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded mt-4">
-    <strong>Không tìm thấy phiếu trả sách phù hợp với tiêu chí tìm kiếm.</strong>
-    <p class="mt-2">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'return_book_list' %}" class="underline hover:text-yellow-900">xóa lọc</a>.</p>
-</div>
-{% comment %} {% else %}
-<!-- Chưa tìm kiếm -->
-<div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded mt-4" >
-     <strong>Nhập tiêu chí tìm kiếm ở trên để bắt đầu.</strong>
-</div> {% endcomment %}
 {% endif %}
 {% endblock %}
+

@@ -21,15 +21,15 @@
     <div class="p-6">
         <div class="space-y-4">
             <div class="flex justify-between py-2 border-b">
-                <span class="text-gray-600 dark:text-gray-400">Tên loại độc giả</span>
+                <span class="text-gray-600 dark:text-gray-100">Tên loại độc giả</span>
                 <strong class="text-gray-900 dark:text-gray-100">{{ reader_type.reader_type_name }}</strong>
             </div>
             <div class="flex justify-between py-2 border-b">
-                <span class="text-gray-600 dark:text-gray-400">Mô tả</span>
+                <span class="text-gray-600 dark:text-gray-100">Mô tả</span>
                 <span class="text-gray-900 dark:text-gray-100">{{ reader_type.description|default:"-" }}</span>
             </div>
             <div class="flex justify-between py-2">
-                <span class="text-gray-600 dark:text-gray-400">Số lượng độc giả</span>
+                <span class="text-gray-600 dark:text-gray-100">Số lượng độc giả</span>
                 <span class="{% if reader_count > 0 %}text-red-600 font-bold{% else %}text-green-600{% endif %}">
                     {{ reader_count }} độc giả
                 </span>
@@ -37,12 +37,12 @@
         </div>
         
         {% if reader_count > 0 %}
-        <div class="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 text-red-700 p-4 rounded mt-4">
+        <div class="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 dark:text-red-50 text-red-700 p-4 rounded mt-4">
             <strong>Không thể xóa!</strong>
             <p class="mt-1">Loại độc giả này đang được sử dụng bởi {{ reader_count }} độc giả. Vui lòng chuyển các độc giả sang loại khác trước khi xóa.</p>
         </div>
         {% else %}
-        <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded mt-4">
+        <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 dark:text-yellow-50 text-yellow-700 p-4 rounded mt-4">
             <strong>Cảnh báo!</strong>
             <p class="mt-1">Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa loại độc giả "{{ reader_type.reader_type_name }}"?</p>
         </div>
@@ -57,7 +57,7 @@
             <form method="POST" style="display: inline;">
                 {% csrf_token %}
                 <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                    🗑️ Xác nhận xóa
+                    Xác nhận xóa
                 </button>
             </form>
             {% endif %}
