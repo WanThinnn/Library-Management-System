@@ -394,10 +394,10 @@ function loadReturnHistory(filter = 'all') {
                     historyBody.appendChild(clonedRow);
                 });
             } else {
-                historyList.innerHTML = '<div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded">Không có dữ liệu</div>';
+                historyList.innerHTML = '<div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded mt-4">Không có dữ liệu</div>';
             }
         })
         .catch(error => {
-            historyList.innerHTML = `<div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded">Lỗi tải dữ liệu</div>`;
+            historyList.innerHTML = `<div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded dark:bg-red-900 dark:border-red-900 dark:text-white">Lỗi tải dữ liệu</div>`;
         });
 }

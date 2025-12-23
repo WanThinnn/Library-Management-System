@@ -38,10 +38,10 @@
                     Thống kê
                 </button>
                 <a href="{% url 'report_borrow_situation_excel' %}?from_date={{ from_date|date:'Y-m-d' }}&to_date={{ to_date|date:'Y-m-d' }}" 
-                   class="hover:scale-105 duration-200 transition-transform bg-green-600 dark:bg-blue-700 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                   class="hover:scale-105 duration-200 transition-transform bg-green-600 dark:bg-green-700 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Xuất Excel
                 </a>
-                <button onclick="window.print()" class="hover:scale-105 duration-200 transition-transform bg-green-600 dark:bg-blue-700 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                <button onclick="window.print()" class="hover:scale-105 duration-200 transition-transform bg-green-600 dark:bg-green-700 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     In báo cáo
                 </button>
                 <!-- Nút in -->
@@ -50,8 +50,15 @@
                         
                     </button>
                 </div> {% endcomment %}
+
             </div>
+
         </form>
+        {% if not report_data %}
+            <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded mt-4">
+                Không có dữ liệu mượn sách trong khoảng thời gian đã chọn
+            </div>
+        {% endif %}
     </div>
 </div>
 
@@ -108,10 +115,10 @@
 
     </div>
 </div>
-{% else %}
-<div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded">
+{% comment %} {% else %}
+<div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded mt-4">
     Không có dữ liệu mượn sách trong khoảng thời gian đã chọn
-</div>
+</div> {% endcomment %}
 {% endif %}
 
 <!-- Chart.js -->
