@@ -406,6 +406,18 @@ def reader_list_view(request):
 # ==================== YC2: TIẾP NHẬN SÁCH MỚI ====================
 
 @permission_required('Lập phiếu nhập sách', 'add')
+def book_import_select_view(request):
+    """
+    Trang trung gian - Chọn phương thức nhập sách
+    Cho phép user chọn: Nhập thủ công hoặc Nhập từ Excel
+    """
+    context = {
+        'page_title': 'Tiếp nhận sách mới'
+    }
+    return render(request, 'app/books/book_import_select.html', context)
+
+
+@permission_required('Lập phiếu nhập sách', 'add')
 def book_import_view(request):
     """
     View tiếp nhận sách mới - YC2

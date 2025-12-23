@@ -84,8 +84,14 @@
             <button type="submit" class="hover:scale-105 duration-200 transition-transform bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg shadow-lg">
                 Tiến hành nhập
             </button>
-            <a href="{% url 'book_import' %}" class="hover:scale-105 duration-200 transition-transform bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-lg shadow-lg">
+            {% comment %} <a href="{% url 'book_import_select' %}" class="hover:scale-105 duration-200 transition-transform bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-lg shadow-lg">
                 Quay lại
+            </a> {% endcomment %}
+            <a
+              href="{% url 'book_import_list' %}"
+              class="hover:scale-105 duration-200 transition-transform bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg"
+            >
+              Xem danh sách
             </a>
         </div>
       </form>
