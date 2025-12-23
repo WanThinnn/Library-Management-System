@@ -53,9 +53,13 @@
             </div>
         </form>
         {% if not receipts %}
-        <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded mt-4">
+        {% comment %} <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded mt-4">
             <h5 class="font-semibold mb-2">Chưa có phiếu nhập nào</h5>
             <p class="text-sm">Bắt đầu nhập sách mới bằng cách click nút "Nhập sách mới"</p>
+        </div> {% endcomment %}
+        <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded mt-4">
+            <strong>Chưa có phiếu nhập nào</strong>
+            <p class="mt-2">Bắt đầu nhập sách mới bằng cách click nút "Nhập sách mới"</p>
         </div>
         {% endif %}
     </div>
