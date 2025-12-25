@@ -93,7 +93,7 @@
                     <div>
                         <h6 class="text-sm font-medium text-gray-500 mb-1">Tổng ngày mượn</h6>
                         <p class="text-lg font-bold text-gray-600 dark:text-gray-400">
-                            {% with total_days=receipt.return_date|timesince:receipt.borrow_date %}
+                            {% with total_days=receipt.borrow_date|timesince:receipt.return_date %}
                                 {{ total_days }}
                             {% endwith %}
                         </p>
@@ -134,7 +134,7 @@
 
                 {% if receipt.reader.total_debt %}
                 <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded mt-6">
-                    <strong>💰 Tổng nợ của độc giả:</strong> 
+                    <strong>Tổng nợ của độc giả:</strong> 
                     <span class="text-xl font-bold">
                         {{ receipt.reader.total_debt|floatformat:0 }}đ
                     </span>
@@ -199,13 +199,13 @@
         <!-- Action buttons -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 overflow-hidden">
             <div class="p-4 space-y-2">
-                <a href="{% url 'return_book' %}" class="w-full bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                <a href="{% url 'return_book' %}" class="hover:scale-101 duration-200 transition-transform w-full bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                     Trả sách khác
                 </a>
-                <a href="{% url 'return_book_list' %}" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                <a href="{% url 'return_book_list' %}" class="hover:scale-101 duration-200 transition-transform w-full bg-cyan-500 hover:bg-cyan-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                     Danh sách trả sách
                 </a>
-                <a href="{% url 'reader_detail' receipt.reader.id %}" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                <a href="{% url 'reader_detail' receipt.reader.id %}" class="hover:scale-101 duration-200 transition-transform w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                     Xem độc giả
                 </a>
                 {% comment %} <a href="{% url 'home' %}" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
