@@ -1123,10 +1123,13 @@ def borrow_book_view(request):
                     # Lấy độc giả
                     reader = Reader.objects.get(id=reader_id)
                     
-                    # Tính ngày phải trả (tối đa 4 ngày)
-                    from datetime import datetime, timedelta
-                    borrow_datetime = datetime.combine(borrow_date, datetime.min.time())
-                    borrow_datetime = timezone.make_aware(borrow_datetime)
+                    # Xử lý datetime từ form (đã là datetime, chỉ cần make_aware nếu cần)
+                    from datetime import timedelta
+                    borrow_datetime = borrow_date
+                    if timezone.is_naive(borrow_datetime):
+                        borrow_datetime = timezone.make_aware(borrow_datetime)
+                    
+                    # Tính ngày phải trả
                     due_date = borrow_datetime + timedelta(days=params.max_borrow_days)
                     
                     # Tạo phiếu mượn cho từng sách
@@ -2777,9 +2780,8 @@ def book_detail_view(request, book_id):
 @permission_required('Quản lý kho sách', 'edit')
 def book_edit_view(request, book_id):
     """
-    Chỉnh sửa thông tin sách
-    - Admin (superuser): chỉnh sửa tất cả các trường
-    - Staff: chỉ chỉnh sửa số lượng, ISBN, phiên bản, ngôn ngữ
+    Chỉnh sửa thông tin sách - Phiên bản đầy đủ
+    Cho phép chỉnh sửa: tất cả các trường bao gồm thể loại, tác giả, đơn giá, năm XB, NXB
     """
     book = get_object_or_404(Book, id=book_id)
     is_admin = request.user.is_superuser
@@ -2788,27 +2790,64 @@ def book_edit_view(request, book_id):
         form = BookEditForm(request.POST, instance=book, is_admin=is_admin)
         if form.is_valid():
             try:
-                # Nếu là staff, chỉ lưu các trường được phép
-                if not is_admin:
-                    # Giữ nguyên các giá trị của trường admin-only
-                    book = form.save(commit=False)
-                    original = Book.objects.get(id=book_id)
-                    book.unit_price = original.unit_price
-                    book.publish_year = original.publish_year
-                    book.publisher = original.publisher
-                    book.save()
-                else:
+                with transaction.atomic():
+                    # 1. Lưu các trường thuộc Book (từ form)
                     form.save()
-                
-                # Cập nhật mô tả sách (thuộc BookTitle)
-                description = request.POST.get('description', '').strip()
-                book_title = book.book_title
-                if book_title.description != description:
+                    
+                    # 2. Lưu các trường Book bổ sung (từ POST data)
+                    book.unit_price = int(request.POST.get('unit_price', book.unit_price))
+                    book.publish_year = int(request.POST.get('publish_year', book.publish_year))
+                    book.publisher = request.POST.get('publisher', book.publisher).strip()
+                    book.save()
+                    
+                    # 3. Cập nhật BookTitle
+                    book_title = book.book_title
+                    
+                    # 3a. Cập nhật mô tả
+                    description = request.POST.get('description', '').strip()
                     book_title.description = description
+                    
+                    # 3b. Cập nhật thể loại
+                    category_id = request.POST.get('category')
+                    if category_id:
+                        new_category = Category.objects.get(id=int(category_id))
+                        book_title.category = new_category
+                    
                     book_title.save()
-                
-                messages.success(request, f'Cập nhật sách "{book.book_title.book_title}" thành công!')
-                return redirect('book_detail', book_id=book.id)
+                    
+                    # 3c. Cập nhật tác giả
+                    # Đọc existing authors từ form
+                    author_ids = request.POST.getlist('authors', [])
+                    existing_author_ids = [aid for aid in author_ids if aid and not aid.startswith('new_')]
+                    
+                    # Đọc new authors từ hidden input
+                    new_author_names_str = request.POST.get('new_author_names', '')
+                    new_author_names = [name.strip() for name in new_author_names_str.split('|||') if name.strip()]
+                    
+                    # Xóa tất cả author hiện tại và thêm lại
+                    AuthorDetail.objects.filter(book_title=book_title).delete()
+                    
+                    # Thêm existing authors
+                    for aid in existing_author_ids:
+                        try:
+                            author = Author.objects.get(id=int(aid))
+                            AuthorDetail.objects.create(author=author, book_title=book_title)
+                        except (Author.DoesNotExist, ValueError):
+                            pass
+                    
+                    # Tạo và thêm new authors
+                    for name in new_author_names:
+                        # Case-insensitive lookup để tránh trùng lặp
+                        existing = Author.objects.filter(author_name__iexact=name).first()
+                        if existing:
+                            author = existing
+                        else:
+                            author = Author.objects.create(author_name=name)
+                        AuthorDetail.objects.get_or_create(author=author, book_title=book_title)
+                    
+                    messages.success(request, f'Cập nhật sách "{book.book_title.book_title}" thành công!')
+                    return redirect('book_detail', book_id=book.id)
+                    
             except Exception as e:
                 messages.error(request, f'Có lỗi xảy ra: {str(e)}')
         else:
@@ -2818,17 +2857,76 @@ def book_edit_view(request, book_id):
     else:
         form = BookEditForm(instance=book, is_admin=is_admin)
     
+    # Lấy danh sách NXB có sẵn
+    existing_publishers = list(Book.objects.values_list('publisher', flat=True).distinct().order_by('publisher'))
+    
+    # Kiểm tra quyền xoá sách
+    from .decorators import check_permission
+    can_delete_book = request.user.is_superuser or check_permission(request.user, 'Quản lý kho sách', 'delete')
+    
     context = {
         'form': form,
         'book': book,
         'is_admin': is_admin,
+        'can_delete_book': can_delete_book,
+        'categories': Category.objects.all().order_by('category_name'),
+        'all_authors': Author.objects.all().order_by('author_name'),
+        'existing_publishers': existing_publishers,
         'page_title': f'Chỉnh sửa sách - {book.book_title.book_title}'
     }
     
     return render(request, 'app/books/book_edit.html', context)
 
 
-# ==================== READER TYPE MANAGEMENT ====================
+@permission_required('Quản lý kho sách', 'delete')
+def book_delete_view(request, book_id):
+    """
+    Xoá sách khỏi hệ thống
+    
+    Điều kiện xoá:
+    - Sách không đang được mượn (không có BookItem nào is_borrowed=True)
+    """
+    book = get_object_or_404(Book, id=book_id)
+    book_title_name = book.book_title.book_title
+    
+    # Kiểm tra điều kiện xoá
+    borrowed_items = BookItem.objects.filter(book=book, is_borrowed=True)
+    if borrowed_items.exists():
+        borrowed_count = borrowed_items.count()
+        messages.error(
+            request, 
+            f'Không thể xoá sách "{book_title_name}" vì đang có {borrowed_count} cuốn được mượn. '
+            'Vui lòng chờ độc giả trả sách trước khi xoá.'
+        )
+        return redirect('book_detail', book_id=book.id)
+    
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # Xoá các BookItem liên quan
+                BookItem.objects.filter(book=book).delete()
+                
+                # Xoá các BookImportDetail liên quan
+                BookImportDetail.objects.filter(book=book).delete()
+                
+                # Xoá sách
+                book.delete()
+                
+                messages.success(request, f'Đã xoá sách "{book_title_name}" thành công!')
+                return redirect('book_search')
+                
+        except Exception as e:
+            messages.error(request, f'Có lỗi xảy ra khi xoá sách: {str(e)}')
+            return redirect('book_detail', book_id=book_id)
+    
+    # GET request - hiển thị trang xác nhận
+    context = {
+        'book': book,
+        'book_items_count': BookItem.objects.filter(book=book).count(),
+        'page_title': f'Xoá sách - {book_title_name}'
+    }
+    
+    return render(request, 'app/books/book_delete.html', context)
 
 @manager_required
 def reader_type_list_view(request):

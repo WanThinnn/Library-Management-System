@@ -248,11 +248,11 @@ class BorrowBookForm(forms.Form):
         widget=forms.HiddenInput()  # Sẽ nhận "id1,id2,id3"
     )
     
-    borrow_date = forms.DateField(
-        label='Ngày mượn',
-        widget=forms.DateInput(attrs={
+    borrow_date = forms.DateTimeField(
+        label='Ngày giờ mượn',
+        widget=forms.DateTimeInput(attrs={
             'class': 'form-control',
-            'type': 'date'
+            'type': 'datetime-local'
         })
     )
     
