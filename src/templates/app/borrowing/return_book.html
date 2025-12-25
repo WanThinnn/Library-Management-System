@@ -18,13 +18,13 @@
 <!-- Messages -->
 {% if messages %}
     {% for message in messages %}
-        <div class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-700{% else %}bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400{% endif %} p-4 rounded mb-6 flex justify-between items-start">
+        {% comment %} <div class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-700{% else %}bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400{% endif %} p-4 rounded mb-6 flex justify-between items-start">
             <div class="flex items-center gap-2">
                 {% if message.tags == 'success' %}{% elif message.tags == 'error' %}❌{% else %}{% endif %}
                 <span>{{ message }}</span>
             </div>
             <button type="button" onclick="this.parentElement.remove()" class="text-current opacity-50 hover:opacity-100 text-lg leading-none">×</button>
-        </div>
+        </div> {% endcomment %}
     {% endfor %}
 {% endif %}
 
@@ -104,13 +104,13 @@
                             
                             <button type="submit" class="hover:scale-105 duration-200 transition-transform w-full bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2" id="submitBtn" disabled>
                                 <span id="submitBtnText">Ghi nhận trả sách</span>
-                                <span id="submitBtnLoading" class="hidden">
+                                {% comment %} <span id="submitBtnLoading" class="hidden">
                                     <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
                                     Đang xử lý...
-                                </span>
+                                </span> {% endcomment %}
                             </button>
                         </form>
 

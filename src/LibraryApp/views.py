@@ -1430,7 +1430,14 @@ def return_book_view(request):
     if request.method == 'POST':
         form = ReturnBookForm(request.POST)
         if form.is_valid():
-            receipts = form.save()
+            try:
+                receipts = form.save()
+            except ValidationError as e:
+                # Bắt lỗi validation từ model (ví dụ: ngày trả < ngày mượn)
+                for field, errors in e.message_dict.items():
+                    for error in errors:
+                        messages.error(request, error)
+                return redirect('return_book')
             if receipts:
                 count = len(receipts)
                 # Lấy reader từ receipt đầu tiên và kiểm tra nợ
