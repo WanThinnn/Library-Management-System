@@ -225,8 +225,21 @@ document.querySelectorAll('.card-carousel').forEach(carousel => {
 {% endif %} {% else %}
 <!-- Unauthenticated View with Background -->
 {% load static %}
-<div class="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat" style="background-image: url('{% static 'image/background.webp' %}');"></div>
+<div id="hero-bg" class="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat bg-loading" style="background-color: #1a365d;"></div>
 <div class="fixed inset-0 -z-10 bg-black/50"></div>
+<script>
+  // Preload and smoothly show background image
+  (function() {
+    var bgUrl = "{% static 'image/background.webp' %}";
+    var bgEl = document.getElementById('hero-bg');
+    var img = new Image();
+    img.onload = function() {
+      bgEl.style.backgroundImage = 'url(' + bgUrl + ')';
+      bgEl.classList.add('loaded');
+    };
+    img.src = bgUrl;
+  })();
+</script>
 
 <div class="text-center py-20 px-4 min-h-[70vh] flex flex-col justify-center items-center">
   <h1

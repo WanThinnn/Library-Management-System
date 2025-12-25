@@ -6,7 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Hệ thống Quản lý Thư viện{% endblock %}</title>
     <link rel="icon" type="image/png" href="{% static 'image/favicon.png' %}">
-    <link rel="preload" href="{% static 'image/background.webp' %}" as="image">
+    <link rel="preload" href="{% static 'image/background.webp' %}" as="image" fetchpriority="high">
+    <style>
+      /* Background loading optimization - smooth fade-in */
+      .bg-loading {
+        background-color: #1a365d; /* Fallback color similar to the image */
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+      }
+      .bg-loading.loaded {
+        opacity: 1;
+      }
+    </style>
     <script>
       // Apply dark mode immediately to prevent flash - runs before page render
       (function() {
