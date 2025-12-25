@@ -652,10 +652,15 @@ def book_import_view(request):
     from datetime import date
     min_year = date.today().year - params.book_return_period
     
+    # Lấy danh sách nhà xuất bản có sẵn từ DB
+    existing_publishers = Book.objects.values_list('publisher', flat=True).distinct().order_by('publisher')
+    existing_publishers = [p for p in existing_publishers if p]  # Filter out empty values
+    
     context = {
         'form': form,
         'params': params,
         'min_year': min_year,
+        'existing_publishers': existing_publishers,
         'page_title': 'Tiếp nhận sách mới'
     }
     

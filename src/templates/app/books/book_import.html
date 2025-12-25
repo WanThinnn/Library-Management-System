@@ -57,7 +57,14 @@
             >{{ form.publisher.label }}
             <span class="text-red-500">*</span></label
           >
-          {{ form.publisher }}
+          <!-- TomSelect will replace this -->
+          <select id="publisher_select" class="hidden">
+            {% for pub in existing_publishers %}
+            <option value="{{ pub }}">{{ pub }}</option>
+            {% endfor %}
+          </select>
+          <!-- Hidden input to submit the actual value -->
+          <input type="hidden" name="publisher" id="publisher_hidden" value="">
         </div>
       </div>
 
@@ -218,9 +225,10 @@
   </style>
 
   <script>
-  // Global variable to store Tom Select instance
+  // Global variable to store Tom Select instances
   let tomSelectInstance = null;
   let originalContainer = null;
+  let publisherSelectInstance = null;
 
   document.addEventListener('DOMContentLoaded', function() {
       // Initialize Tom Select
@@ -296,6 +304,45 @@
           // Hide the visual container but keep the input functional
           const newAuthorsRow = document.getElementById('div_id_new_authors');
           if (newAuthorsRow) newAuthorsRow.classList.add('hidden');
+      }
+      
+      // Initialize TomSelect for Publisher
+      var publisherSelect = document.getElementById('publisher_select');
+      
+      if (publisherSelect) {
+          var pubOptions = [];
+          Array.from(publisherSelect.options).forEach(function(opt) {
+              pubOptions.push({value: opt.value, text: opt.text});
+          });
+          
+          // Create input for TomSelect
+          var pubInput = document.createElement('input');
+          pubInput.id = 'tom-select-publisher';
+          pubInput.placeholder = 'Chọn hoặc nhập nhà xuất bản mới...';
+          publisherSelect.parentNode.insertBefore(pubInput, publisherSelect);
+          
+          publisherSelectInstance = new TomSelect(pubInput, {
+              plugins: ['remove_button'],
+              create: true,
+              createOnBlur: true,
+              persist: true,
+              maxItems: 1,
+              valueField: 'value',
+              labelField: 'text',
+              searchField: 'text',
+              options: pubOptions,
+              render: {
+                  option_create: function(data, escape) {
+                      return '<div class="create">Thêm NXB mới <strong>' + escape(data.input) + '</strong>...</div>';
+                  }
+              },
+              create: function(input) {
+                  return {
+                      value: input,
+                      text: input
+                  }
+              }
+          });
       }
 
       // HANDLE FORM SUBMIT
@@ -401,6 +448,18 @@
                   if (newAuthorNamesHidden) {
                       newAuthorNamesHidden.value = newNames.join('|||');
                       console.log('DEBUG: Set new_author_names_hidden:', newAuthorNamesHidden.value);
+                  }
+              }
+              
+              // SYNC PUBLISHER
+              if (publisherSelectInstance) {
+                  var pubValue = publisherSelectInstance.getValue();
+                  console.log('DEBUG: Publisher value:', pubValue);
+                  
+                  var publisherHidden = document.getElementById('publisher_hidden');
+                  if (publisherHidden) {
+                      publisherHidden.value = pubValue || '';
+                      console.log('DEBUG: Set publisher_hidden:', publisherHidden.value);
                   }
               }
           });

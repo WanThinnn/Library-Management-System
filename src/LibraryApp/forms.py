@@ -598,11 +598,23 @@ class BookImportForm(forms.Form):
         })
     )
     
-    language = forms.CharField(
+    LANGUAGE_CHOICES = [
+        ('Tiếng Việt', 'Tiếng Việt'),
+        ('Tiếng Anh', 'Tiếng Anh'),
+        ('Tiếng Pháp', 'Tiếng Pháp'),
+        ('Tiếng Trung', 'Tiếng Trung'),
+        ('Tiếng Nhật', 'Tiếng Nhật'),
+        ('Tiếng Hàn', 'Tiếng Hàn'),
+        ('Tiếng Đức', 'Tiếng Đức'),
+        ('Tiếng Tây Ban Nha', 'Tiếng Tây Ban Nha'),
+        ('Khác', 'Khác'),
+    ]
+    
+    language = forms.ChoiceField(
         label='Ngôn ngữ',
-        max_length=50,
+        choices=LANGUAGE_CHOICES,
         initial='Tiếng Việt',
-        widget=forms.TextInput(attrs={
+        widget=forms.Select(attrs={
             'class': 'form-control'
         })
     )
