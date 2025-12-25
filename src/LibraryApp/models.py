@@ -218,6 +218,21 @@ class Reader(models.Model):
         default=0,
         validators=[MinValueValidator(0)]
     )
+
+    @property
+    def total_debt_with_pending(self):
+        """
+        Tổng nợ bao gồm cả tiền phạt dự kiến của các sách đang mượn quá hạn
+        """
+        pending_fines = 0
+        # Lấy danh sách phiếu mượn chưa trả
+        active_receipts = self.borrow_receipts.filter(return_date__isnull=True)
+        
+        for receipt in active_receipts:
+            if receipt.is_overdue:
+                pending_fines += receipt.calculate_fine()
+                
+        return self.total_debt + pending_fines
     
     # Trạng thái
     is_active = models.BooleanField(
@@ -827,12 +842,19 @@ class BorrowReturnReceipt(models.Model):
     @property
     def is_overdue(self):
         """Kiểm tra có trễ hạn không"""
-        due_date = self.due_date.date() if hasattr(self.due_date, 'date') else self.due_date
+    @property
+    def is_overdue(self):
+        """Kiểm tra có trễ hạn không"""
+        current_due_date = self.due_date
+        if hasattr(current_due_date, 'date'):
+             current_due_date = timezone.localtime(current_due_date).date()
         
         if self.is_returned:
-            return_date = self.return_date.date() if hasattr(self.return_date, 'date') else self.return_date
-            return return_date > due_date
-        return timezone.localdate() > due_date
+            current_return_date = self.return_date
+            if hasattr(current_return_date, 'date'):
+                 current_return_date = timezone.localtime(current_return_date).date()
+            return current_return_date > current_due_date
+        return timezone.localdate() > current_due_date
     
     @property
     def days_overdue(self):
@@ -840,15 +862,21 @@ class BorrowReturnReceipt(models.Model):
         if not self.is_overdue:
             return 0
         
-        # Sử dụng date() để tránh lỗi timezone
-        due_date = self.due_date.date() if hasattr(self.due_date, 'date') else self.due_date
+        # Convert sang localtime trước khi lấy date() để tránh lệch ngày do múi giờ
+        # DB lưu UTC, nếu mượn lúc 1:00 AM VN (18:00 PM hôm trước UTC) thì .date() thẳng sẽ sai
+        
+        current_due_date = self.due_date
+        if hasattr(current_due_date, 'date'):
+             current_due_date = timezone.localtime(current_due_date).date()
         
         if self.is_returned:
-            return_date = self.return_date.date() if hasattr(self.return_date, 'date') else self.return_date
-            delta = return_date - due_date
+            current_return_date = self.return_date
+            if hasattr(current_return_date, 'date'):
+                 current_return_date = timezone.localtime(current_return_date).date()
+            delta = current_return_date - current_due_date
         else:
             today = timezone.localdate()
-            delta = today - due_date
+            delta = today - current_due_date
         
         return max(0, delta.days)
     

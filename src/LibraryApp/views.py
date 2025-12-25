@@ -1649,8 +1649,13 @@ def api_reader_borrowed_books(request, reader_id):
             days_borrowed = (today - receipt.borrow_date.date()).days
             book_title = receipt.book_item.book.book_title.book_title
             
-            # Tính days_overdue từ due_date thực sự, không phải hardcoded
-            due_date = receipt.due_date.date() if receipt.due_date else receipt.borrow_date.date()
+            # Tính days_overdue từ due_date thực sự, converted sang localtime
+            due_date = receipt.due_date
+            if due_date:
+                due_date = timezone.localtime(due_date).date()
+            else:
+                due_date = timezone.localtime(receipt.borrow_date).date()
+            
             days_overdue = max(0, (today - due_date).days)
             
             data.append({

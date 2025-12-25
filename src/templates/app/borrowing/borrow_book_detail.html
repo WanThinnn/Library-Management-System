@@ -135,7 +135,13 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-500">Tiền phạt:</label>
-                <p class="text-xl font-bold text-red-600">{{ receipt.fine_amount|default:"0" }} VNĐ</p>
+                <p class="text-xl font-bold text-red-600">
+                    {% if receipt.is_returned %}
+                        {{ receipt.fine_amount|default:"0" }}
+                    {% else %}
+                        {{ receipt.calculate_fine }}
+                    {% endif %}
+                 VNĐ</p>
             </div>
         </div>
     </div>
