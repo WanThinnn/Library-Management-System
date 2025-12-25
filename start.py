@@ -16,10 +16,13 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
 NO_SSL_OVERRIDE = REPO_ROOT / "docker-compose.nossl.yml"
-CERT_WILDCARD = REPO_ROOT / "certs" / "_.cyberfortress.local.crt"
-CERT_KEY = REPO_ROOT / "certs" / "_.cyberfortress.local.key"
+CERTS_DIR = REPO_ROOT / "certs"
 ENV_FILE = REPO_ROOT / ".env"
 CLOUDFLARE_CONFIG = REPO_ROOT / "cloudflared" / "config.yml"
+
+# Default SSL certificate filenames (can be overridden via .env)
+DEFAULT_SSL_CERT = "_.cyberfortress.local.crt"
+DEFAULT_SSL_KEY = "_.cyberfortress.local.key"
 
 
 def compose_cmd(files: list[Path], use_ssl: bool, use_tunnel: bool) -> list[str]:
@@ -130,9 +133,16 @@ def main(argv: list[str]) -> int:
     args = parser.parse_args(argv)
 
     compose_file = REPO_ROOT / ("docker-compose.prod.yml" if args.prod else "docker-compose.yml")
-    use_ssl = CERT_WILDCARD.exists() and CERT_KEY.exists()
-    compose_files = [compose_file] if use_ssl else [compose_file, NO_SSL_OVERRIDE]
     env_vars = load_env_file(ENV_FILE)
+    
+    # Get SSL certificate filenames from .env or use defaults
+    ssl_cert_file = env_vars.get("SSL_CERT_FILE", DEFAULT_SSL_CERT)
+    ssl_key_file = env_vars.get("SSL_KEY_FILE", DEFAULT_SSL_KEY)
+    cert_path = CERTS_DIR / ssl_cert_file
+    key_path = CERTS_DIR / ssl_key_file
+    
+    use_ssl = cert_path.exists() and key_path.exists()
+    compose_files = [compose_file] if use_ssl else [compose_file, NO_SSL_OVERRIDE]
     use_tunnel = False
     tunnel_note = ""
     if args.tunnel:
