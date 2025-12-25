@@ -444,10 +444,40 @@ def book_import_view(request):
                     book_title_name = form.cleaned_data['book_title']
                     category = form.cleaned_data['category']
                     
-                    # Lấy tác giả từ form (TomSelect đã sync vào form fields)
-                    authors = list(form.cleaned_data.get('authors', []))
-                    new_authors_str = form.cleaned_data.get('new_authors', '').strip()
+                    # Đọc tác giả từ HIDDEN INPUTS (primary source - reliable)
+                    # Django form field cho SelectMultiple có thể không hoạt động đúng khi element bị ẩn
+                    authors = []
+                    new_authors_str = ''
                     
+                    # 1. Đọc existing author IDs từ hidden input (primary)
+                    author_ids_str = request.POST.get('author_ids', '').strip()
+                    print(f"DEBUG Python: author_ids from hidden input: '{author_ids_str}'")
+                    
+                    if author_ids_str:
+                        author_ids = [aid.strip() for aid in author_ids_str.split(',') if aid.strip() and aid.strip().isdigit()]
+                        print(f"DEBUG Python: Parsed author IDs: {author_ids}")
+                        for aid in author_ids:
+                            try:
+                                author = Author.objects.get(id=int(aid))
+                                if author not in authors:
+                                    authors.append(author)
+                                    print(f"DEBUG Python: Added existing author: {author.author_name}")
+                            except Author.DoesNotExist:
+                                print(f"DEBUG Python: Author ID {aid} not found in database")
+                    
+                    # 2. Nếu hidden input rỗng, fallback về Django form field
+                    if not authors:
+                        form_authors = list(form.cleaned_data.get('authors', []))
+                        print(f"DEBUG Python: Fallback to form.cleaned_data authors: {form_authors}")
+                        authors = form_authors
+                    
+                    # 3. Đọc new authors từ hidden input (primary) hoặc form field
+                    new_authors_str = request.POST.get('new_author_names', '').strip()
+                    print(f"DEBUG Python: new_author_names from hidden input: '{new_authors_str}'")
+                    
+                    if not new_authors_str:
+                        new_authors_str = form.cleaned_data.get('new_authors', '').strip()
+                        print(f"DEBUG Python: Fallback to form.cleaned_data new_authors: '{new_authors_str}'")
                     # VALIDATION: Phải có ít nhất 1 tác giả
                     if not authors and not new_authors_str:
                         messages.error(request, 'Tác giả: Vui lòng chọn hoặc nhập ít nhất 1 tác giả')
@@ -472,13 +502,36 @@ def book_import_view(request):
                     import_date = form.cleaned_data['import_date']
                     
                     # Xử lý tác giả mới
+                    # JavaScript sử dụng delimiter '|||' để tránh conflict với tên có dấu phẩy
                     if new_authors_str:
-                        new_author_names = [name.strip() for name in new_authors_str.split(',') if name.strip()]
+                        # Support both delimiters: '|||' (new) and ',' (fallback for old submissions)
+                        if '|||' in new_authors_str:
+                            new_author_names = [name.strip() for name in new_authors_str.split('|||') if name.strip()]
+                        else:
+                            new_author_names = [name.strip() for name in new_authors_str.split(',') if name.strip()]
+                        
                         for name in new_author_names:
-                            # Tìm hoặc tạo tác giả mới (không phân biệt hoa thường để tránh trùng lặp)
-                            # Tuy nhiên, models.Author không có constraint unique=True cho author_name
-                            # Nên ta dùng get_or_create đơn giản
-                            author, _ = Author.objects.get_or_create(author_name=name)
+                            # Safety: Strip 'new_' prefix if it somehow got through
+                            if name.startswith('new_'):
+                                name = name[4:].strip()
+                            
+                            # Validate: skip if name is empty after stripping
+                            if not name:
+                                continue
+                            
+                            # Validate: skip if name looks like an author ID (numeric only)
+                            if name.isdigit():
+                                # This is likely an ID that was incorrectly synced, skip it
+                                print(f"DEBUG: Skipping numeric-only author name '{name}' - likely an ID")
+                                continue
+                            
+                            # Tìm hoặc tạo tác giả mới (case-insensitive search để tránh trùng lặp)
+                            existing_author = Author.objects.filter(author_name__iexact=name).first()
+                            if existing_author:
+                                author = existing_author
+                            else:
+                                author = Author.objects.create(author_name=name)
+                            
                             if author not in authors:
                                 authors.append(author)
                     

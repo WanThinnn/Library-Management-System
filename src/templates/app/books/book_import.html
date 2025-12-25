@@ -34,15 +34,6 @@
     <form method="post">
       {% csrf_token %}
 
-      <!-- Messages -->
-      {% comment %} {% if messages %} {% for message in messages %}
-      <div
-        class="{% if message.tags == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700{% elif message.tags == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-700{% else %}bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400{% endif %} p-4 rounded mb-4"
-      >
-        {{ message }}
-      </div>
-      {% endfor %} {% endif %} {% endcomment %}
-
       <!-- Book Title -->
       <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
@@ -190,21 +181,6 @@
         >
           Xem danh sách
         </a>
-        {% comment %} <a
-          href="{% url 'book_import_select' %}"
-          class="hover:scale-105 duration-200 transition-transform border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium py-2 px-4 rounded-lg"
-        >
-          ← Quay lại
-        </a> {% endcomment %}
-
-        {% comment %}
-        <a
-          href="{% url 'home' %}"
-          class="border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium py-2 px-4 rounded-lg transition-colors"
-        >
-          Về trang chủ
-        </a>
-        {% endcomment %}
       </div>
     </form>
   </div>
@@ -278,7 +254,7 @@
       if (originalContainer) {
           // If it's a SELECT (SelectMultiple), extract options
           if (originalContainer.tagName === 'SELECT') {
-              Array.from(originalContainer.options).forEach(opt => {
+              Array.from(originalContainer.options).forEach(function(opt) {
                  options.push({value: opt.value, text: opt.text});
                  if (opt.selected) items.push(opt.value);
               });
@@ -288,26 +264,11 @@
               // Fallback for checkboxes if ever reverted
               const checkboxes = originalContainer.querySelectorAll('input[type="checkbox"]');
               if (checkboxes.length > 0) {
-                  checkboxes.forEach(cb => {
+                  checkboxes.forEach(function(cb) {
                       const label = originalContainer.querySelector('label[for="' + cb.id + '"]');
                       const text = label ? label.innerText.trim() : cb.value;
                       options.push({value: cb.value, text: text});
                       if (cb.checked) items.push(cb.value);
-                  });
-              } else {
-                  // Last resort: search globally if ID container failed
-                  const inputs = document.getElementsByName('authors');
-                  Array.from(inputs).forEach(input => {
-                      if(input.type !== 'checkbox') return;
-                      let text = input.value;
-                      if (input.id) {
-                          const label = document.querySelector('label[for="' + input.id + '"]');
-                          if (label) text = label.innerText.trim();
-                      } else if (input.parentNode.tagName === 'LABEL') {
-                          text = input.parentNode.innerText.trim();
-                      }
-                      options.push({value: input.value, text: text});
-                      if (input.checked) items.push(input.value);
                   });
               }
               originalContainer.classList.add('hidden');
@@ -335,104 +296,113 @@
           // Hide the visual container but keep the input functional
           const newAuthorsRow = document.getElementById('div_id_new_authors');
           if (newAuthorsRow) newAuthorsRow.classList.add('hidden');
-          // Keep id_new_authors as text input (not hidden) so it can be submitted
-          // Just hide it visually via parent container
       }
 
-      // HANDLE FORM SUMBIT
+      // HANDLE FORM SUBMIT
       const form = document.querySelector('form');
       if (form) {
           form.addEventListener('submit', function(e) {
               // Basic Validation for Quantity/Price
               const quantityField = document.querySelector('input[name="quantity"]');
-              console.log('DEBUG: Quantity field value before validation:', quantityField ? quantityField.value : 'not found');
               if (quantityField) {
                   const qtyValue = quantityField.value.trim();
                   if (!qtyValue || isNaN(qtyValue) || parseInt(qtyValue) < 1) {
-                      console.log('DEBUG: Setting quantity to 1 (was:', qtyValue, ')');
                       quantityField.value = '1';
                   }
               }
               const unitPriceField = document.querySelector('input[name="unit_price"]');
-              console.log('DEBUG: Unit price field value before validation:', unitPriceField ? unitPriceField.value : 'not found');
               if (unitPriceField) {
                   const priceValue = unitPriceField.value.trim();
                   if (!priceValue || isNaN(priceValue) || parseInt(priceValue) < 0) {
-                      console.log('DEBUG: Setting unit price to 0 (was:', priceValue, ')');
                       unitPriceField.value = '0';
                   }
               }
 
               // SYNC AUTHORS
               if (tomSelectInstance && originalContainer) {
-                  let values = tomSelectInstance.getValue(); // IDs or "new_Name"
+                  // Get items from TomSelect - use items property which is an array
+                  var selectedItems = tomSelectInstance.items;
                   
-                  // Convert to array if it's not already
-                  if (!Array.isArray(values)) {
-                      values = values ? [values] : [];
+                  console.log('DEBUG: TomSelect items array:', selectedItems);
+                  
+                  var existingIds = [];
+                  var newNames = [];
+                  
+                  // Build set of existing author IDs from DB
+                  var existingOptionValues = new Set();
+                  if (originalContainer.tagName === 'SELECT') {
+                      Array.from(originalContainer.options).forEach(function(opt) {
+                          existingOptionValues.add(String(opt.value));
+                      });
                   }
                   
-                  const existingIds = [];
-                  const newNames = [];
+                  console.log('DEBUG: Existing IDs in DB:', Array.from(existingOptionValues));
                   
-                  console.log('DEBUG: Raw values from Tom Select:', values);
-                  
-                  // Separate existing IDs vs New Names
-                  values.forEach(val => {
-                      const valStr = String(val); // Force string comparison
-                      if (valStr.startsWith('new_')) {
-                          newNames.push(valStr.substring(4));
+                  // Process each selected item
+                  selectedItems.forEach(function(valStr) {
+                      valStr = String(valStr).trim();
+                      if (!valStr) return;
+                      
+                      console.log('DEBUG: Processing item:', valStr);
+                      
+                      if (valStr.indexOf('new_') === 0) {
+                          // New author - extract name by removing 'new_' prefix
+                          var authorName = valStr.substring(4).trim();
+                          console.log('DEBUG: New author name:', authorName);
+                          if (authorName) {
+                              newNames.push(authorName);
+                          }
+                      } else if (existingOptionValues.has(valStr)) {
+                          // Existing author ID
+                          console.log('DEBUG: Existing author ID:', valStr);
+                          existingIds.push(valStr);
+                      } else if (/^\d+$/.test(valStr)) {
+                          // Numeric but not in options - treat as ID anyway
+                          console.log('DEBUG: Numeric ID (not in options):', valStr);
+                          existingIds.push(valStr);
                       } else {
-                          // Allow loose check for IDs
-                          existingIds.push(valStr); 
+                          // Unknown string - treat as new author
+                          console.log('DEBUG: Unknown, treating as new author:', valStr);
+                          newNames.push(valStr);
                       }
                   });
                   
-                  // Sync to hidden SELECT
+                  console.log('DEBUG: Final existingIds:', existingIds);
+                  console.log('DEBUG: Final newNames:', newNames);
+                  
+                  // Sync to hidden SELECT for Django form
                   if (originalContainer.tagName === 'SELECT') {
-                      // Reset selection
-                      Array.from(originalContainer.options).forEach(opt => opt.selected = false);
-                      
-                      // Select matching IDs
-                      existingIds.forEach(id => {
-                          for (let i = 0; i < originalContainer.options.length; i++) {
-                              if (String(originalContainer.options[i].value) === String(id)) {
-                                  originalContainer.options[i].selected = true;
-                                  break;
-                              }
+                      Array.from(originalContainer.options).forEach(function(opt) {
+                          opt.selected = false;
+                      });
+                      existingIds.forEach(function(id) {
+                          var opt = originalContainer.querySelector('option[value="' + id + '"]');
+                          if (opt) {
+                              opt.selected = true;
+                              console.log('DEBUG: Selected option:', id);
                           }
                       });
-                  } else {
-                      // Fallback Sync for checkboxes
-                      const checkboxes = originalContainer.querySelectorAll('input[type="checkbox"]');
-                      checkboxes.forEach(cb => {
-                          cb.checked = existingIds.includes(cb.value);
-                      });
-                       // Double check by name if container query failed
-                       if (checkboxes.length === 0) {
-                           const inputs = document.getElementsByName('authors');
-                           Array.from(inputs).forEach(input => {
-                               if(input.type === 'checkbox') {
-                                   input.checked = existingIds.includes(input.value);
-                               }
-                           });
-                       }
                   }
                   
-                  // Sync New Names to the actual form field 'new_authors'
-                  const newAuthorsInput = document.getElementById('id_new_authors');
+                  // Update hidden inputs (primary source for Python)
+                  var authorIdsHidden = document.getElementById('author_ids_hidden');
+                  if (authorIdsHidden) {
+                      authorIdsHidden.value = existingIds.join(',');
+                      console.log('DEBUG: Set author_ids_hidden:', authorIdsHidden.value);
+                  }
+                  
+                  var newAuthorsInput = document.getElementById('id_new_authors');
                   if (newAuthorsInput) {
-                      newAuthorsInput.value = newNames.join(', ');
-                      console.log('DEBUG: Synced new_authors input:', newAuthorsInput.value);
+                      newAuthorsInput.value = newNames.join('|||');
+                      console.log('DEBUG: Set new_authors:', newAuthorsInput.value);
                   }
                   
-                  // Debug: Check what's being synced
-                  console.log('DEBUG: Existing author IDs:', existingIds);
-                  console.log('DEBUG: New author names:', newNames);
-                  console.log('DEBUG: Original SELECT selected:', 
-                      Array.from(originalContainer.selectedOptions || []).map(o => o.value));
+                  var newAuthorNamesHidden = document.getElementById('new_author_names_hidden');
+                  if (newAuthorNamesHidden) {
+                      newAuthorNamesHidden.value = newNames.join('|||');
+                      console.log('DEBUG: Set new_author_names_hidden:', newAuthorNamesHidden.value);
+                  }
               }
-              // Normal submit proceeds now
           });
       }
   });
