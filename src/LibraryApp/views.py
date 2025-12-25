@@ -603,8 +603,14 @@ def book_import_view(request):
                     # and BookItem creation automatically
                     
                     # Tạo phiếu nhập
+                    # Kết hợp ngày từ form với giờ hiện tại để có datetime đầy đủ
+                    from datetime import datetime, time
+                    import_date_with_time = timezone.make_aware(
+                        datetime.combine(import_date, timezone.localtime().time())
+                    ) if import_date else timezone.now()
+                    
                     receipt = BookImportReceipt.objects.create(
-                        import_date=import_date,
+                        import_date=import_date_with_time,
                         created_by=request.user.username,
                         notes=notes
                     )
