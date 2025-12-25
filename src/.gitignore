@@ -100,3 +100,14 @@ Procfile.tailwind
 
 # Bank info
 bank/
+
+# Temp file
+Temp.*
+temp.*
+tmp.*
+Tmp.*
+tmp*
+tmp.md
+docs/tmp*
+docs/tmp.md
+docs/tmp.png
