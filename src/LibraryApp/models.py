@@ -112,6 +112,12 @@ class Parameter(models.Model):
         default=True
     )
     
+    allow_borrow_when_overdue = models.BooleanField(
+        verbose_name='Cho phép mượn khi có sách quá hạn',
+        default=False,
+        help_text='Nếu bật, độc giả vẫn có thể mượn sách mới dù đang có sách quá hạn chưa trả'
+    )
+    
     # Quy định về năm
     establishment_year = models.PositiveIntegerField(
         verbose_name='Năm thành lập',
@@ -879,6 +885,18 @@ class BorrowReturnReceipt(models.Model):
             self.fine_amount = self.calculate_fine()
         
         is_new = self.pk is None
+        
+        # Kiểm tra xem có phải lần đầu trả sách không (return_date được set lần đầu)
+        is_first_return = False
+        if not is_new and self.return_date:
+            # Lấy giá trị cũ từ DB để so sánh
+            try:
+                old_receipt = BorrowReturnReceipt.objects.get(pk=self.pk)
+                if old_receipt.return_date is None:
+                    is_first_return = True
+            except BorrowReturnReceipt.DoesNotExist:
+                pass
+        
         super().save(*args, **kwargs)
         
         # Cập nhật trạng thái sách
@@ -888,14 +906,14 @@ class BorrowReturnReceipt(models.Model):
             self.book_item.save(update_fields=['is_borrowed'])
             self.book_item.book.remaining_quantity -= 1
             self.book_item.book.save(update_fields=['remaining_quantity'])
-        elif self.return_date:
-            # Trả sách
+        elif is_first_return:
+            # Trả sách LẦN ĐẦU TIÊN
             self.book_item.is_borrowed = False
             self.book_item.save(update_fields=['is_borrowed'])
             self.book_item.book.remaining_quantity += 1
             self.book_item.book.save(update_fields=['remaining_quantity'])
             
-            # Cập nhật nợ của độc giả
+            # Cập nhật nợ của độc giả (chỉ cộng tiền phạt 1 lần)
             if self.fine_amount > 0:
                 self.reader.total_debt += self.fine_amount
                 self.reader.save(update_fields=['total_debt'])

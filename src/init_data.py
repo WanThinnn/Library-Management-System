@@ -65,6 +65,9 @@ def init_parameters():
             
             # Quy định về thu tiền
             'enable_receipt_amount_validation': True,
+
+            # Quy định về mượn sách
+            'allow_borrow_when_overdue': False,
         }
     )
     

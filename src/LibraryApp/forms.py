@@ -297,16 +297,17 @@ class BorrowBookForm(forms.Form):
                 'reader_id': f'Thẻ độc giả đã hết hạn (hết hạn: {reader.expiration_date.strftime("%d/%m/%Y")}).'
             })
         
-        # QĐ4.2: Kiểm tra độc giả không có sách mượn quá hạn
-        overdue_borrows = BorrowReturnReceipt.objects.filter(
-            reader=reader,
-            return_date__isnull=True,
-            due_date__lt=today
-        ).exists()
-        if overdue_borrows:
-            raise ValidationError({
-                'reader_id': 'Độc giả có sách mượn quá hạn. Vui lòng trả sách trước khi mượn thêm.'
-            })
+        # QĐ4.2: Kiểm tra độc giả không có sách mượn quá hạn (nếu setting yêu cầu)
+        if not params.allow_borrow_when_overdue:
+            overdue_borrows = BorrowReturnReceipt.objects.filter(
+                reader=reader,
+                return_date__isnull=True,
+                due_date__lt=today
+            ).exists()
+            if overdue_borrows:
+                raise ValidationError({
+                    'reader_id': 'Độc giả có sách mượn quá hạn. Vui lòng trả sách trước khi mượn thêm.'
+                })
         
         # QĐ4.4: Kiểm tra số sách đang mượn + số sách chọn không vượt quá tối đa
         current_borrowed = BorrowReturnReceipt.objects.filter(
@@ -830,8 +831,14 @@ class ReturnBookForm(forms.Form):
         """Kiểm tra ngày trả hợp lệ"""
         return_date = self.cleaned_data.get('return_date')
         
-        if return_date and return_date.date() > timezone.now().date():
-            raise ValidationError('Ngày trả không được trong tương lai')
+        if return_date:
+            # Đảm bảo return_date là timezone-aware
+            if timezone.is_naive(return_date):
+                return_date = timezone.make_aware(return_date)
+            
+            # Sử dụng localdate() để so sánh đúng với timezone của user
+            if return_date.date() > timezone.localdate():
+                raise ValidationError('Ngày trả không được trong tương lai')
         
         return return_date
     
@@ -1006,7 +1013,8 @@ class ParameterForm(forms.ModelForm):
             'book_return_period', 
             'max_borrowed_books', 'max_borrow_days',
             'fine_rate',
-            'enable_receipt_amount_validation'
+            'enable_receipt_amount_validation',
+            'allow_borrow_when_overdue'
         ]
         widgets = {
             'min_age': forms.NumberInput(attrs={

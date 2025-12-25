@@ -1440,16 +1440,20 @@ def return_book_view(request):
                 return redirect('return_book')
             if receipts:
                 count = len(receipts)
-                # Lấy reader từ receipt đầu tiên và kiểm tra nợ
-                reader = receipts[0].reader if receipts else None
-                if reader and reader.total_debt > 0:
-                    messages.success(
-                        request, 
-                        f'Đã ghi nhận trả sách - {count} quyển. '
-                        f'Độc giả còn nợ {reader.total_debt:,}đ. '
-                        f'<a href="/receipt/" class="text-blue-600 dark:text-blue-50 underline font-semibold">Lập phiếu thu ngay</a>',
-                        extra_tags='safe'
-                    )
+                # Lấy reader từ receipt đầu tiên và REFRESH từ DB để có total_debt mới nhất
+                reader_id = receipts[0].reader_id if receipts else None
+                if reader_id:
+                    reader = Reader.objects.get(id=reader_id)
+                    if reader.total_debt > 0:
+                        messages.success(
+                            request, 
+                            f'Đã ghi nhận trả sách - {count} quyển. '
+                            f'Độc giả còn nợ {reader.total_debt:,}đ. '
+                            f'<a href="/receipt/" class="text-blue-600 dark:text-blue-50 underline font-semibold">Lập phiếu thu ngay</a>',
+                            extra_tags='safe'
+                        )
+                    else:
+                        messages.success(request, f'Đã ghi nhận trả sách - {count} quyển')
                 else:
                     messages.success(request, f'Đã ghi nhận trả sách - {count} quyển')
                 return redirect('return_book_list')
@@ -2331,11 +2335,11 @@ def parameter_update_view(request):
                 messages.success(
                     request,
                     ' Cập nhật quy định thành công! '
-                    f'Tuổi: {updated_param.min_age}-{updated_param.max_age}, '
-                    f'Thời hạn thẻ: {updated_param.card_validity_period} tháng, '
-                    f'Số sách mượn tối đa: {updated_param.max_borrowed_books}, '
-                    f'Số ngày mượn tối đa: {updated_param.max_borrow_days}, '
-                    f'Tiền phạt: {updated_param.fine_rate:,}đ/ngày'
+                    # f'Tuổi: {updated_param.min_age}-{updated_param.max_age}, '
+                    # f'Thời hạn thẻ: {updated_param.card_validity_period} tháng, '
+                    # f'Số sách mượn tối đa: {updated_param.max_borrowed_books}, '
+                    # f'Số ngày mượn tối đa: {updated_param.max_borrow_days}, '
+                    # f'Tiền phạt: {updated_param.fine_rate:,}đ/ngày'
                 )
                 return redirect('parameter_update')
             except Exception as e:

@@ -20,41 +20,54 @@
         <h5 class="font-semibold">Thông tin quy định hiện tại</h5>
     </div>
     <div class="p-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Column 1 -->
             <div class="space-y-2">
                 <div class="flex justify-between py-2 border-b">
                     <span class="text-gray-600 dark:text-gray-100">Tuổi tối thiểu</span>
                     <strong class="text-gray-900 dark:text-gray-100">{{ parameter.min_age }} tuổi</strong>
                 </div>
                 <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600 dark:text-gray-100">Số sách mượn tối đa</span>
+                    <strong class="text-gray-900 dark:text-gray-100">{{ parameter.max_borrowed_books }} cuốn</strong>
+                </div>
+                <div class="flex justify-between py-2">
+                    <span class="text-gray-600 dark:text-gray-100">Năm XB tối đa</span>
+                    <strong class="text-gray-900 dark:text-gray-100">{{ parameter.book_return_period }} năm</strong>
+                </div>
+            </div>
+            <!-- Column 2 -->
+            <div class="space-y-2">
+                <div class="flex justify-between py-2 border-b">
                     <span class="text-gray-600 dark:text-gray-100">Tuổi tối đa</span>
                     <strong class="text-gray-900 dark:text-gray-100">{{ parameter.max_age }} tuổi</strong>
                 </div>
                 <div class="flex justify-between py-2 border-b">
-                    <span class="text-gray-600 dark:text-gray-100">Thời hạn thẻ độc giả</span>
-                    <strong class="text-gray-900 dark:text-gray-100">{{ parameter.card_validity_period }} tháng</strong>
-                </div>
-                <div class="flex justify-between py-2">
-                    <span class="text-gray-600 dark:text-gray-100">Khoảng cách năm xuất bản</span>
-                    <strong class="text-gray-900 dark:text-gray-100">{{ parameter.book_return_period }} năm</strong>
-                </div>
-            </div>
-            <div class="space-y-2">
-                <div class="flex justify-between py-2 border-b">
-                    <span class="text-gray-600 dark:text-gray-100">Số sách mượn tối đa</span>
-                    <strong class="text-gray-900 dark:text-gray-100">{{ parameter.max_borrowed_books }} cuốn</strong>
-                </div>
-                <div class="flex justify-between py-2 border-b">
                     <span class="text-gray-600 dark:text-gray-100">Số ngày mượn tối đa</span>
                     <strong class="text-gray-900 dark:text-gray-100">{{ parameter.max_borrow_days }} ngày</strong>
+                </div>
+                <div class="flex justify-between py-2">
+                    <span class="text-gray-600 dark:text-gray-100">Kiểm tra số tiền thu</span>
+                    {% if parameter.enable_receipt_amount_validation %}
+                        <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full inline-flex items-center gap-1 justify-center whitespace-nowrap">Bật</span>
+                    {% else %}
+                        <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Tắt</span>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- Column 3 -->
+            <div class="space-y-2">
+                <div class="flex justify-between py-2 border-b">
+                    <span class="text-gray-600 dark:text-gray-100">Thời hạn thẻ độc giả</span>
+                    <strong class="text-gray-900 dark:text-gray-100">{{ parameter.card_validity_period }} tháng</strong>
                 </div>
                 <div class="flex justify-between py-2 border-b">
                     <span class="text-gray-600 dark:text-gray-100">Đơn giá phạt</span>
                     <strong class="text-gray-900 dark:text-gray-100">{{ parameter.fine_rate|floatformat:0 }} VNĐ/ngày</strong>
                 </div>
                 <div class="flex justify-between py-2">
-                    <span class="text-gray-600 dark:text-gray-100">Kiểm tra số tiền thu</span>
-                    {% if parameter.enable_receipt_amount_validation %}
+                    <span class="text-gray-600 dark:text-gray-100">Cho phép mượn khi quá hạn</span>
+                    {% if parameter.allow_borrow_when_overdue %}
                         <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full inline-flex items-center gap-1 justify-center whitespace-nowrap">Bật</span>
                     {% else %}
                         <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Tắt</span>
@@ -120,9 +133,9 @@
         <form method="POST" id="parameterForm">
             {% csrf_token %}
             
-            <!-- Grid layout gọn gàng -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <!-- Tuổi -->
+            <!-- Grid layout 3 cột x 3 hàng -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <!-- Row 1 -->
                 <div>
                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-100 mb-1">Tuổi tối thiểu *</label>
                     {{ form.min_age }}
@@ -135,15 +148,8 @@
                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-100 mb-1">Thời hạn thẻ (tháng) *</label>
                     {{ form.card_validity_period }}
                 </div>
-                <!-- Sách -->
-                <div>
-                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-100 mb-1">Năm XB tối đa *</label>
-                    {{ form.book_return_period }}
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <!-- Mượn sách -->
+                
+                <!-- Row 2 -->
                 <div>
                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-100 mb-1">Số sách mượn tối đa *</label>
                     {{ form.max_borrowed_books }}
@@ -152,12 +158,16 @@
                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-100 mb-1">Số ngày mượn tối đa *</label>
                     {{ form.max_borrow_days }}
                 </div>
-                <!-- Tiền phạt -->
                 <div>
                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-100 mb-1">Tiền phạt (VNĐ/ngày) *</label>
                     {{ form.fine_rate }}
                 </div>
-                <!-- Thu tiền -->
+                
+                <!-- Row 3 -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-100 mb-1">Năm XB tối đa *</label>
+                    {{ form.book_return_period }}
+                </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 dark:text-gray-100 mb-1">Kiểm tra tiền thu</label>
                     <div class="flex items-center h-[38px] px-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md">
@@ -165,6 +175,16 @@
                             <input type="checkbox" name="enable_receipt_amount_validation" {% if form.enable_receipt_amount_validation.value %}checked{% endif %} class="sr-only peer">
                             <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 dark:peer-checked:bg-blue-700"></div>
                             <span class="ml-2 text-xs text-gray-600 dark:text-gray-400">{% if form.enable_receipt_amount_validation.value %}Bật{% else %}Tắt{% endif %}</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-100 mb-1">Cho phép mượn khi quá hạn</label>
+                    <div class="flex items-center h-[38px] px-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="allow_borrow_when_overdue" {% if form.allow_borrow_when_overdue.value %}checked{% endif %} class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-gray-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 dark:peer-checked:bg-blue-700"></div>
+                            <span class="ml-2 text-xs text-gray-600 dark:text-gray-400">{% if form.allow_borrow_when_overdue.value %}Bật{% else %}Tắt{% endif %}</span>
                         </label>
                     </div>
                 </div>
