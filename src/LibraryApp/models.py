@@ -220,19 +220,21 @@ class Reader(models.Model):
     )
 
     @property
+    def pending_debt(self):
+        """Tính nợ dự kiến từ sách chưa trả"""
+        pending = 0
+        active_receipts = self.borrow_receipts.filter(return_date__isnull=True)
+        for receipt in active_receipts:
+            if receipt.is_overdue:
+                pending += receipt.calculate_fine()
+        return pending
+
+    @property
     def total_debt_with_pending(self):
         """
         Tổng nợ bao gồm cả tiền phạt dự kiến của các sách đang mượn quá hạn
         """
-        pending_fines = 0
-        # Lấy danh sách phiếu mượn chưa trả
-        active_receipts = self.borrow_receipts.filter(return_date__isnull=True)
-        
-        for receipt in active_receipts:
-            if receipt.is_overdue:
-                pending_fines += receipt.calculate_fine()
-                
-        return self.total_debt + pending_fines
+        return self.total_debt + self.pending_debt
     
     # Trạng thái
     is_active = models.BooleanField(

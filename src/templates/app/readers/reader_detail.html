@@ -111,10 +111,15 @@
                     {% endif %}
                 </div>
                 <div>
-                    <p class="text-gray-500 text-sm">Tổng nợ:</p>
-                    <p class="text-2xl font-bold {% if reader.total_debt > 0 %}text-red-600{% else %}text-green-600{% endif %}">
-                        {{ reader.total_debt|floatformat:0|default:"0" }}đ
+                    <p class="text-gray-500 text-sm">Tổng nợ (gồm dự tính):</p>
+                    <p class="text-2xl font-bold {% if reader.total_debt_with_pending > 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                        {{ reader.total_debt_with_pending|floatformat:0|default:"0" }}đ
                     </p>
+                    {% if reader.pending_debt > 0 %}
+                    <small class="text-xs text-blue-600 dark:text-blue-300 block">
+                        ({{ reader.total_debt|floatformat:0 }}đ đã chốt + {{ reader.pending_debt|floatformat:0 }}đ dự tính)
+                    </small>
+                    {% endif %}
                 </div>
             </div>
         </div>

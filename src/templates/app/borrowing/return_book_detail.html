@@ -131,15 +131,21 @@
                         </small>
                     </div>
                 </div>
-
-                {% if receipt.reader.total_debt %}
+{% comment %} 
+                {% if receipt.reader.total_debt_with_pending %}
                 <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-400 p-4 rounded mt-6">
-                    <strong>Tổng nợ của độc giả:</strong> 
+                    <strong>Tổng nợ (bao gồm dự tính):</strong> 
                     <span class="text-xl font-bold">
-                        {{ receipt.reader.total_debt|floatformat:0 }}đ
+                        {{ receipt.reader.total_debt_with_pending|floatformat:0 }}đ
                     </span>
+                    {% if receipt.reader.pending_debt > 0 %}
+                    <br>
+                    <small class="text-sm text-blue-600 dark:text-blue-300">
+                        (Đã chốt: {{ receipt.reader.total_debt|floatformat:0 }}đ + Đang tính: {{ receipt.reader.pending_debt|floatformat:0 }}đ)
+                    </small>
+                    {% endif %}
                 </div>
-                {% endif %}
+                {% endif %} {% endcomment %}
             </div>
         </div>
     </div>
