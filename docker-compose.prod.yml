@@ -32,6 +32,11 @@ services:
     volumes:
       - static_volume:/app/staticfiles:ro
       - ./certs:/etc/nginx/certs:ro
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME:-library.cyberfortress.local}
+      - SSL_CERT_FILE=${SSL_CERT_FILE:-_.cyberfortress.local.crt}
+      - SSL_KEY_FILE=${SSL_KEY_FILE:-_.cyberfortress.local.key}
+      - SSL_CA_FILE=${SSL_CA_FILE:-CyberFortress-RootCA.crt}
     depends_on:
       - web
     restart: unless-stopped

@@ -38,6 +38,32 @@ A comprehensive library management system built with Django, featuring book cata
 
 To access the application via `https://library.cyberfortress.local` without browser warnings, you need to configure your hosts file and trust the generated Root CA.
 
+### Using a Custom Domain
+
+If you want to use your own domain (e.g., `library.yourdomain.local`), you will need to:
+
+1. **Generate your own Root CA and Leaf Certificate**: Create new self-signed certificates for your domain. You can use tools like `openssl` or `mkcert` to generate:
+   - A Root CA certificate (to be trusted by your system/browser)
+   - A leaf/server certificate signed by your Root CA (for your custom domain)
+
+2. **Place the certificates in the `certs/` folder**:
+   - Your leaf certificate (e.g., `_.yourdomain.local.crt`)
+   - Your private key (e.g., `_.yourdomain.local.key`)
+   - Your Root CA certificate (e.g., `YourRootCA.crt`)
+
+3. **Update the `.env` file** with your domain and certificate filenames:
+   ```env
+   DOMAIN_NAME="library.yourdomain.local library.yourdomain.local *.yourdomain.local"
+   SSL_CERT_FILE=_.yourdomain.local.crt
+   SSL_KEY_FILE=_.yourdomain.local.key
+   SSL_CA_FILE=YourRootCA.crt
+   ALLOWED_HOSTS=library.yourdomain.local,127.0.0.1,localhost
+   ```
+
+4. **Trust your Root CA certificate** on your system (see instructions below).
+
+5. **Update your hosts file** to point your domain to `127.0.0.1`. 
+
 ### 1. Update Hosts File
 
 Map the local domain to your localhost IP (`127.0.0.1`).
@@ -207,6 +233,7 @@ For production, you can use the optimized `docker-compose.prod.yml`.
 
 1. **Build/Pull Images**:
    ```bash
+   python start.py --prod setup
    python start.py --prod build
    ```
    *Note: Ensure you build locally if using custom code changes.*
@@ -218,6 +245,7 @@ For production, you can use the optimized `docker-compose.prod.yml`.
 
 3. **Manage Database**:
    ```bash
+   python start.py --prod makemigrations
    python start.py --prod migrate
    python start.py --prod initdata
    ```
