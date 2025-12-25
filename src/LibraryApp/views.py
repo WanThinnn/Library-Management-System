@@ -535,12 +535,19 @@ def book_import_view(request):
                             if author not in authors:
                                 authors.append(author)
                     
-                    # Kiểm tra hoặc tạo BookTitle
-                    book_title, created = BookTitle.objects.get_or_create(
-                        book_title=book_title_name,
-                        category=category,
-                        defaults={'description': description}
-                    )
+                    # Kiểm tra hoặc tạo BookTitle (case-insensitive)
+                    existing_book_title = BookTitle.objects.filter(
+                        book_title__iexact=book_title_name,
+                        category=category
+                    ).first()
+                    if existing_book_title:
+                        book_title = existing_book_title
+                    else:
+                        book_title = BookTitle.objects.create(
+                            book_title=book_title_name,
+                            category=category,
+                            description=description
+                        )
                     
                     # Thêm tác giả cho BookTitle (cả cũ và mới)
                     # Nếu BookTitle đã tồn tại, ta vẫn nên kiểm tra xem có cần bổ sung tác giả không?
@@ -558,12 +565,12 @@ def book_import_view(request):
                                 book_title=book_title
                             )
                     
-                    # Smart duplicate detection:
+                    # Smart duplicate detection (case-insensitive publisher):
                     # Find existing books with same title, publisher, year
                     existing_books = Book.objects.filter(
                         book_title=book_title,
                         publish_year=publish_year,
-                        publisher=publisher
+                        publisher__iexact=publisher
                     )
                     
                     # Check ISBN and Edition - both must match for same book
@@ -744,30 +751,48 @@ def book_import_excel_view(request):
                             try: unit_price = int(unit_price)
                             except: unit_price = 0
                             
-                            # 2. Get/Create Category
-                            category, _ = Category.objects.get_or_create(category_name=category_name)
+                            # 2. Get/Create Category (case-insensitive)
+                            existing_category = Category.objects.filter(category_name__iexact=category_name).first()
+                            if existing_category:
+                                category = existing_category
+                            else:
+                                category = Category.objects.create(category_name=category_name)
                             
-                            # 3. Get/Create BookTitle
-                            book_title, created = BookTitle.objects.get_or_create(
-                                book_title=book_title_name,
-                                category=category,
-                                defaults={'description': description}
-                            )
+                            # 3. Get/Create BookTitle (case-insensitive)
+                            existing_book_title = BookTitle.objects.filter(
+                                book_title__iexact=book_title_name,
+                                category=category
+                            ).first()
+                            if existing_book_title:
+                                book_title = existing_book_title
+                            else:
+                                book_title = BookTitle.objects.create(
+                                    book_title=book_title_name,
+                                    category=category,
+                                    description=description
+                                )
                             
-                            # 4. Handle Authors
+                            # 4. Handle Authors (case-insensitive)
                             author_names = [name.strip() for name in author_names_str.split(',') if name.strip()]
                             current_authors = book_title.authors.all()
                             
                             for name in author_names:
-                                author, _ = Author.objects.get_or_create(author_name=name)
+                                # Case-insensitive author lookup
+                                existing_author = Author.objects.filter(author_name__iexact=name).first()
+                                if existing_author:
+                                    author = existing_author
+                                else:
+                                    author = Author.objects.create(author_name=name)
+                                
                                 if author not in current_authors:
                                     AuthorDetail.objects.create(author=author, book_title=book_title)
                             
                             # 5. Smart duplicate detection for Excel import
+                            # Also use case-insensitive publisher matching
                             existing_books = Book.objects.filter(
                                 book_title=book_title,
                                 publish_year=publish_year,
-                                publisher=publisher
+                                publisher__iexact=publisher
                             )
                             
                             # Check ISBN and Edition

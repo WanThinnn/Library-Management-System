@@ -52,32 +52,41 @@
 
         <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800 mb-6">
             <h6 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">Cấu trúc file mẫu:</h6>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                Các cột bắt buộc: <span class="font-medium">Tên sách, Thể loại, Tác giả, Năm XB, NXB, Số lượng, Đơn giá</span><br>
+                Các cột tùy chọn: <span class="italic">ISBN, Phiên bản, Ngôn ngữ, Mô tả</span>
+            </p>
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
-                            <th class="px-6 py-3">Tên sách</th>
-                            <th class="px-6 py-3">Thể loại</th>
-                            <th class="px-6 py-3">Tác giả</th>
-                            <th class="px-6 py-3">Năm XB</th>
-                            <th class="px-6 py-3">NXB</th>
-                            <th class="px-6 py-3">Số lượng</th>
-                            <th class="px-6 py-3">Đơn giá</th>
+                            <th class="px-4 py-2">Tên sách</th>
+                            <th class="px-4 py-2">Thể loại</th>
+                            <th class="px-4 py-2">Tác giả</th>
+                            <th class="px-4 py-2">Năm XB</th>
+                            <th class="px-4 py-2">NXB</th>
+                            <th class="px-4 py-2">Số lượng</th>
+                            <th class="px-4 py-2">Đơn giá</th>
+                            <th class="px-4 py-2 text-gray-400">(Ngôn ngữ)</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">Đắc Nhân Tâm</td>
-                            <td class="px-6 py-4">Tâm lý</td>
-                            <td class="px-6 py-4">Dale Carnegie</td>
-                            <td class="px-6 py-4">2023</td>
-                            <td class="px-6 py-4">NXB Trẻ</td>
-                            <td class="px-6 py-4">10</td>
-                            <td class="px-6 py-4">80000</td>
+                            <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">Đắc Nhân Tâm</td>
+                            <td class="px-4 py-3">Tâm lý</td>
+                            <td class="px-4 py-3">Dale Carnegie, Nguyễn Văn A</td>
+                            <td class="px-4 py-3">2023</td>
+                            <td class="px-4 py-3">NXB Trẻ</td>
+                            <td class="px-4 py-3">10</td>
+                            <td class="px-4 py-3">80000</td>
+                            <td class="px-4 py-3 text-gray-400">Tiếng Việt</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                <strong>Lưu ý:</strong> Nhiều tác giả phân cách bằng dấu phẩy. Ngôn ngữ mặc định là "Tiếng Việt" nếu để trống.
+            </p>
         </div>
 
         <div class="flex gap-4 justify-center">
