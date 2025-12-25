@@ -1207,7 +1207,7 @@ def borrow_book_detail_view(request, receipt_id):
     
     context = {
         'receipt': receipt,
-        'page_title': f'Phiếu mượn #{receipt.id}'
+        'page_title': f'Chi tiết phiếu mượn sách #{receipt.id}'
     }
     
     return render(request, 'app/borrowing/borrow_book_detail.html', context)
