@@ -225,7 +225,11 @@ document.querySelectorAll('.card-carousel').forEach(carousel => {
 {% endif %} {% else %}
 <!-- Unauthenticated View with Background -->
 {% load static %}
-<div id="hero-bg" class="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat bg-loading" style="background-color: #1a365d;"></div>
+<!-- Layer 1: Solid color - always visible -->
+<div class="fixed inset-0 -z-10 bg-solid"></div>
+<!-- Layer 2: Background image - fades in when loaded -->
+<div id="hero-bg" class="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat bg-image"></div>
+<!-- Layer 3: Dark overlay -->
 <div class="fixed inset-0 -z-10 bg-black/50"></div>
 <script>
   // Preload and smoothly show background image
