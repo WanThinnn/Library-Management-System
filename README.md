@@ -1,6 +1,9 @@
 # Library Management System
 
-A comprehensive library management system built with Django, featuring book cataloging, reader management, borrowing/return tracking, and detailed reporting capabilities.
+A comprehensive library management system built with Django, featuring book cataloging, reader management, borrowing/return tracking, and detailed reporting capabilities. 
+
+<img src="image/image-1.png" alt="image" style="border: 1px solid #000; padding: 0px; background: #fff;">
+
 
 ## Features
 
@@ -32,6 +35,12 @@ A comprehensive library management system built with Django, featuring book cata
 - Docker Compose v2.0+
 - Git
 - Python 3.10+ (for local scripts)
+
+## Preview UI/UX
+
+Screenshots of the web interface are available in the image/ directory.
+
+<img src="image/image-2.png" alt="image" style="border: 1px solid #000; padding: 0px; background: #fff;">
 
 
 ## Local DNS & SSL Configuration
