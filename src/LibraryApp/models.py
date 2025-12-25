@@ -827,9 +827,12 @@ class BorrowReturnReceipt(models.Model):
     @property
     def is_overdue(self):
         """Kiểm tra có trễ hạn không"""
+        due_date = self.due_date.date() if hasattr(self.due_date, 'date') else self.due_date
+        
         if self.is_returned:
-            return self.return_date > self.due_date
-        return timezone.now() > self.due_date
+            return_date = self.return_date.date() if hasattr(self.return_date, 'date') else self.return_date
+            return return_date > due_date
+        return timezone.localdate() > due_date
     
     @property
     def days_overdue(self):
@@ -837,10 +840,15 @@ class BorrowReturnReceipt(models.Model):
         if not self.is_overdue:
             return 0
         
+        # Sử dụng date() để tránh lỗi timezone
+        due_date = self.due_date.date() if hasattr(self.due_date, 'date') else self.due_date
+        
         if self.is_returned:
-            delta = self.return_date - self.due_date
+            return_date = self.return_date.date() if hasattr(self.return_date, 'date') else self.return_date
+            delta = return_date - due_date
         else:
-            delta = timezone.now() - self.due_date
+            today = timezone.localdate()
+            delta = today - due_date
         
         return max(0, delta.days)
     

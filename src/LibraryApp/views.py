@@ -1547,11 +1547,12 @@ def return_book_list_view(request):
     paginator = Paginator(receipts, 20)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-    
+    params = Parameter.objects.first()
+    fine_rate = params.fine_rate if params else 1000
     # Tính tiền phạt cho mỗi receipt
     for receipt in page_obj.object_list:
         if hasattr(receipt, 'is_overdue') and receipt.is_overdue:
-            receipt.fine_amount = receipt.days_overdue * 1000  # 1000đ/ngày
+            receipt.fine_amount = receipt.days_overdue * fine_rate
         else:
             receipt.fine_amount = 0
     
@@ -1644,9 +1645,13 @@ def api_reader_borrowed_books(request, reader_id):
     data = []
     for receipt in receipts:
         try:
-            days_borrowed = (timezone.now().date() - receipt.borrow_date.date()).days
+            today = timezone.localdate()
+            days_borrowed = (today - receipt.borrow_date.date()).days
             book_title = receipt.book_item.book.book_title.book_title
-            days_overdue = max(0, days_borrowed - 4)
+            
+            # Tính days_overdue từ due_date thực sự, không phải hardcoded
+            due_date = receipt.due_date.date() if receipt.due_date else receipt.borrow_date.date()
+            days_overdue = max(0, (today - due_date).days)
             
             data.append({
                 'receipt_id': receipt.id,
