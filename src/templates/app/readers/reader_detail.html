@@ -125,10 +125,20 @@
                 <h5 class="font-semibold">Thao tác</h5>
             </div>
             <div class="p-4 space-y-2">
-                <a href="{% url 'reader_create' %}" class="hover:scale-105 duration-200 transition-transform  w-full bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                {% if can_edit_readers %}
+                <a href="{% url 'reader_edit' reader.id %}" class="hover:scale-105 duration-200 transition-transform w-full bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2">
+                    {% comment %} <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg> {% endcomment %}
+                    Sửa thông tin
+                </a>
+                {% endif %}
+                {% if can_add_readers %}
+                <a href="{% url 'reader_create' %}" class="hover:scale-105 duration-200 transition-transform w-full bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2">
                     Lập thẻ độc giả khác
                 </a>
-                <a href="{% url 'reader_list' %}" class="hover:scale-105 duration-200 transition-transform w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                {% endif %}
+                <a href="{% url 'reader_list' %}" class="hover:scale-105 duration-200 transition-transform w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2">
                     Danh sách độc giả
                 </a>
             </div>
@@ -161,7 +171,11 @@ function loadReaderBorrowingInfo() {
                     
                     return `
                         <tr class="${isOverdue ? 'bg-red-50' : ''} hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700">
-                            <td class="px-3 py-2 text-sm"><strong>${book.title}</strong></td>
+                            <td class="px-3 py-2 text-sm">
+                                <a href="/book/${book.id}/" class="text-blue-950 hover:text-blue-800 dark:text-blue-50 dark:hover:text-blue-300 font-semibold hover:underline">
+                                    ${book.title}
+                                </a>
+                            </td>
                             <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">${book.borrow_date}</td>
                             <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">${book.due_date}</td>
                             <td class="px-3 py-2 text-sm">

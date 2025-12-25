@@ -9,11 +9,12 @@
         <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {{ page_title }}
         </h1>
-        <p class="text-gray-500">Tạo thẻ độc giả mới theo quy định của thư viện</p>
+        <p class="text-gray-500">{% if is_edit %}Chỉnh sửa thông tin độc giả{% else %}Tạo thẻ độc giả mới theo quy định của thư viện{% endif %}</p>
     </div>
 </div>
 
-<!-- Quy định lập thẻ -->
+<!-- Quy định lập thẻ - Chỉ hiển thị khi tạo mới -->
+{% if not is_edit %}
 <div class="bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-lg shadow-md mb-6 p-6">
     <h3 class="text-lg font-bold mb-3">Quy định lập thẻ</h3>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -31,11 +32,17 @@
         </div>
     </div>
 </div>
+{% endif %}
                
 <!-- Form Card -->
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 mb-6 overflow-hidden">
-    <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
+    <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3 flex justify-between items-center">
         <h5 class="font-semibold">Thông tin độc giả</h5>
+        {% if is_edit %}
+        <span class="bg-white/20 text-white text-sm font-medium px-3 py-1 rounded-full">
+            Mã ĐG: {{ reader.id }}
+        </span>
+        {% endif %}
     </div>
     <div class="p-6">
         <form method="post" novalidate>
@@ -109,6 +116,31 @@
                         {% endif %}
                     </div>
                 </div>
+                
+                <!-- Trạng thái hoạt động - Chỉ hiển thị khi sửa -->
+                {% if is_edit %}
+                <div class="md:col-span-3 mb-4">
+                    <label for="{{ form.is_active.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ form.is_active.label }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            {{ form.is_active }}
+                            <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {% comment %} {{ form.is_active.label }} {% endcomment %}
+                                 Bật
+                            </span>
+                        </label>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                            (Tắt để khóa tài khoản độc giả)
+                        </span>
+                    </div>
+                    {% if form.is_active.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.is_active.errors }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
                 <!-- Địa chỉ -->
                 <div class="mb-4 md:col-span-3">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -253,8 +285,13 @@
             <!-- Buttons -->
             <div class="mt-6 flex flex-wrap gap-3 justify-center">
                 <button type="submit" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                    Lập thẻ độc giả
+                    {% if is_edit %}Cập nhật thông tin{% else %}Lập thẻ độc giả{% endif %}
                 </button>
+                {% if is_edit %}
+                <a href="{% url 'reader_detail' reader.id %}" class="hover:scale-105 duration-200 transition-transform bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                    Hủy
+                </a>
+                {% endif %}
                 <a href="{% url 'reader_list' %}" class="hover:scale-105 duration-200 transition-transform bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-6 rounded-lg transition-colors">
                     Danh sách độc giả
                 </a>

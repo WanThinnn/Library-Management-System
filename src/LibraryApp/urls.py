@@ -31,6 +31,7 @@ urlpatterns = [
     # YC1: Lập thẻ độc giả
     path('reader/create/', views.reader_create_view, name='reader_create'),
     path('reader/<int:reader_id>/', views.reader_detail_view, name='reader_detail'),
+    path('reader/<int:reader_id>/edit/', views.reader_edit_view, name='reader_edit'),
     path('readers/', views.reader_list_view, name='reader_list'),
     
     # YC2: Tiếp nhận sách mới

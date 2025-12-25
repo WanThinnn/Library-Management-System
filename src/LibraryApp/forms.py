@@ -115,7 +115,8 @@ class ReaderForm(forms.ModelForm):
             'date_of_birth',
             'address',
             'email',
-            'card_creation_date'
+            'card_creation_date',
+            'is_active'
         ]
         widgets = {
             'reader_name': forms.TextInput(attrs={
@@ -141,6 +142,9 @@ class ReaderForm(forms.ModelForm):
             'card_creation_date': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500'
             })
         }
         labels = {
@@ -149,7 +153,8 @@ class ReaderForm(forms.ModelForm):
             'date_of_birth': 'Ngày sinh',
             'address': 'Địa chỉ',
             'email': 'Email',
-            'card_creation_date': 'Ngày lập thẻ'
+            'card_creation_date': 'Ngày lập thẻ',
+            'is_active': 'Trạng thái hoạt động'
         }
     
     def __init__(self, *args, **kwargs):
@@ -397,16 +402,15 @@ class BookSearchForm(forms.Form):
 class BookEditForm(forms.ModelForm):
     """
     Form chỉnh sửa sách
-    - Staff: chỉ chỉnh sửa quantity, remaining_quantity
-    - Admin: chỉnh sửa tất cả các trường
+    Chỉ cho phép chỉnh sửa: số lượng, ISBN, phiên bản, ngôn ngữ
+    Các trường khác (đơn giá, năm XB, NXB) chỉnh sửa qua Admin Panel
     """
     
     class Meta:
         model = Book
         fields = [
             'quantity', 'remaining_quantity',
-            'isbn', 'edition', 'language',
-            'unit_price', 'publish_year', 'publisher'
+            'isbn', 'edition', 'language'
         ]
         widgets = {
             'quantity': forms.NumberInput(attrs={
@@ -428,19 +432,6 @@ class BookEditForm(forms.ModelForm):
             'language': forms.TextInput(attrs={
                 'class': 'form-control'
             }),
-            'unit_price': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '0',
-                'step': '1000'
-            }),
-            'publish_year': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '1900',
-                'max': '2100'
-            }),
-            'publisher': forms.TextInput(attrs={
-                'class': 'form-control'
-            }),
         }
         labels = {
             'quantity': 'Số lượng tổng',
@@ -448,23 +439,11 @@ class BookEditForm(forms.ModelForm):
             'isbn': 'ISBN',
             'edition': 'Phiên bản',
             'language': 'Ngôn ngữ',
-            'unit_price': 'Đơn giá (VNĐ)',
-            'publish_year': 'Năm xuất bản',
-            'publisher': 'Nhà xuất bản',
         }
     
     def __init__(self, *args, is_admin=False, **kwargs):
         super().__init__(*args, **kwargs)
-        self.is_admin = is_admin
-        
-        # Staff chỉ được chỉnh sửa một số trường
-        if not is_admin:
-            # Disable các trường admin-only
-            admin_only_fields = ['unit_price', 'publish_year', 'publisher']
-            for field_name in admin_only_fields:
-                if field_name in self.fields:
-                    self.fields[field_name].widget.attrs['readonly'] = True
-                    self.fields[field_name].widget.attrs['class'] += ' bg-gray-100'
+        self.is_admin = is_admin  # Kept for backwards compatibility
     
     def clean(self):
         cleaned_data = super().clean()

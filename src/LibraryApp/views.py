@@ -358,6 +358,56 @@ def reader_create_view(request):
     
     return render(request, 'app/readers/reader_create.html', context)
 
+
+@permission_required('Quản lý độc giả', 'change')
+def reader_edit_view(request, reader_id):
+    """
+    View chỉnh sửa thông tin độc giả
+    
+    Cho phép sửa:
+    - Họ tên, email, địa chỉ
+    - Loại độc giả
+    - Ngày sinh (với validation tuổi)
+    - Ngày lập thẻ (sẽ tự động tính lại ngày hết hạn)
+    """
+    reader = get_object_or_404(Reader, id=reader_id)
+    params = Parameter.objects.first()
+    
+    if not params:
+        messages.error(request, 'Hệ thống chưa được cấu hình. Vui lòng liên hệ quản trị viên.')
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = ReaderForm(request.POST, instance=reader)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    reader = form.save()
+                    
+                    messages.success(
+                        request,
+                        f'Cập nhật thông tin độc giả thành công! '
+                        f'Mã độc giả: {reader.id} - {reader.reader_name}.'
+                    )
+                    return redirect('reader_detail', reader_id=reader.id)
+            except Exception as e:
+                messages.error(request, f'Có lỗi xảy ra: {str(e)}')
+        else:
+            messages.error(request, 'Vui lòng kiểm tra lại thông tin.')
+    else:
+        form = ReaderForm(instance=reader)
+    
+    context = {
+        'form': form,
+        'params': params,
+        'reader_types': ReaderType.objects.all(),
+        'reader': reader,
+        'is_edit': True,
+        'page_title': f'Chỉnh sửa độc giả - {reader.reader_name}'
+    }
+    
+    return render(request, 'app/readers/reader_create.html', context)
+
 @permission_required('Quản lý độc giả', 'view')
 def reader_detail_view(request, reader_id):
     """
@@ -1273,6 +1323,7 @@ def api_borrowing_readers(request):
             'is_overdue': is_overdue,
             'books': [
                 {
+                    'id': b.book_item.book.id,
                     'title': b.book_item.book.book_title.book_title,
                     'borrow_date': b.borrow_date.strftime('%d/%m/%Y'),
                     'due_date': b.due_date.strftime('%d/%m/%Y'),

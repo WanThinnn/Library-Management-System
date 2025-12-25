@@ -30,22 +30,32 @@
             
             <!-- Thông tin tựa sách (chỉ hiển thị, không chỉnh sửa) -->
             <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
-                <h6 class="font-semibold text-blue-600 mb-4">Thông tin tựa sách</h6>
+                <h6 class="font-semibold text-blue-600 mb-4 dark:text-blue-400">Thông tin tựa sách</h6>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên sách</label>
-                        <input type="text" value="{{ book.book_title.book_title }}" class="form-control bg-gray-100 dark:bg-gray-700" readonly>
+                        <input type="text" value="{{ book.book_title.book_title }}" class="form-control bg-gray-100 dark:bg-gray-600 dark:text-gray-200" readonly>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thể loại</label>
-                        <input type="text" value="{{ book.book_title.category.category_name }}" class="form-control bg-gray-100 dark:bg-gray-700" readonly>
+                        <input type="text" value="{{ book.book_title.category.category_name }}" class="form-control bg-gray-100 dark:bg-gray-600 dark:text-gray-200" readonly>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tác giả</label>
+                        <div class="flex flex-wrap gap-2 p-2 bg-gray-100 dark:bg-gray-600 dark:text-gray-300 rounded-lg min-h-[42px]">
+                            {% for author in book.book_title.authors.all %}
+                                <span class="bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-500 text-sm px-3 py-1 rounded-full">{{ author.author_name }}</span>
+                            {% empty %}
+                                <span class="text-gray-500 dark:text-gray-400 italic">Chưa có thông tin tác giả</span>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
             
             <!-- Số lượng -->
             <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
-                <h6 class="font-semibold text-green-600 mb-4">Thông tin số lượng</h6>
+                <h6 class="font-semibold text-green-600 mb-4 dark:text-green-400">Thông tin số lượng</h6>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="{{ form.quantity.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -66,7 +76,7 @@
             
             <!-- Thông tin bổ sung -->
             <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
-                <h6 class="font-semibold text-blue-600 mb-4">Thông tin bổ sung</h6>
+                <h6 class="font-semibold text-blue-600 mb-4 dark:text-blue-400">Thông tin bổ sung</h6>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label for="{{ form.isbn.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -89,34 +99,44 @@
                 </div>
             </div>
             
-            <!-- Thông tin admin-only -->
+            <!-- Thông tin nâng cao (Readonly - Chỉnh sửa qua Admin Panel) -->
             <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
-                <h6 class="font-semibold text-purple-600 mb-4">
+                <h6 class="font-semibold text-purple-600 mb-4 dark:text-purple-400">
                     Thông tin nâng cao
-                    {% if not is_admin %}
-                        <span class="text-gray-400 text-xs font-normal">(Chỉ quản lý được chỉnh sửa)</span>
-                    {% endif %}
+                    <span class="text-gray-400 text-xs font-normal">(Chỉ xem)</span>
                 </h6>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label for="{{ form.unit_price.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Đơn giá (VNĐ)
                         </label>
-                        {{ form.unit_price }}
+                        <input type="text" value="{{ book.unit_price|floatformat:0 }}" class="form-control bg-gray-100 dark:bg-gray-600 dark:text-gray-200" readonly>
                     </div>
                     <div>
-                        <label for="{{ form.publish_year.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Năm xuất bản
                         </label>
-                        {{ form.publish_year }}
+                        <input type="text" value="{{ book.publish_year }}" class="form-control bg-gray-100 dark:bg-gray-600 dark:text-gray-200" readonly>
                     </div>
                     <div>
-                        <label for="{{ form.publisher.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Nhà xuất bản
                         </label>
-                        {{ form.publisher }}
+                        <input type="text" value="{{ book.publisher }}" class="form-control bg-gray-100 dark:bg-gray-600 dark:text-gray-200" readonly>
                     </div>
                 </div>
+                
+                <!-- Notice: Admin Panel -->
+                {% if is_admin %}
+                <div class="mt-4 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg">
+                    <p class="text-sm text-amber-800 dark:text-amber-300">
+                        <strong>Lưu ý:</strong> Để chỉnh sửa thông tin nâng cao (đơn giá, năm XB, NXB, thể loại, tác giả...), vui lòng truy cập 
+                        <a href="/admin/LibraryApp/book/{{ book.id }}/change/" class="text-blue-600 dark:text-blue-400 underline hover:no-underline font-medium" target="_blank">
+                            Django Admin Panel →
+                        </a>
+                    </p>
+                </div>
+                {% endif %}
             </div>
             
             <!-- Buttons -->
