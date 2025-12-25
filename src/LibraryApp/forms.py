@@ -429,9 +429,20 @@ class BookEditForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'VD: Lần thứ 2'
             }),
-            'language': forms.TextInput(attrs={
-                'class': 'form-control'
-            }),
+            'language': forms.Select(
+                choices=[
+                    ('Tiếng Việt', 'Tiếng Việt'),
+                    ('Tiếng Anh', 'Tiếng Anh'),
+                    ('Tiếng Pháp', 'Tiếng Pháp'),
+                    ('Tiếng Trung', 'Tiếng Trung'),
+                    ('Tiếng Nhật', 'Tiếng Nhật'),
+                    ('Tiếng Hàn', 'Tiếng Hàn'),
+                    ('Tiếng Đức', 'Tiếng Đức'),
+                    ('Tiếng Tây Ban Nha', 'Tiếng Tây Ban Nha'),
+                    ('Khác', 'Khác'),
+                ],
+                attrs={'class': 'form-control'}
+            ),
         }
         labels = {
             'quantity': 'Số lượng tổng',
