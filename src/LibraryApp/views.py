@@ -592,6 +592,10 @@ def book_import_view(request):
                     ).first()
                     if existing_book_title:
                         book_title = existing_book_title
+                        # Cập nhật description nếu chưa có và có description mới
+                        if description and not book_title.description:
+                            book_title.description = description
+                            book_title.save()
                     else:
                         book_title = BookTitle.objects.create(
                             book_title=book_title_name,
@@ -815,6 +819,10 @@ def book_import_excel_view(request):
                             ).first()
                             if existing_book_title:
                                 book_title = existing_book_title
+                                # Cập nhật description nếu chưa có và có description mới từ Excel
+                                if description and not book_title.description:
+                                    book_title.description = description
+                                    book_title.save()
                             else:
                                 book_title = BookTitle.objects.create(
                                     book_title=book_title_name,
@@ -978,6 +986,59 @@ def book_import_list_view(request):
     }
     
     return render(request, 'app/books/book_import_list.html', context)
+
+
+@permission_required('Lập phiếu nhập sách', 'view')
+def download_book_import_template(request):
+    """
+    Tải file Excel mẫu để nhập sách
+    """
+    import pandas as pd
+    from django.http import HttpResponse
+    from io import BytesIO
+    
+    # Tạo dữ liệu mẫu
+    sample_data = {
+        'Tên sách': ['Đắc Nhân Tâm', 'Clean Code', 'Nhà Giả Kim'],
+        'Thể loại': ['Tâm lý', 'Công nghệ', 'Văn học'],
+        'Tác giả': ['Dale Carnegie', 'Robert C. Martin', 'Paulo Coelho'],
+        'Năm XB': [2023, 2022, 2021],
+        'NXB': ['NXB Trẻ', 'Prentice Hall', 'NXB Văn Học'],
+        'Số lượng': [10, 5, 8],
+        'Đơn giá': [80000, 350000, 95000],
+        'Ngôn ngữ': ['Tiếng Việt', 'Tiếng Anh', 'Tiếng Việt'],
+        'ISBN': ['978-604-1-12345-6', '978-0-13-235088-4', ''],
+        'Phiên bản': ['Tái bản lần 5', 'First Edition', ''],
+        'Mô tả': ['Sách về nghệ thuật đối nhân xử thế', 'Sách về lập trình sạch', '']
+    }
+    
+    # Tạo DataFrame
+    df = pd.DataFrame(sample_data)
+    
+    # Tạo file Excel trong memory
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name='Nhập sách', index=False)
+        
+        # Điều chỉnh độ rộng cột
+        worksheet = writer.sheets['Nhập sách']
+        for idx, col in enumerate(df.columns):
+            max_length = max(
+                df[col].astype(str).map(len).max(),
+                len(col)
+            ) + 2
+            worksheet.column_dimensions[chr(65 + idx)].width = max_length
+    
+    output.seek(0)
+    
+    # Tạo response
+    response = HttpResponse(
+        output.read(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="mau_nhap_sach.xlsx"'
+    
+    return response
 
 
 # ==================== BOOK SEARCH (YC3) ====================

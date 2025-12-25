@@ -40,6 +40,7 @@ urlpatterns = [
     path('book/import/excel/', views.book_import_excel_view, name='book_import_excel'),
     path('book/import/<int:import_id>/', views.book_import_detail_view, name='book_import_detail'),
     path('books/import/', views.book_import_list_view, name='book_import_list'),
+    path('book/import/template/download/', views.download_book_import_template, name='download_book_import_template'),
     
     # YC3: Tra cứu sách
     path('books/search/', views.book_search_view, name='book_search'),
