@@ -54,6 +54,16 @@
                             {% endfor %}
                         </div>
                     </div>
+                    
+                    <!-- Mô tả sách - Có thể chỉnh sửa -->
+                    <div class="md:col-span-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Mô tả sách <span class="text-gray-400 text-xs">(tùy chọn)</span>
+                        </label>
+                        <textarea name="description" id="description" rows="3" 
+                            class="form-control w-full" 
+                            placeholder="Nhập mô tả về nội dung sách...">{{ book.book_title.description|default:"" }}</textarea>
+                    </div>
                 </div>
             </div>
             

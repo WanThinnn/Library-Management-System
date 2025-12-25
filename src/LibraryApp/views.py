@@ -2800,6 +2800,13 @@ def book_edit_view(request, book_id):
                 else:
                     form.save()
                 
+                # Cập nhật mô tả sách (thuộc BookTitle)
+                description = request.POST.get('description', '').strip()
+                book_title = book.book_title
+                if book_title.description != description:
+                    book_title.description = description
+                    book_title.save()
+                
                 messages.success(request, f'Cập nhật sách "{book.book_title.book_title}" thành công!')
                 return redirect('book_detail', book_id=book.id)
             except Exception as e:
