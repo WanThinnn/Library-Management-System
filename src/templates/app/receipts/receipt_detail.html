@@ -13,6 +13,23 @@
     </div>
 </div>
 
+<!-- Cancelled Receipt Warning -->
+{% if receipt.is_cancelled %}
+<div class="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 dark:text-red-50 text-red-700 p-4 rounded-lg mb-6">
+    <div class="flex items-start gap-3">
+        <div class="flex-1">
+            <p class="font-semibold text-lg mb-2">Phiếu thu này đã bị hủy</p>
+            <div class="space-y-1 text-sm">
+                <p><strong>Người hủy:</strong> {{ receipt.cancelled_by.username }}</p>
+                <p><strong>Thời gian hủy:</strong> {{ receipt.cancelled_at|date:"d/m/Y H:i" }}</p>
+                <p><strong>Lý do:</strong> {{ receipt.cancel_reason }}</p>
+            </div>
+            <p class="mt-2 text-sm">Số tiền <strong>{{ receipt.collected_amount|floatformat:0 }}đ</strong> đã được hoàn lại vào tổng nợ của độc giả.</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Chi tiết phiếu -->
     <div class="lg:col-span-2">
@@ -93,9 +110,11 @@
                     <a href="{% url 'receipt_form' %}" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         Lập phiếu mới
                     </a>
+                    {% if can_cancel_receipt and not receipt.is_cancelled %}
                     <a href="{% url 'receipt_cancel' receipt.id %}" class="hover:scale-105 duration-200 transition-transform bg-red-600 dark:bg-red-700 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         Hủy phiếu
                     </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

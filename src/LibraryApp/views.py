@@ -1841,45 +1841,57 @@ def receipt_form_view(request):
 def receipt_list_view(request):
     """
     Danh sách phiếu thu tiền
-    Hỗ trợ tìm kiếm, lọc theo ngày
     """
+    from .decorators import check_permission
+    from django.db.models import Q
+    from django.core.paginator import Paginator
+    
+    # Get all receipts (including cancelled)
+    receipts = Receipt.objects.select_related('reader').all().order_by('-created_date')
+    
+    # Status filter
+    status = request.GET.get('status', '')
+    if status == 'active':
+        receipts = receipts.filter(is_cancelled=False)
+    elif status == 'cancelled':
+        receipts = receipts.filter(is_cancelled=True)
+    # else: show all
+    
+    # Search by reader name or email
     search = request.GET.get('search', '')
-    search_type = request.GET.get('search_type', 'reader_name')
-    from_date = request.GET.get('from_date', '')
-    to_date = request.GET.get('to_date', '')
-    
-    # Base query
-    receipts = Receipt.objects.select_related('reader').order_by('-created_date')
-    
-    # Tìm kiếm
-    if search and search_type == 'reader_name':
-        from django.db.models import Q
+    if search:
         receipts = receipts.filter(
-            Q(reader__reader_name__icontains=search) |
+            Q(reader__reader_name__icontains=search) | 
             Q(reader__email__icontains=search)
         )
     
-    # Lọc theo ngày
+    # Date range filter
+    from_date = request.GET.get('from_date')
+    to_date = request.GET.get('to_date')
+    
     if from_date:
         receipts = receipts.filter(created_date__gte=from_date)
     if to_date:
-        receipts = receipts.filter(created_date__lte=to_date)
+        # Include the entire end date
+        to_date_obj = timezone.datetime.strptime(to_date, '%Y-%m-%d')
+        to_date_end = to_date_obj.replace(hour=23, minute=59, second=59)
+        receipts = receipts.filter(created_date__lte=to_date_end)
     
-    # Phân trang
-    from django.core.paginator import Paginator
-    paginator = Paginator(receipts, 20)
-    page_number = request.GET.get('page', 1)
+    # Pagination
+    paginator = Paginator(receipts, 20)  # 20 items per page
+    page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
     context = {
-        'page_title': 'Danh sách phiếu thu tiền',
+        'receipts': page_obj,
         'page_obj': page_obj,
-        'receipts': page_obj.object_list,
+        'total_results': receipts.count(),
         'search': search,
-        'search_type': search_type,
         'from_date': from_date,
         'to_date': to_date,
-        'total_results': paginator.count,
+        'status': status,
+        'can_add_receipt': check_permission(request.user, 'Quản lý phiếu thu', 'add'),
+        'page_title': 'Danh sách phiếu thu'
     }
     
     return render(request, 'app/receipts/receipt_list.html', context)
@@ -1892,8 +1904,13 @@ def receipt_detail_view(request, receipt_id):
     """
     receipt = get_object_or_404(Receipt, id=receipt_id)
     
+    # Check permission for cancel action
+    from .decorators import check_permission
+    can_cancel_receipt = check_permission(request.user, 'Quản lý phiếu thu', 'delete')
+    
     context = {
         'receipt': receipt,
+        'can_cancel_receipt': can_cancel_receipt,
         'page_title': f'Chi tiết phiếu thu #{receipt.id}'
     }
     
