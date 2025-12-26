@@ -62,6 +62,7 @@ def init_parameters():
             
             # Quy định về tiền phạt
             'fine_rate': 1000,  # 1000đ/ngày trả trễ
+            'cancellation_time_limit': 24,  # 24 giờ - thời hạn hủy phiếu
             
             # Quy định về thu tiền
             'enable_receipt_amount_validation': True,

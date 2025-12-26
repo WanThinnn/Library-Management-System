@@ -46,7 +46,7 @@ class ParameterAdmin(admin.ModelAdmin):
             'fields': ('establishment_year', 'book_return_period', 'max_borrowed_books', 'max_borrow_days')
         }),
         ('Quy định về tiền phạt', {
-            'fields': ('fine_rate',)
+            'fields': ('fine_rate', 'cancellation_time_limit')
         }),
         ('Quy định khác', {
             'fields': ('enable_receipt_amount_validation', 'allow_borrow_when_overdue')

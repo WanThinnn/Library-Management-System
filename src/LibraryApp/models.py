@@ -106,6 +106,14 @@ class Parameter(models.Model):
         validators=[MinValueValidator(0)]
     )
     
+    # Thời hạn hủy phiếu
+    cancellation_time_limit = models.PositiveIntegerField(
+        verbose_name='Thời hạn hủy phiếu (giờ)',
+        default=24,
+        validators=[MinValueValidator(1), MaxValueValidator(168)],
+        help_text='Số giờ cho phép hủy phiếu kể từ khi lập (mượn/trả/thu/nhập). Tối đa 168 giờ (1 tuần)'
+    )
+    
     # Quy định khác
     enable_receipt_amount_validation = models.BooleanField(
         verbose_name='Kiểm tra số tiền thu không vượt quá nợ',

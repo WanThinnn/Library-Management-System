@@ -1423,10 +1423,13 @@ def borrow_cancel_view(request, receipt_id):
         messages.error(request, f'Không thể hủy phiếu mượn #{receipt.id} vì sách đã được trả. Đây là bản ghi lịch sử.')
         return redirect('borrow_book_detail', receipt_id=receipt.id)
     
-    # Kiểm tra thời gian: chỉ hủy trong vòng 24h kể từ khi mượn
+    # Kiểm tra thời gian: chỉ hủy trong vòng N giờ kể từ khi mượn (N từ tham số hệ thống)
+    params = Parameter.objects.first()
+    cancellation_hours = params.cancellation_time_limit if params else 24
+    
     time_since_borrow = timezone.now() - receipt.borrow_date
-    if time_since_borrow.total_seconds() > 24 * 3600:  # 24 hours
-        messages.error(request, f'Không thể hủy phiếu mượn #{receipt.id}. Chỉ được hủy trong vòng 24 giờ kể từ khi mượn.')
+    if time_since_borrow.total_seconds() > cancellation_hours * 3600:
+        messages.error(request, f'Không thể hủy phiếu mượn #{receipt.id}. Chỉ được hủy trong vòng {cancellation_hours} giờ kể từ khi mượn.')
         return redirect('borrow_book_detail', receipt_id=receipt.id)
     
     if request.method == 'POST':
@@ -1799,10 +1802,13 @@ def return_cancel_view(request, receipt_id):
         messages.error(request, f'Phiếu #{receipt.id} chưa trả sách. Không có gì để hủy.')
         return redirect('return_book_detail', receipt_id=receipt.id)
     
-    # Kiểm tra thời gian: chỉ hủy trong vòng 24h kể từ khi trả
+    # Kiểm tra thời gian: chỉ hủy trong vòng N giờ kể từ khi trả (N từ tham số hệ thống)
+    params = Parameter.objects.first()
+    cancellation_hours = params.cancellation_time_limit if params else 24
+    
     time_since_return = timezone.now() - receipt.return_date
-    if time_since_return.total_seconds() > 24 * 3600:  # 24 hours
-        messages.error(request, f'Không thể hủy hành động trả sách #{receipt.id}. Chỉ được hủy trong vòng 24 giờ kể từ khi trả.')
+    if time_since_return.total_seconds() > cancellation_hours * 3600:
+        messages.error(request, f'Không thể hủy hành động trả sách #{receipt.id}. Chỉ được hủy trong vòng {cancellation_hours} giờ kể từ khi trả.')
         return redirect('return_book_detail', receipt_id=receipt.id)
     
     if request.method == 'POST':
@@ -2222,10 +2228,13 @@ def receipt_cancel_view(request, receipt_id):
         messages.error(request, f'Phiếu thu #{receipt.id} đã được hủy trước đó.')
         return redirect('receipt_detail', receipt_id=receipt.id)
     
-    # Kiểm tra thời gian: chỉ hủy trong vòng 24h kể từ khi lập phiếu
+    # Kiểm tra thời gian: chỉ hủy trong vòng N giờ kể từ khi lập phiếu (N từ tham số hệ thống)
+    params = Parameter.objects.first()
+    cancellation_hours = params.cancellation_time_limit if params else 24
+    
     time_since_created = timezone.now() - receipt.created_date
-    if time_since_created.total_seconds() > 24 * 3600:  # 24 hours
-        messages.error(request, f'Không thể hủy phiếu thu #{receipt.id}. Chỉ được hủy trong vòng 24 giờ kể từ khi lập phiếu.')
+    if time_since_created.total_seconds() > cancellation_hours * 3600:
+        messages.error(request, f'Không thể hủy phiếu thu #{receipt.id}. Chỉ được hủy trong vòng {cancellation_hours} giờ kể từ khi lập phiếu.')
         return redirect('receipt_detail', receipt_id=receipt.id)
     
     if request.method == 'POST':
