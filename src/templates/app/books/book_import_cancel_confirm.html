@@ -20,9 +20,11 @@
             <h5 class="font-semibold">Cảnh báo!</h5>
         </div>
         <div class="p-6">
-            <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 dark:text-yellow-50 text-yellow-700 p-4 rounded mb-4">
-                <p class="font-semibold mb-1">Lưu ý quan trọng!</p>
-                <p class="text-sm">Khi hủy phiếu nhập, <strong>sách đã nhập vẫn ở trong kho</strong>. Chỉ đánh dấu phiếu là đã hủy để ghi nhận.</p>
+            <div class="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 dark:text-red-50 text-red-700 p-4 rounded mb-4">
+                <p class="font-semibold mb-1">Cảnh báo quan trọng!</p>
+                <p class="text-sm">Khi hủy phiếu nhập, <strong class="text-red-600 dark:text-red-400">TẤT CẢ sách đã nhập sẽ bị XÓA VĨNH VIỄN khỏi kho</strong>.</p>
+                <p class="text-sm mt-1">Hành động này KHÔNG THỂ hoàn tác! Vui lòng kiểm tra kỹ trước khi xác nhận.</p>
+                <p class="text-sm mt-2 font-medium">Chỉ được hủy trong vòng {{ cancellation_hours }} giờ kể từ khi nhập.</p>
             </div>
             
             <h6 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Thông tin phiếu nhập sẽ bị hủy:</h6>
@@ -43,6 +45,15 @@
                     <span class="text-gray-900 dark:text-gray-100">Tổng số sách:</span>
                     <span class="text-gray-900 dark:text-gray-100">{{ receipt.total_books_imported }} cuốn</span>
                 </div>
+            </div>
+            
+            <div class="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 dark:text-red-50 text-red-700 p-4 rounded mb-4">
+                <h6 class="font-semibold text-red-900 dark:text-red-100 mb-2">Sách sẽ bị XÓA khỏi kho:</h6>
+                <ul class="list-disc list-inside space-y-1 text-sm text-red-700 dark:text-red-200">
+                    {% for detail in import_details %}
+                    <li><strong>{{ detail.book.book_title.book_title }}</strong> - {{ detail.quantity }} cuốn</li>
+                    {% endfor %}
+                </ul>
             </div>
             
             <form method="POST" class="space-y-4">
@@ -67,7 +78,7 @@
                     </a>
                     <button type="submit" 
                             class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
-                            onclick="return confirm('Bạn có CHẮC CHẮN muốn hủy phiếu nhập này?')">
+                            onclick="return confirm('BẠN CÓ CHẮC CHẮN?\n\nTất cả sách đã nhập sẽ bị XÓA VĨNH VIỄN khỏi kho!\nHành động này KHÔNG THỂ hoàn tác!')">
                         Xác nhận hủy
                     </button>
                 </div>

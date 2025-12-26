@@ -1045,19 +1045,54 @@ def book_import_detail_view(request, import_id):
 @permission_required('Lập phiếu nhập sách', 'delete')
 def book_import_cancel_view(request, import_id):
     """
-    Hủy phiếu nhập sách với audit trail
+    Hủy phiếu nhập sách và XÓA sách đã nhập khỏi CSDL
     
     Business Logic:
-    - Đánh dấu phiếu là đã hủy (is_cancelled=True)
-    - Ghi lại: người hủy, thời gian hủy, lý do hủy
-    - KHÔNG rollback sách đã nhập (sách vẫn ở trong kho, chỉ đánh dấu phiếu hủy)
-    - Không cho phép hủy phiếu đã bị hủy trước đó
+    - Kiểm tra thời hạn hủy (từ tham số cancellation_time_limit)
+    - Kiểm tra không có sách nào đang được mượn
+    - Xóa BookItem được tạo từ phiếu nhập này
+    - Giảm quantity của Book tương ứng
+    - Đánh dấu phiếu đã hủy với audit trail
     """
     receipt = get_object_or_404(BookImportReceipt, id=import_id)
     
     # Kiểm tra phiếu đã bị hủy chưa
     if receipt.is_cancelled:
         messages.error(request, f'Phiếu nhập #{receipt.id} đã được hủy trước đó.')
+        return redirect('book_import_detail', import_id=receipt.id)
+    
+    # Kiểm tra thời hạn hủy (sử dụng tham số từ CSDL)
+    params = Parameter.objects.first()
+    cancellation_hours = params.cancellation_time_limit if params else 24
+    
+    time_since_import = timezone.now() - receipt.import_date
+    if time_since_import.total_seconds() > cancellation_hours * 3600:
+        messages.error(
+            request, 
+            f'Không thể hủy phiếu nhập #{receipt.id}. '
+            f'Chỉ được hủy trong vòng {cancellation_hours} giờ kể từ khi nhập.'
+        )
+        return redirect('book_import_detail', import_id=receipt.id)
+    
+    # Kiểm tra sách có đang được mượn không
+    borrowed_books = []
+    for detail in receipt.import_details.all():
+        # Kiểm tra nếu có bất kỳ BookItem nào của sách này đang được mượn
+        borrowed_count = BookItem.objects.filter(
+            book=detail.book,
+            is_borrowed=True
+        ).count()
+        
+        if borrowed_count > 0:
+            borrowed_books.append(f"{detail.book.book_title.book_title} ({borrowed_count} cuốn)")
+    
+    if borrowed_books:
+        messages.error(
+            request,
+            f'Không thể hủy phiếu nhập #{receipt.id}. '
+            f'Các sách sau đang được mượn: {", ".join(borrowed_books)}. '
+            f'Vui lòng đợi trả sách trước khi hủy phiếu.'
+        )
         return redirect('book_import_detail', import_id=receipt.id)
     
     if request.method == 'POST':
@@ -1073,16 +1108,66 @@ def book_import_cancel_view(request, import_id):
             return render(request, 'app/books/book_import_cancel_confirm.html', context)
         
         try:
-            # Đánh dấu phiếu đã hủy với audit trail
-            receipt.is_cancelled = True
-            receipt.cancelled_at = timezone.now()
-            receipt.cancelled_by = request.user
-            receipt.cancel_reason = cancel_reason
-            receipt.save(update_fields=['is_cancelled', 'cancelled_at', 'cancelled_by', 'cancel_reason'])
+            from django.db import transaction
+            
+            with transaction.atomic():
+                # Track số liệu để báo cáo
+                deleted_items_count = 0
+                updated_books = []
+                
+                # Xử lý từng BookImportDetail
+                for detail in receipt.import_details.all():
+                    book = detail.book
+                    quantity_to_remove = detail.quantity
+                    
+                    # Xóa BookItem (lấy N items KHÔNG ĐANG MƯỢN, mới nhất của book này)
+                    # Sắp xếp theo id giảm dần để lấy những item mới tạo nhất
+                    items_to_delete_ids = list(
+                        BookItem.objects.filter(
+                            book=book,
+                            is_borrowed=False
+                        ).order_by('-id')[:quantity_to_remove].values_list('id', flat=True)
+                    )
+                    
+                    items_deleted = len(items_to_delete_ids)
+                    
+                    # Kiểm tra số lượng có đủ để xóa không
+                    if items_deleted < quantity_to_remove:
+                        raise Exception(
+                            f'Không đủ sách để xóa cho "{book.book_title.book_title}". '
+                            f'Cần xóa {quantity_to_remove} nhưng chỉ có {items_deleted} sách rảnh.'
+                        )
+                    
+                    # Xóa các BookItem bằng cách sử dụng IDs
+                    BookItem.objects.filter(id__in=items_to_delete_ids).delete()
+                    deleted_items_count += items_deleted
+                    
+                    # Cập nhật số lượng Book
+                    new_quantity = max(0, book.quantity - quantity_to_remove)
+                    new_remaining = max(0, book.remaining_quantity - quantity_to_remove)
+                    
+                    # Sử dụng update() để bypass model validation
+                    # (vì quantity có MinValueValidator(1) nhưng khi hủy phiếu có thể về 0)
+                    Book.objects.filter(pk=book.pk).update(
+                        quantity=new_quantity,
+                        remaining_quantity=new_remaining
+                    )
+                    updated_books.append(f"{book.book_title.book_title} (-{quantity_to_remove} cuốn)")
+                
+                # Đánh dấu phiếu đã hủy với audit trail
+                receipt.is_cancelled = True
+                receipt.cancelled_at = timezone.now()
+                receipt.cancelled_by = request.user
+                receipt.cancel_reason = cancel_reason
+                receipt.save(update_fields=[
+                    'is_cancelled', 'cancelled_at', 'cancelled_by', 'cancel_reason'
+                ])
             
             messages.success(
                 request,
-                f'Đã hủy phiếu nhập #{receipt.id}. Lưu ý: Sách đã nhập vẫn ở trong kho.'
+                f'Đã hủy phiếu nhập #{receipt.id}. '
+                f'Đã xóa {deleted_items_count} cuốn sách khỏi kho. '
+                f'Sách đã cập nhật: {", ".join(updated_books)}'
             )
             return redirect('book_import_list')
             
@@ -1094,7 +1179,8 @@ def book_import_cancel_view(request, import_id):
     context = {
         'receipt': receipt,
         'import_details': receipt.import_details.all(),
-        'page_title': f'Hủy phiếu nhập #{receipt.id}'
+        'page_title': f'Hủy phiếu nhập #{receipt.id}',
+        'cancellation_hours': params.cancellation_time_limit if params else 24,
     }
     
     return render(request, 'app/books/book_import_cancel_confirm.html', context)
