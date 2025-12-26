@@ -49,11 +49,15 @@
                     <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{{ item.user.email|default:"-" }}</td>
                     <td class="px-4 py-3 text-sm">
                         {% if item.user.is_superuser %}
-                            <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">{{ item.role }}</span>
+                            <span class="bg-purple-600 text-white text-xs px-2 py-1 rounded-full">Quản lý</span>
                         {% elif item.user.is_staff %}
-                            <span class="bg-cyan-500 text-white text-xs px-2 py-1 rounded-full">{{ item.role }}</span>
+                            {% if item.user.library_user.user_group %}
+                                <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">{{ item.user.library_user.user_group.user_group_name }}</span>
+                            {% else %}
+                                <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Nhân viên</span>
+                            {% endif %}
                         {% else %}
-                            <span class="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">{{ item.role }}</span>
+                            <span class="bg-gray-500 text-white text-xs px-2 py-1 rounded-full">Người dùng</span>
                         {% endif %}
                     </td>
                     <td class="px-4 py-3 text-sm">
