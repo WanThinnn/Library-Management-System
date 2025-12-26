@@ -32,7 +32,9 @@ urlpatterns = [
     path('reader/create/', views.reader_create_view, name='reader_create'),
     path('reader/<int:reader_id>/', views.reader_detail_view, name='reader_detail'),
     path('reader/<int:reader_id>/edit/', views.reader_edit_view, name='reader_edit'),
+    path('reader/<int:reader_id>/delete/', views.reader_delete_view, name='reader_delete'),
     path('readers/', views.reader_list_view, name='reader_list'),
+
     
     # YC2: Tiếp nhận sách mới
     path('book/import/select/', views.book_import_select_view, name='book_import_select'),

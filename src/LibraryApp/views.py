@@ -415,8 +415,17 @@ def reader_detail_view(request, reader_id):
     """
     reader = get_object_or_404(Reader, id=reader_id)
     
+    # Check permissions for actions
+    from .decorators import check_permission
+    can_edit_readers = check_permission(request.user, 'Quản lý độc giả', 'change')
+    can_add_readers = check_permission(request.user, 'Lập thẻ độc giả', 'add')
+    can_delete_readers = check_permission(request.user, 'Quản lý độc giả', 'delete')
+    
     context = {
         'reader': reader,
+        'can_edit_readers': can_edit_readers,
+        'can_add_readers': can_add_readers,
+        'can_delete_readers': can_delete_readers,
         'page_title': f'Thẻ độc giả - {reader.reader_name}'
     }
     
@@ -451,6 +460,79 @@ def reader_list_view(request):
     }
     
     return render(request, 'app/readers/reader_list.html', context)
+
+
+@permission_required('Quản lý độc giả', 'delete')
+def reader_delete_view(request, reader_id):
+    """
+    View xóa độc giả
+    
+    Business Rules:
+    - Chỉ xóa được nếu độc giả không còn sách đang mượn
+    - Chỉ xóa được nếu độc giả không có nợ tiền phạt
+    - Yêu cầu quyền DELETE trong chức năng "Quản lý độc giả"
+    """
+    reader = get_object_or_404(Reader, id=reader_id)
+    
+    if request.method == 'POST':
+        try:
+            # Kiểm tra sách đang mượn
+            borrowing_count = BorrowReturnReceipt.objects.filter(
+                reader=reader,
+                return_date__isnull=True
+            ).count()
+            
+            if borrowing_count > 0:
+                messages.error(
+                    request,
+                    f'Không thể xóa độc giả "{reader.reader_name}" vì còn {borrowing_count} sách đang mượn. '
+                    'Vui lòng trả hết sách trước khi xóa.'
+                )
+                return redirect('reader_detail', reader_id=reader.id)
+            
+            # Kiểm tra nợ tiền phạt
+            if reader.total_debt > 0:
+                messages.error(
+                    request,
+                    f'Không thể xóa độc giả "{reader.reader_name}" vì còn nợ {reader.total_debt:,}đ tiền phạt. '
+                    'Vui lòng thu hết nợ trước khi xóa.'
+                )
+                return redirect('reader_detail', reader_id=reader.id)
+            
+            # Thực hiện xóa
+            reader_name = reader.reader_name
+            reader.delete()
+            
+            messages.success(
+                request,
+                f'Đã xóa độc giả "{reader_name}" thành công!'
+            )
+            return redirect('reader_list')
+            
+        except Exception as e:
+            messages.error(request, f'Có lỗi xảy ra khi xóa độc giả: {str(e)}')
+            return redirect('reader_detail', reader_id=reader.id)
+    
+    # GET: Hiển thị trang xác nhận xóa
+    # Đếm số phiếu mượn và phiếu thu liên quan
+    borrow_count = BorrowReturnReceipt.objects.filter(reader=reader).count()
+    receipt_count = Receipt.objects.filter(reader=reader).count()
+    borrowing_count = BorrowReturnReceipt.objects.filter(
+        reader=reader,
+        return_date__isnull=True
+    ).count()
+    
+    context = {
+        'reader': reader,
+        'borrow_count': borrow_count,
+        'receipt_count': receipt_count,
+        'borrowing_count': borrowing_count,
+        'can_delete': borrowing_count == 0 and reader.total_debt == 0,
+        'page_title': f'Xóa độc giả - {reader.reader_name}'
+    }
+    
+    return render(request, 'app/readers/reader_delete_confirm.html', context)
+
 
 
 # ==================== YC2: TIẾP NHẬN SÁCH MỚI ====================

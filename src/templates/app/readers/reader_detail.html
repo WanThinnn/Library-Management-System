@@ -138,6 +138,12 @@
                     Sửa thông tin
                 </a>
                 {% endif %}
+                {% if can_delete_readers %}
+                <a href="{% url 'reader_delete' reader.id %}" 
+                   class="hover:scale-105 duration-200 transition-transform w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2">
+                    Xóa độc giả
+                </a>
+                {% endif %}
                 {% if can_add_readers %}
                 <a href="{% url 'reader_create' %}" class="hover:scale-105 duration-200 transition-transform w-full bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2">
                     Lập thẻ độc giả khác
