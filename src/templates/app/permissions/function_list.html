@@ -14,7 +14,7 @@
 <!-- Actions -->
 <div class="mb-6 flex flex-wrap gap-3">
     <a href="{% url 'function_create' %}" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-        + Thêm chức năng mới
+        Thêm chức năng mới
     </a>
     <a href="{% url 'user_group_list' %}" class="hover:scale-105 duration-200 transition-transform bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
         Quản lý nhóm người dùng
@@ -32,11 +32,11 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">STT</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Tên chức năng</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Màn hình</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">URL Pattern</th>
-                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Thao tác</th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">STT</th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">Tên chức năng</th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">Màn hình</th>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">URL Pattern</th>
+                    <th class="px-4 py-3 text-center text-xs font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">Thao tác</th>
                 </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -44,8 +44,8 @@
                 <tr class="hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700">
                     <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ forloop.counter }}</td>
                     <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">{{ func.function_name }}</td>
-                    <td class="px-4 py-3 text-sm text-gray-500">{{ func.screen_name }}</td>
-                    <td class="px-4 py-3 text-sm text-gray-500 font-mono">{{ func.url_pattern|default:"-" }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-100">{{ func.screen_name }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-500 font-mono dark:text-gray-100">{{ func.url_pattern|default:"-" }}</td>
                     <td class="px-4 py-3 text-sm text-center whitespace-nowrap">
                         <div class="flex justify-center gap-2">
                             <a href="{% url 'function_edit' func.id %}" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors">
