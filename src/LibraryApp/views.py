@@ -2351,7 +2351,6 @@ def parameter_update_view(request):
                     # f'Số ngày mượn tối đa: {updated_param.max_borrow_days}, '
                     # f'Tiền phạt: {updated_param.fine_rate:,}đ/ngày'
                 )
-                return redirect('parameter_update')
             except Exception as e:
                 messages.error(request, f'Có lỗi xảy ra: {str(e)}')
         else:
@@ -2367,6 +2366,9 @@ def parameter_update_view(request):
                     field_label = form.fields[field].label if field in form.fields else field
                     for error in errors:
                         messages.error(request, f'{field_label}: {error}')
+        
+        # Always redirect to refresh form with database values
+        return redirect('parameter_update')
     else:
         # GET: Hiển thị form với giá trị hiện tại (D3)
         form = ParameterForm(instance=parameter)
