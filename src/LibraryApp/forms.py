@@ -1067,7 +1067,9 @@ class ParameterForm(forms.ModelForm):
         
         # Kiểm tra min_age < max_age
         if min_age and max_age and min_age >= max_age:
-            raise ValidationError('Tuổi tối thiểu phải nhỏ hơn tuổi tối đa')
+            raise ValidationError({
+                'min_age': 'Tuổi tối thiểu phải nhỏ hơn tuổi tối đa'
+            })
         
         return cleaned_data
 

@@ -2357,8 +2357,16 @@ def parameter_update_view(request):
         else:
             # Hiển thị lỗi validation
             for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f'{field}: {error}')
+                # Lấy label thân thiện từ form field, bỏ qua '__all__' errors
+                if field == '__all__':
+                    # Non-field errors
+                    for error in errors:
+                        messages.error(request, str(error))
+                else:
+                    # Field-specific errors
+                    field_label = form.fields[field].label if field in form.fields else field
+                    for error in errors:
+                        messages.error(request, f'{field_label}: {error}')
     else:
         # GET: Hiển thị form với giá trị hiện tại (D3)
         form = ParameterForm(instance=parameter)

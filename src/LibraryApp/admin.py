@@ -49,7 +49,7 @@ class ParameterAdmin(admin.ModelAdmin):
             'fields': ('fine_rate',)
         }),
         ('Quy định khác', {
-            'fields': ('enable_receipt_amount_validation',)
+            'fields': ('enable_receipt_amount_validation', 'allow_borrow_when_overdue')
         }),
         ('Thông tin hệ thống', {
             'fields': ('created_at', 'updated_at'),

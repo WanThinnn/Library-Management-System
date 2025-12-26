@@ -65,13 +65,13 @@ class Parameter(models.Model):
     """
     # Độ tuổi
     max_age = models.PositiveSmallIntegerField(
-        verbose_name='Độ tuổi thấp nhất',
-        default=18,
+        verbose_name='Độ tuổi cao nhất',
+        default=55,
         validators=[MinValueValidator(1), MaxValueValidator(100)]
     )
     min_age = models.PositiveSmallIntegerField(
-        verbose_name='Độ tuổi cao nhất',
-        default=55,
+        verbose_name='Độ tuổi thấp nhất',
+        default=18,
         validators=[MinValueValidator(1), MaxValueValidator(100)]
     )
     

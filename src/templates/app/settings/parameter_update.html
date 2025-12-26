@@ -192,7 +192,7 @@
 
             <!-- Buttons -->
             <div class="flex justify-end gap-3 pt-3 border-t">
-                <button type="reset" class="hover:scale-105 duration-200 transition-transform bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm">
+                <button type="button" id="resetBtn" class="hover:scale-105 duration-200 transition-transform bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm">
                     Đặt lại
                 </button>
                 <button type="submit" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm">
@@ -215,10 +215,30 @@
 </div>
 
 <script>
-document.getElementById('parameterForm').addEventListener('submit', function(e) {
-    if (!confirm('Bạn có chắc chắn muốn thay đổi quy định hệ thống?')) {
-        e.preventDefault();
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('parameterForm');
+    const resetBtn = document.getElementById('resetBtn');
+    
+    if (!form || !resetBtn) {
+        console.error('Form or resetBtn not found!');
+        return;
     }
+    
+    // Xử lý sự kiện submit
+    form.addEventListener('submit', function(e) {
+        if (!confirm('Bạn có chắc chắn muốn thay đổi quy định hệ thống?')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Xử lý sự kiện reset
+    resetBtn.addEventListener('click', function(e) {
+        console.log('Reset button clicked!');
+        if (confirm('Bạn có chắc chắn muốn đặt lại các giá trị về ban đầu không?')) {
+            form.reset();
+            console.log('Form reset!');
+        }
+    });
 });
 </script>
 {% endblock %}
