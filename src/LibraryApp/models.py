@@ -654,6 +654,30 @@ class BookImportReceipt(models.Model):
         blank=True,
         verbose_name='Ghi chú'
     )
+    
+    # Audit trail for cancellation
+    is_cancelled = models.BooleanField(
+        default=False,
+        verbose_name='Đã hủy'
+    )
+    cancelled_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Thời gian hủy'
+    )
+    cancelled_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='cancelled_import_receipts',
+        verbose_name='Người hủy'
+    )
+    cancel_reason = models.TextField(
+        blank=True,
+        verbose_name='Lý do hủy'
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ngày tạo')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Ngày cập nhật')
     
@@ -818,6 +842,30 @@ class BorrowReturnReceipt(models.Model):
         blank=True,
         verbose_name='Ghi chú'
     )
+    
+    # Audit trail for cancellation
+    is_cancelled = models.BooleanField(
+        default=False,
+        verbose_name='Đã hủy'
+    )
+    cancelled_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Thời gian hủy'
+    )
+    cancelled_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='cancelled_borrow_receipts',
+        verbose_name='Người hủy'
+    )
+    cancel_reason = models.TextField(
+        blank=True,
+        verbose_name='Lý do hủy'
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ngày tạo')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Ngày cập nhật')
     

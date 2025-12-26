@@ -41,6 +41,7 @@ urlpatterns = [
     path('book/import/', views.book_import_view, name='book_import'),
     path('book/import/excel/', views.book_import_excel_view, name='book_import_excel'),
     path('book/import/<int:import_id>/', views.book_import_detail_view, name='book_import_detail'),
+    path('book/import/<int:import_id>/cancel/', views.book_import_cancel_view, name='book_import_cancel'),
     path('books/import/', views.book_import_list_view, name='book_import_list'),
     path('book/import/template/download/', views.download_book_import_template, name='download_book_import_template'),
     
@@ -50,11 +51,13 @@ urlpatterns = [
     # YC4: Cho mượn sách
     path('book/borrow/', views.borrow_book_view, name='borrow_book'),
     path('book/borrow/<int:receipt_id>/', views.borrow_book_detail_view, name='borrow_book_detail'),
+    path('book/borrow/<int:receipt_id>/cancel/', views.borrow_cancel_view, name='borrow_cancel'),
     path('books/borrow/', views.borrow_book_list_view, name='borrow_book_list'),
     
     # YC5: Nhận trả sách
     path('book/return/', views.return_book_view, name='return_book'),
     path('book/return/<int:receipt_id>/', views.return_book_detail_view, name='return_book_detail'),
+    path('book/return/<int:receipt_id>/cancel/', views.return_cancel_view, name='return_cancel'),
     path('books/return/', views.return_book_list_view, name='return_book_list'),
     
     # API endpoints for borrow book

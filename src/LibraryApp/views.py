@@ -1013,13 +1013,76 @@ def book_import_detail_view(request, import_id):
     receipt = get_object_or_404(BookImportReceipt, id=import_id)
     import_details = receipt.import_details.all()
     
+    # Check permission for cancel action
+    from .decorators import check_permission
+    can_cancel_import = check_permission(request.user, 'Lập phiếu nhập sách', 'delete')
+    
     context = {
         'receipt': receipt,
         'import_details': import_details,
+        'can_cancel_import': can_cancel_import,
         'page_title': f'Phiếu nhập sách #{receipt.id}'
     }
     
     return render(request, 'app/books/book_import_detail.html', context)
+
+
+@permission_required('Lập phiếu nhập sách', 'delete')
+def book_import_cancel_view(request, import_id):
+    """
+    Hủy phiếu nhập sách với audit trail
+    
+    Business Logic:
+    - Đánh dấu phiếu là đã hủy (is_cancelled=True)
+    - Ghi lại: người hủy, thời gian hủy, lý do hủy
+    - KHÔNG rollback sách đã nhập (sách vẫn ở trong kho, chỉ đánh dấu phiếu hủy)
+    - Không cho phép hủy phiếu đã bị hủy trước đó
+    """
+    receipt = get_object_or_404(BookImportReceipt, id=import_id)
+    
+    # Kiểm tra phiếu đã bị hủy chưa
+    if receipt.is_cancelled:
+        messages.error(request, f'Phiếu nhập #{receipt.id} đã được hủy trước đó.')
+        return redirect('book_import_detail', import_id=receipt.id)
+    
+    if request.method == 'POST':
+        cancel_reason = request.POST.get('cancel_reason', '').strip()
+        
+        if not cancel_reason:
+            messages.error(request, 'Vui lòng nhập lý do hủy phiếu.')
+            context = {
+                'receipt': receipt,
+                'import_details': receipt.import_details.all(),
+                'page_title': f'Hủy phiếu nhập #{receipt.id}'
+            }
+            return render(request, 'app/books/book_import_cancel_confirm.html', context)
+        
+        try:
+            # Đánh dấu phiếu đã hủy với audit trail
+            receipt.is_cancelled = True
+            receipt.cancelled_at = timezone.now()
+            receipt.cancelled_by = request.user
+            receipt.cancel_reason = cancel_reason
+            receipt.save(update_fields=['is_cancelled', 'cancelled_at', 'cancelled_by', 'cancel_reason'])
+            
+            messages.success(
+                request,
+                f'Đã hủy phiếu nhập #{receipt.id}. Lưu ý: Sách đã nhập vẫn ở trong kho.'
+            )
+            return redirect('book_import_list')
+            
+        except Exception as e:
+            messages.error(request, f'Có lỗi xảy ra khi hủy phiếu: {str(e)}')
+            return redirect('book_import_detail', import_id=receipt.id)
+    
+    # GET: Hiển thị trang xác nhận hủy
+    context = {
+        'receipt': receipt,
+        'import_details': receipt.import_details.all(),
+        'page_title': f'Hủy phiếu nhập #{receipt.id}'
+    }
+    
+    return render(request, 'app/books/book_import_cancel_confirm.html', context)
 
 
 @permission_required('Lập phiếu nhập sách', 'view')
@@ -1069,17 +1132,34 @@ def book_import_list_view(request):
     
     return render(request, 'app/books/book_import_list.html', context)
 
-
 @permission_required('Lập phiếu nhập sách', 'view')
 def download_book_import_template(request):
     """
-    Tải file Excel mẫu để nhập sách
+    Tải file Excel mẫu để nhập sách.
+    Nếu tồn tại /docs/mau_nhap.xlsx thì dùng file đó.
+    Nếu không có thì tự tạo file mẫu và trả về.
     """
     import pandas as pd
-    from django.http import HttpResponse
+    from django.http import HttpResponse, FileResponse
     from io import BytesIO
-    
-    # Tạo dữ liệu mẫu
+    from pathlib import Path
+
+    # === Xác định đường dẫn file docs/mau_nhap.xlsx ===
+    # views.py -> LibraryApp -> src -> project_root
+    ROOT_DIR = Path("/")
+    DOCS_DIR = ROOT_DIR / "docs"
+    TEMPLATE_PATH = DOCS_DIR / "mau_nhap.xlsx"
+
+    # === Nếu file tồn tại → trả file luôn ===
+    if TEMPLATE_PATH.exists():
+        return FileResponse(
+            open(TEMPLATE_PATH, "rb"),
+            as_attachment=True,
+            filename="mau_nhap.xlsx",
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+    # === Không có file → tạo file mẫu ===
     sample_data = {
         'Tên sách': ['Đắc Nhân Tâm', 'Clean Code', 'Nhà Giả Kim'],
         'Thể loại': ['Tâm lý', 'Công nghệ', 'Văn học'],
@@ -1093,16 +1173,17 @@ def download_book_import_template(request):
         'Phiên bản': ['Tái bản lần 5', 'First Edition', ''],
         'Mô tả': ['Sách về nghệ thuật đối nhân xử thế', 'Sách về lập trình sạch', '']
     }
-    
-    # Tạo DataFrame
+
     df = pd.DataFrame(sample_data)
-    
-    # Tạo file Excel trong memory
+
+    # Đảm bảo thư mục /docs tồn tại
+    DOCS_DIR.mkdir(exist_ok=True)
+
+    # Ghi file vào memory
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, sheet_name='Nhập sách', index=False)
-        
-        # Điều chỉnh độ rộng cột
+
         worksheet = writer.sheets['Nhập sách']
         for idx, col in enumerate(df.columns):
             max_length = max(
@@ -1110,16 +1191,19 @@ def download_book_import_template(request):
                 len(col)
             ) + 2
             worksheet.column_dimensions[chr(65 + idx)].width = max_length
-    
+
     output.seek(0)
-    
-    # Tạo response
+
+    # Đồng thời lưu file mẫu vào /docs để tái sử dụng
+    with open(TEMPLATE_PATH, "wb") as f:
+        f.write(output.getvalue())
+
+    # Trả file cho người dùng
     response = HttpResponse(
         output.read(),
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    response['Content-Disposition'] = 'attachment; filename="mau_nhap_sach.xlsx"'
-    
+    response['Content-Disposition'] = 'attachment; filename="mau_nhap.xlsx"'
     return response
 
 
@@ -1287,12 +1371,91 @@ def borrow_book_detail_view(request, receipt_id):
     """
     receipt = get_object_or_404(BorrowReturnReceipt, id=receipt_id)
     
+    # Check permission for cancel action
+    from .decorators import check_permission
+    can_cancel_borrow = check_permission(request.user, 'Quản lý mượn/trả', 'delete')
+    
     context = {
         'receipt': receipt,
+        'can_cancel_borrow': can_cancel_borrow,
         'page_title': f'Chi tiết phiếu mượn sách #{receipt.id}'
     }
     
     return render(request, 'app/borrowing/borrow_book_detail.html', context)
+
+
+@permission_required('Quản lý mượn/trả', 'delete')
+def borrow_cancel_view(request, receipt_id):
+    """
+    Hủy phiếu mượn sách với audit trail
+    
+    Business Logic:
+    - CHỈ hủy được phiếu CHƯA TRẢ (return_date is NULL)
+    - Đánh dấu phiếu là đã hủy (is_cancelled=True)
+    - Ghi lại: người hủy, thời gian hủy, lý do hủy
+    - Rollback: Set book_item.is_borrowed = False, tăng book.remaining_quantity
+    - Nếu có fine amount, trừ khỏi reader.total_debt
+    """
+    receipt = get_object_or_404(BorrowReturnReceipt, id=receipt_id)
+    
+    # Kiểm tra phiếu đã bị hủy chưa
+    if receipt.is_cancelled:
+        messages.error(request, f'Phiếu mượn #{receipt.id} đã được hủy trước đó.')
+        return redirect('borrow_book_detail', receipt_id=receipt.id)
+    
+    # Kiểm tra đã trả sách chưa
+    if receipt.return_date:
+        messages.error(request, f'Không thể hủy phiếu mượn #{receipt.id} vì sách đã được trả. Đây là bản ghi lịch sử.')
+        return redirect('borrow_book_detail', receipt_id=receipt.id)
+    
+    if request.method == 'POST':
+        cancel_reason = request.POST.get('cancel_reason', '').strip()
+        
+        if not cancel_reason:
+            messages.error(request, 'Vui lòng nhập lý do hủy phiếu.')
+            context = {
+                'receipt': receipt,
+                'page_title': f'Hủy phiếu mượn #{receipt.id}'
+            }
+            return render(request, 'app/borrowing/borrow_cancel_confirm.html', context)
+        
+        try:
+            # Đánh dấu phiếu đã hủy với audit trail
+            receipt.is_cancelled = True
+            receipt.cancelled_at = timezone.now()
+            receipt.cancelled_by = request.user
+            receipt.cancel_reason = cancel_reason
+            receipt.save(update_fields=['is_cancelled', 'cancelled_at', 'cancelled_by', 'cancel_reason'])
+            
+            # Rollback: Un-borrow book
+            receipt.book_item.is_borrowed = False
+            receipt.book_item.save(update_fields=['is_borrowed'])
+            
+            receipt.book_item.book.remaining_quantity += 1
+            receipt.book_item.book.save(update_fields=['remaining_quantity'])
+            
+            # Nếu có fine, trừ khỏi reader debt
+            if receipt.fine_amount > 0:
+                receipt.reader.total_debt -= receipt.fine_amount
+                receipt.reader.save(update_fields=['total_debt'])
+            
+            messages.success(
+                request,
+                f'Đã hủy phiếu mượn #{receipt.id}. Sách đã được trả lại kho.'
+            )
+            return redirect('borrow_book_list')
+            
+        except Exception as e:
+            messages.error(request, f'Có lỗi xảy ra khi hủy phiếu: {str(e)}')
+            return redirect('borrow_book_detail', receipt_id=receipt.id)
+    
+    # GET: Hiển thị trang xác nhận hủy
+    context = {
+        'receipt': receipt,
+        'page_title': f'Hủy phiếu mượn #{receipt.id}'
+    }
+    
+    return render(request, 'app/borrowing/borrow_cancel_confirm.html', context)
 
 
 @permission_required('Quản lý mượn/trả', 'view')
@@ -1574,15 +1737,103 @@ def return_book_detail_view(request, receipt_id):
     days_overdue = receipt.days_overdue if receipt.is_overdue else 0
     fine_amount = days_overdue * fine_rate
     
+    # Check permission for cancel return action
+    from .decorators import check_permission
+    can_cancel_return = check_permission(request.user, 'Quản lý mượn/trả', 'delete')
+    
     context = {
         'page_title': f'Chi tiết phiếu trả sách #{receipt_id}',
         'receipt': receipt,
         'days_overdue': days_overdue,
         'fine_amount': fine_amount,
         'fine_rate': fine_rate,
+        'can_cancel_return': can_cancel_return,
     }
     
     return render(request, 'app/borrowing/return_book_detail.html', context)
+
+
+@permission_required('Quản lý mượn/trả', 'delete')
+def return_cancel_view(request, receipt_id):
+    """
+    Hủy hành động trả sách (reverse return)
+    
+    Business Logic:
+    - CHỈ hủy được phiếu ĐÃ TRẢ (return_date is NOT NULL)
+    - Đặt lại return_date = NULL
+    - Đánh dấu sách là đang mượn (is_borrowed = True)
+    - Giảm remaining_quantity
+    - Nếu đã thu tiền phạt (fine_amount > 0), hoàn lại vào reader.total_debt
+    - Ghi audit trail
+    """
+    receipt = get_object_or_404(BorrowReturnReceipt, id=receipt_id)
+    
+    # Kiểm tra phiếu đã bị hủy chưa
+    if receipt.is_cancelled:
+        messages.error(request, f'Phiếu mượn #{receipt.id} đã được hủy trước đó. Không thể hủy hành động trả.')
+        return redirect('return_book_detail', receipt_id=receipt.id)
+    
+    # Kiểm tra phải là phiếu đã trả
+    if not receipt.return_date:
+        messages.error(request, f'Phiếu #{receipt.id} chưa trả sách. Không có gì để hủy.')
+        return redirect('return_book_detail', receipt_id=receipt.id)
+    
+    if request.method == 'POST':
+        cancel_reason = request.POST.get('cancel_reason', '').strip()
+        
+        if not cancel_reason:
+            messages.error(request, 'Vui lòng nhập lý do hủy hành động trả sách.')
+            context = {
+                'receipt': receipt,
+                'page_title': f'Hủy hành động trả sách #{receipt.id}'
+            }
+            return render(request, 'app/borrowing/return_cancel_confirm.html', context)
+        
+        try:
+            # Lưu thông tin cũ
+            old_return_date = receipt.return_date
+            old_fine = receipt.fine_amount
+            
+            # Đặt lại return_date = NULL
+            receipt.return_date = None
+            
+            # Ghi audit trail
+            receipt.is_cancelled = True
+            receipt.cancelled_at = timezone.now()
+            receipt.cancelled_by = request.user
+            receipt.cancel_reason = f"Hủy trả sách (đã trả lúc {old_return_date.strftime('%d/%m/%Y %H:%M')}): {cancel_reason}"
+            receipt.save(update_fields=['return_date', 'is_cancelled', 'cancelled_at', 'cancelled_by', 'cancel_reason'])
+            
+            # Đánh dấu sách lại là đang mượn
+            receipt.book_item.is_borrowed = True
+            receipt.book_item.save(update_fields=['is_borrowed'])
+            
+            # Giảm remaining_quantity
+            receipt.book_item.book.remaining_quantity -= 1
+            receipt.book_item.book.save(update_fields=['remaining_quantity'])
+            
+            # Hoàn tiền phạt nếu có
+            if old_fine > 0:
+                receipt.reader.total_debt += old_fine
+                receipt.reader.save(update_fields=['total_debt'])
+            
+            messages.success(
+                request,
+                f'Đã hủy hành động trả sách #{receipt.id}. Sách được đánh dấu lại là đang mượn.'
+            )
+            return redirect('borrow_book_list')
+            
+        except Exception as e:
+            messages.error(request, f'Có lỗi xảy ra khi hủy: {str(e)}')
+            return redirect('return_book_detail', receipt_id=receipt.id)
+    
+    # GET: Hiển thị trang xác nhận
+    context = {
+        'receipt': receipt,
+        'page_title': f'Hủy hành động trả sách #{receipt.id}'
+    }
+    
+    return render(request, 'app/borrowing/return_cancel_confirm.html', context)
 
 
 @permission_required('Lập phiếu trả sách', 'view')
