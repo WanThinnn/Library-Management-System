@@ -10,6 +10,7 @@ services:
              gunicorn LibraryManagementSystem.wsgi:application -c gunicorn.conf.py"
     volumes:
       - ./src:/app
+      - ./docs:/docs  
       - ./scripts/gunicorn.conf.py:/app/gunicorn.conf.py:ro
       - static_volume:/app/staticfiles
       - sqlite_volume:/app/data
