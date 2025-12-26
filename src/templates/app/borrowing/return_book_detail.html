@@ -14,6 +14,23 @@
     </div>
 </div>
 
+<!-- Cancelled/Reversed Return Warning -->
+{% if receipt.is_cancelled %}
+<div class="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 dark:text-red-50 text-red-700 p-4 rounded-lg mb-6">
+    <div class="flex items-start gap-3">
+        <div class="flex-1">
+            <p class="font-semibold text-lg mb-2">❌ Hành động trả sách đã bị hủy</p>
+            <div class="space-y-1 text-sm">
+                <p><strong>Người hủy:</strong> {{ receipt.cancelled_by.username }}</p>
+                <p><strong>Thời gian hủy:</strong> {{ receipt.cancelled_at|date:"d/m/Y H:i" }}</p>
+                <p><strong>Lý do:</strong> {{ receipt.cancel_reason }}</p>
+            </div>
+            <p class="mt-2 text-sm">Sách đã được đánh dấu lại là đang mượn.</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2 space-y-6">
         <!-- Thông tin phiếu -->
@@ -214,6 +231,11 @@
                 <a href="{% url 'return_book_list' %}" class="hover:scale-101 duration-200 transition-transform w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                     Danh sách trả sách
                 </a>
+                {% if can_cancel_return and receipt.return_date and not receipt.is_cancelled %}
+                <a href="{% url 'return_cancel' receipt.id %}" class="hover:scale-101 duration-200 transition-transform w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    Hủy hành động trả
+                </a>
+                {% endif %}
 
                 {% comment %} <a href="{% url 'home' %}" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                     Trang chủ
