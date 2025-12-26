@@ -26,15 +26,17 @@ def home_view(request):
         # Đếm tổng số đầu sách (BookTitle)
         context['total_books'] = BookTitle.objects.count()
         
-        # Đếm số phiếu mượn đang hoạt động (chưa trả)
+        # Đếm số phiếu mượn đang hoạt động (chưa trả, loại trừ đã hủy)
         context['active_borrows'] = BorrowReturnReceipt.objects.filter(
-            return_date__isnull=True
+            return_date__isnull=True,
+            is_cancelled=False  # Loại trừ phiếu đã hủy
         ).count()
         
-        # Đếm số sách quá hạn
+        # Đếm số sách quá hạn (loại trừ đã hủy)
         from datetime import date
         context['overdue_books'] = BorrowReturnReceipt.objects.filter(
             return_date__isnull=True,
+            is_cancelled=False,  # Loại trừ phiếu đã hủy
             due_date__lt=date.today()
         ).count()
     
@@ -515,6 +517,19 @@ def reader_delete_view(request, reader_id):
     
     # GET: Hiển thị trang xác nhận xóa
     # Đếm số phiếu mượn và phiếu thu liên quan
+    # Thống kê (loại trừ phiếu đã hủy)
+    total_readers = Reader.objects.count()
+    total_books = BookTitle.objects.count()
+    total_borrowed = BorrowReturnReceipt.objects.filter(
+        return_date__isnull=True,
+        is_cancelled=False  # Loại trừ phiếu đã hủy
+    ).count()
+    total_overdue = BorrowReturnReceipt.objects.filter(
+        return_date__isnull=True,
+        is_cancelled=False,  # Loại trừ phiếu đã hủy
+        due_date__lt=timezone.now()
+    ).count()
+    
     borrow_count = BorrowReturnReceipt.objects.filter(reader=reader).count()
     receipt_count = Receipt.objects.filter(reader=reader).count()
     borrowing_count = BorrowReturnReceipt.objects.filter(
@@ -1408,6 +1423,12 @@ def borrow_cancel_view(request, receipt_id):
         messages.error(request, f'Không thể hủy phiếu mượn #{receipt.id} vì sách đã được trả. Đây là bản ghi lịch sử.')
         return redirect('borrow_book_detail', receipt_id=receipt.id)
     
+    # Kiểm tra thời gian: chỉ hủy trong vòng 24h kể từ khi mượn
+    time_since_borrow = timezone.now() - receipt.borrow_date
+    if time_since_borrow.total_seconds() > 24 * 3600:  # 24 hours
+        messages.error(request, f'Không thể hủy phiếu mượn #{receipt.id}. Chỉ được hủy trong vòng 24 giờ kể từ khi mượn.')
+        return redirect('borrow_book_detail', receipt_id=receipt.id)
+    
     if request.method == 'POST':
         cancel_reason = request.POST.get('cancel_reason', '').strip()
         
@@ -1778,6 +1799,12 @@ def return_cancel_view(request, receipt_id):
         messages.error(request, f'Phiếu #{receipt.id} chưa trả sách. Không có gì để hủy.')
         return redirect('return_book_detail', receipt_id=receipt.id)
     
+    # Kiểm tra thời gian: chỉ hủy trong vòng 24h kể từ khi trả
+    time_since_return = timezone.now() - receipt.return_date
+    if time_since_return.total_seconds() > 24 * 3600:  # 24 hours
+        messages.error(request, f'Không thể hủy hành động trả sách #{receipt.id}. Chỉ được hủy trong vòng 24 giờ kể từ khi trả.')
+        return redirect('return_book_detail', receipt_id=receipt.id)
+    
     if request.method == 'POST':
         cancel_reason = request.POST.get('cancel_reason', '').strip()
         
@@ -1794,15 +1821,21 @@ def return_cancel_view(request, receipt_id):
             old_return_date = receipt.return_date
             old_fine = receipt.fine_amount
             
-            # Đặt lại return_date = NULL
+            # Đặt lại return_date = NULL (reverse return action)
             receipt.return_date = None
             
-            # Ghi audit trail
-            receipt.is_cancelled = True
-            receipt.cancelled_at = timezone.now()
-            receipt.cancelled_by = request.user
-            receipt.cancel_reason = f"Hủy trả sách (đã trả lúc {old_return_date.strftime('%d/%m/%Y %H:%M')}): {cancel_reason}"
-            receipt.save(update_fields=['return_date', 'is_cancelled', 'cancelled_at', 'cancelled_by', 'cancel_reason'])
+            # LƯU Ý: KHÔNG set is_cancelled = True vì:
+            # - Đây là REVERSE RETURN, không phải HỦY PHIẾU
+            # - Phiếu mượn vẫn VALID, chỉ quay lại trạng thái "đang mượn"
+            # - Nếu set is_cancelled = True → home_view sẽ filter ra → bug count!
+            
+            # Ghi lý do trong notes (không dùng cancel_reason)
+            if not receipt.notes:
+                receipt.notes = f"[{timezone.now().strftime('%d/%m/%Y %H:%M')}] Đã hủy hành động trả sách (trả lúc {old_return_date.strftime('%d/%m/%Y %H:%M')}): {cancel_reason}"
+            else:
+                receipt.notes += f"\n[{timezone.now().strftime('%d/%m/%Y %H:%M')}] Đã hủy hành động trả sách (trả lúc {old_return_date.strftime('%d/%m/%Y %H:%M')}): {cancel_reason}"
+            
+            receipt.save(update_fields=['return_date', 'notes'])
             
             # Đánh dấu sách lại là đang mượn
             receipt.book_item.is_borrowed = True
@@ -1812,14 +1845,16 @@ def return_cancel_view(request, receipt_id):
             receipt.book_item.book.remaining_quantity -= 1
             receipt.book_item.book.save(update_fields=['remaining_quantity'])
             
-            # Hoàn tiền phạt nếu có
-            if old_fine > 0:
-                receipt.reader.total_debt += old_fine
-                receipt.reader.save(update_fields=['total_debt'])
+            # LƯU Ý: KHÔNG hoàn tiền phạt vì:
+            # - Fine đã được cộng vào total_debt khi trả sách (BorrowReturnReceipt.save())
+            # - Khi hủy return, fine_amount vẫn giữ nguyên trong total_debt
+            # - Độc giả vẫn phải trả fine vì đã thực sự trả trễ
+            # - Nếu cộng lại sẽ bị DUPLICATE (2x fine)
             
             messages.success(
                 request,
-                f'Đã hủy hành động trả sách #{receipt.id}. Sách được đánh dấu lại là đang mượn.'
+                f'Đã hủy hành động trả sách #{receipt.id}. Sách được đánh dấu lại là đang mượn. '
+                f'Lưu ý: Tiền phạt {old_fine:,}đ vẫn giữ nguyên trong nợ.'
             )
             return redirect('borrow_book_list')
             
@@ -1969,10 +2004,11 @@ def api_reader_borrowed_books(request, reader_id):
     except Reader.DoesNotExist:
         return JsonResponse({'success': False, 'data': [], 'error': 'Reader not found'}, status=404)
     
-    # Lấy danh sách phiếu mượn chưa trả của độc giả
+    # Lấy danh sách phiếu mượn chưa trả của độc giả (loại trừ phiếu đã hủy)
     receipts = BorrowReturnReceipt.objects.filter(
         reader=reader,
-        return_date__isnull=True
+        return_date__isnull=True,
+        is_cancelled=False  # Loại trừ phiếu đã hủy
     ).select_related('book_item__book__book_title')
     
     data = []
@@ -2198,16 +2234,17 @@ def receipt_cancel_view(request, receipt_id):
             return render(request, 'app/receipts/receipt_cancel_confirm.html', context)
         
         try:
-            # Đánh dấu phiếu đã hủy với audit trail
+            # QUAN TRỌNG: Hoàn tiền cho độc giả TRƯỚC khi save receipt
+            # Vì Receipt có validation check: collected_amount <= reader.total_debt
+            receipt.reader.total_debt += receipt.collected_amount
+            receipt.reader.save(update_fields=['total_debt'])
+            
+            # Sau đó mới đánh dấu phiếu đã hủy với audit trail
             receipt.is_cancelled = True
             receipt.cancelled_at = timezone.now()
             receipt.cancelled_by = request.user
             receipt.cancel_reason = cancel_reason
             receipt.save(update_fields=['is_cancelled', 'cancelled_at', 'cancelled_by', 'cancel_reason'])
-            
-            # Hoàn tiền cho độc giả (cộng lại vào nợ)
-            receipt.reader.total_debt += receipt.collected_amount
-            receipt.reader.save(update_fields=['total_debt'])
             
             messages.success(
                 request,
