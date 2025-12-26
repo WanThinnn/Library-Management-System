@@ -1900,6 +1900,66 @@ def receipt_detail_view(request, receipt_id):
     return render(request, 'app/receipts/receipt_detail.html', context)
 
 
+@permission_required('Quản lý phiếu thu', 'delete')
+def receipt_cancel_view(request, receipt_id):
+    """
+    Hủy phiếu thu tiền với audit trail
+    
+    Business Logic:
+    - Đánh dấu phiếu là đã hủy (is_cancelled=True)
+    - Ghi lại: người hủy, thời gian hủy, lý do hủy
+    - Hoàn tiền: cộng lại collected_amount vào reader.total_debt
+    - Không cho phép hủy phiếu đã bị hủy trước đó
+    """
+    receipt = get_object_or_404(Receipt, id=receipt_id)
+    
+    # Kiểm tra phiếu đã bị hủy chưa
+    if receipt.is_cancelled:
+        messages.error(request, f'Phiếu thu #{receipt.id} đã được hủy trước đó.')
+        return redirect('receipt_detail', receipt_id=receipt.id)
+    
+    if request.method == 'POST':
+        cancel_reason = request.POST.get('cancel_reason', '').strip()
+        
+        if not cancel_reason:
+            messages.error(request, 'Vui lòng nhập lý do hủy phiếu.')
+            context = {
+                'receipt': receipt,
+                'page_title': f'Hủy phiếu thu #{receipt.id}'
+            }
+            return render(request, 'app/receipts/receipt_cancel_confirm.html', context)
+        
+        try:
+            # Đánh dấu phiếu đã hủy với audit trail
+            receipt.is_cancelled = True
+            receipt.cancelled_at = timezone.now()
+            receipt.cancelled_by = request.user
+            receipt.cancel_reason = cancel_reason
+            receipt.save(update_fields=['is_cancelled', 'cancelled_at', 'cancelled_by', 'cancel_reason'])
+            
+            # Hoàn tiền cho độc giả (cộng lại vào nợ)
+            receipt.reader.total_debt += receipt.collected_amount
+            receipt.reader.save(update_fields=['total_debt'])
+            
+            messages.success(
+                request,
+                f'Đã hủy phiếu thu #{receipt.id}. Đã hoàn {receipt.collected_amount:,}đ vào tổng nợ của {receipt.reader.reader_name}.'
+            )
+            return redirect('receipt_list')
+            
+        except Exception as e:
+            messages.error(request, f'Có lỗi xảy ra khi hủy phiếu: {str(e)}')
+            return redirect('receipt_detail', receipt_id=receipt.id)
+    
+    # GET: Hiển thị trang xác nhận hủy
+    context = {
+        'receipt': receipt,
+        'page_title': f'Hủy phiếu thu #{receipt.id}'
+    }
+    
+    return render(request, 'app/receipts/receipt_cancel_confirm.html', context)
+
+
 @login_required
 @permission_required('Quản lý độc giả', 'view')
 @require_http_methods(["GET"])

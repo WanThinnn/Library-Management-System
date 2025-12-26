@@ -69,6 +69,7 @@ urlpatterns = [
     # YC6: Lập phiếu thu tiền phạt
     path('receipt/', views.receipt_form_view, name='receipt_form'),
     path('receipt/<int:receipt_id>/', views.receipt_detail_view, name='receipt_detail'),
+    path('receipt/<int:receipt_id>/cancel/', views.receipt_cancel_view, name='receipt_cancel'),
     path('receipts/', views.receipt_list_view, name='receipt_list'),
     
     # API endpoints for receipt
