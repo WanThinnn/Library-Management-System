@@ -2879,15 +2879,93 @@ def book_detail_view(request, book_id):
     book_items = BookItem.objects.filter(book=book)
     borrowed_items = book_items.filter(is_borrowed=True)
     
+    # Check permissions for actions
+    from .decorators import check_permission
+    can_edit_books = check_permission(request.user, 'Quản lý kho sách', 'change')
+    can_delete_books = check_permission(request.user, 'Quản lý kho sách', 'delete')
+    
     context = {
         'book': book,
         'book_items': book_items,
         'borrowed_count': borrowed_items.count(),
         'available_count': book_items.filter(is_borrowed=False).count(),
+        'can_edit_books': can_edit_books,
+        'can_delete_books': can_delete_books,
         'page_title': f'Chi tiết sách - {book.book_title.book_title}'
     }
     
     return render(request, 'app/books/book_detail.html', context)
+
+
+@permission_required('Quản lý kho sách', 'delete')
+def book_delete_view(request, book_id):
+    """
+    View xóa sách
+    
+    Business Rules:
+    - Chỉ xóa được nếu không có book item nào đang được mượn
+    - Yêu cầu quyền DELETE trong chức năng "Quản lý kho sách"
+    - Sẽ xóa cả BookTitle nếu đây là Book cuối cùng của BookTitle đó
+    """
+    book = get_object_or_404(Book, id=book_id)
+    
+    if request.method == 'POST':
+        try:
+            # Kiểm tra book items đang được mượn
+            borrowed_items = BookItem.objects.filter(
+                book=book,
+                is_borrowed=True
+            )
+            borrowed_count = borrowed_items.count()
+            
+            if borrowed_count > 0:
+                messages.error(
+                    request,
+                    f'Không thể xóa sách "{book.book_title.book_title}" vì còn {borrowed_count} cuốn đang được mượn. '
+                    'Vui lòng đợi tất cả các cuốn sách được trả về trước khi xóa.'
+                )
+                return redirect('book_detail', book_id=book.id)
+            
+            # Thực hiện xóa
+            book_title_name = book.book_title.book_title
+            book_title = book.book_title
+            
+            # Xóa book (cascade sẽ xóa book items)
+            book.delete()
+            
+            # Kiểm tra xem BookTitle còn Book nào không
+            # Nếu không còn Book nào, có thể cân nhắc xóa BookTitle
+            # (Tùy business logic - hiện tại giữ lại BookTitle)
+            
+            messages.success(
+                request,
+                f'Đã xóa sách "{book_title_name}" thành công!'
+            )
+            return redirect('book_search')
+            
+        except Exception as e:
+            messages.error(request, f'Có lỗi xảy ra khi xóa sách: {str(e)}')
+            return redirect('book_detail', book_id=book.id)
+    
+    # GET: Hiển thị trang xác nhận xóa
+    # Lấy thông tin về tình trạng mượn
+    book_items = BookItem.objects.filter(book=book)
+    borrowed_items = book_items.filter(is_borrowed=True)
+    
+    # Đếm số phiếu nhập liên quan
+    import_count = BookImportDetail.objects.filter(book=book).count()
+    
+    context = {
+        'book': book,
+        'total_items': book_items.count(),
+        'borrowed_count': borrowed_items.count(),
+        'available_count': book_items.filter(is_borrowed=False).count(),
+        'import_count': import_count,
+        'can_delete': borrowed_items.count() == 0,
+        'page_title': f'Xóa sách - {book.book_title.book_title}'
+    }
+    
+    return render(request, 'app/books/book_delete_confirm.html', context)
 
 
 @permission_required('Quản lý kho sách', 'edit')

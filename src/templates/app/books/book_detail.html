@@ -116,9 +116,16 @@
 
 <!-- Buttons -->
 <div class="flex flex-wrap gap-3 justify-center">
+    {% if can_edit_books %}
     <a href="{% url 'book_edit' book.id %}" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
         Chỉnh sửa
     </a>
+    {% endif %}
+    {% if can_delete_books %}
+    <a href="{% url 'book_delete' book.id %}" class="hover:scale-105 duration-200 transition-transform bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
+        Xóa sách
+    </a>
+    {% endif %}
     <a href="{% url 'book_search' %}" class="hover:scale-105 duration-200 transition-transform bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
         ← Quay lại tra cứu
     </a>

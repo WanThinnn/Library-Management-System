@@ -89,6 +89,7 @@ urlpatterns = [
     path('book/<int:book_id>/', views.book_detail_view, name='book_detail'),
     path('book/<int:book_id>/edit/', views.book_edit_view, name='book_edit'),
     path('book/<int:book_id>/delete/', views.book_delete_view, name='book_delete'),
+
     
     # Reader Type Management
     path('reader-types/', views.reader_type_list_view, name='reader_type_list'),
