@@ -1088,12 +1088,34 @@ class Receipt(models.Model):
             pass
     
     def save(self, *args, **kwargs):
+        # Track if this is a new receipt (before super().save() sets the pk)
+        is_new = self.pk is None
+        
+        # Check if this is an existing receipt being cancelled
+        is_being_cancelled = False
+        if not is_new:
+            try:
+                old_receipt = Receipt.objects.get(pk=self.pk)
+                # If old receipt was not cancelled, but current one is, it's being cancelled
+                if not old_receipt.is_cancelled and self.is_cancelled:
+                    is_being_cancelled = True
+            except Receipt.DoesNotExist:
+                pass
+        
         self.full_clean()
         super().save(*args, **kwargs)
         
         # Trừ nợ của độc giả
-        self.reader.total_debt -= self.collected_amount
-        self.reader.save(update_fields=['total_debt'])
+        # - Chỉ trừ khi tạo mới phiếu thu (is_new=True)
+        # - KHÔNG trừ khi đang hủy phiếu (is_being_cancelled=True) vì cancellation view đã cộng lại debt
+        if is_new and not self.is_cancelled:
+            # Phiếu mới và không bị hủy -> trừ nợ
+            self.reader.total_debt -= self.collected_amount
+            self.reader.save(update_fields=['total_debt'])
+        elif is_being_cancelled:
+            # Đang hủy phiếu -> KHÔNG làm gì (cancellation view đã xử lý)
+            pass
+        # else: Cập nhật phiếu thường -> KHÔNG trừ nợ thêm
 
 
 # ==================== REPORTING ====================

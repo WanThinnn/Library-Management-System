@@ -2222,6 +2222,12 @@ def receipt_cancel_view(request, receipt_id):
         messages.error(request, f'Phiếu thu #{receipt.id} đã được hủy trước đó.')
         return redirect('receipt_detail', receipt_id=receipt.id)
     
+    # Kiểm tra thời gian: chỉ hủy trong vòng 24h kể từ khi lập phiếu
+    time_since_created = timezone.now() - receipt.created_date
+    if time_since_created.total_seconds() > 24 * 3600:  # 24 hours
+        messages.error(request, f'Không thể hủy phiếu thu #{receipt.id}. Chỉ được hủy trong vòng 24 giờ kể từ khi lập phiếu.')
+        return redirect('receipt_detail', receipt_id=receipt.id)
+    
     if request.method == 'POST':
         cancel_reason = request.POST.get('cancel_reason', '').strip()
         
