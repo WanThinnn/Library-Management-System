@@ -2484,7 +2484,7 @@ def report_overdue_books_view(request):
     overdue_receipts = BorrowReturnReceipt.objects.filter(
         return_date__isnull=False,  # Đã trả
         return_date__gt=models.F('due_date')  # Trả sau hạn
-    ).select_related('book_item__book__book_title')
+    ).select_related('book_item__book__book_title', 'reader')
     
     # Tạo danh sách thống kê (D4)
     report_data = []
@@ -2498,7 +2498,10 @@ def report_overdue_books_view(request):
             'stt': idx,
             'book_title': book_title,
             'borrow_date': receipt.borrow_date,
-            'overdue_days': overdue_days
+            'overdue_days': overdue_days,
+            'reader_id': receipt.reader.id,
+            'reader_name': receipt.reader.reader_name,
+            'reader_email': receipt.reader.email
         })
     
     context = {
