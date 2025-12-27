@@ -2721,23 +2721,58 @@ def report_borrow_situation_view(request):
     
     # Đếm theo thể loại
     category_stats = {}
+    category_books = {}  # Lưu số sách từng thể loại
+    category_readers = {}  # Lưu danh sách reader_id
+    category_book_titles = {}  # Lưu tên sách được mượn
     total_borrows = 0
     
     for receipt in borrow_receipts:
         if receipt.book_item and receipt.book_item.book:
             category_name = receipt.book_item.book.book_title.category.category_name
+            book_title_name = receipt.book_item.book.book_title.book_title
+            reader_id = receipt.reader_id
+            
             category_stats[category_name] = category_stats.get(category_name, 0) + 1
             total_borrows += 1
+            
+            # Đếm số sách (đầu sách) trong category
+            if category_name not in category_books:
+                category_books[category_name] = set()
+            category_books[category_name].add(receipt.book_item.book.book_title.id)
+            
+            # Đếm số độc giả duy nhất
+            if category_name not in category_readers:
+                category_readers[category_name] = set()
+            category_readers[category_name].add(reader_id)
+            
+            # Đếm sách được mượn nhiều nhất
+            if category_name not in category_book_titles:
+                category_book_titles[category_name] = {}
+            category_book_titles[category_name][book_title_name] = category_book_titles[category_name].get(book_title_name, 0) + 1
     
     # Tạo dữ liệu báo cáo
     report_data = []
     for idx, (category_name, borrow_count) in enumerate(sorted(category_stats.items(), key=lambda x: -x[1]), 1):
         percentage = round((borrow_count / total_borrows * 100), 2) if total_borrows > 0 else 0
+        
+        # Tìm sách được mượn nhiều nhất trong thể loại
+        top_book = ""
+        top_book_count = 0
+        if category_name in category_book_titles:
+            for book, count in category_book_titles[category_name].items():
+                if count > top_book_count:
+                    top_book = book
+                    top_book_count = count
+        
         report_data.append({
             'stt': idx,
             'category_name': category_name,
             'borrow_count': borrow_count,
-            'percentage': percentage
+            'percentage': percentage,
+            'book_count': len(category_books.get(category_name, set())),
+            'reader_count': len(category_readers.get(category_name, set())),
+            'top_book': top_book,
+            'top_book_count': top_book_count
         })
     
     # Dữ liệu cho biểu đồ (JSON)

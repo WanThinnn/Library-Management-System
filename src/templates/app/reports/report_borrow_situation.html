@@ -76,8 +76,18 @@
 <!-- Bảng thống kê -->
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 dark:border-gray-700 overflow-hidden">
     <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
-        <h5 class="font-semibold">Chi tiết thống kê</h5>
-        {% comment %} <p class="text-sm mt-1">Tổng số lượt mượn: <strong>{{ total_borrows }}</strong></p> {% endcomment %}
+        <h5 class="font-semibold">Chi tiết thống kê mượn sách theo thể loại</h5>
+        <p class="text-sm text-blue-100 mt-1">
+            Từ <strong>{{ from_date|date:'d/m/Y' }}</strong> đến <strong>{{ to_date|date:'d/m/Y' }}</strong>
+            &nbsp;•&nbsp;
+            Tổng: <strong>{{ total_borrows }}</strong> lượt mượn
+            &nbsp;•&nbsp;
+            <strong>{{ report_data|length }}</strong> thể loại
+            {% if report_data %}
+            &nbsp;•&nbsp;
+            Cao nhất: <strong>{{ report_data.0.category_name }}</strong> ({{ report_data.0.borrow_count }} lượt)
+            {% endif %}
+        </p>
     </div>
     <div class="p-4">
         <div class="overflow-x-auto">
@@ -86,27 +96,40 @@
                     <tr>
                         <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">STT</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Tên Thể Loại</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">Số Đầu Sách</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">Số Độc Giả</th>
                         <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">Số Lượt Mượn</th>
                         <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">Tỉ Lệ (%)</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Sách Mượn Nhiều Nhất</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {% for item in report_data %}
                     <tr class="bg-gray-35 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-700 transition-colors">
                         <td class="px-4 py-3 text-sm text-center text-gray-900 dark:text-gray-100">{{ item.stt }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ item.category_name }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-medium">{{ item.category_name }}</td>
+                        <td class="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">{{ item.book_count }}</td>
+                        <td class="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">{{ item.reader_count }}</td>
                         <td class="px-4 py-3 text-sm text-center">
                             <span class="bg-blue-600 dark:bg-blue-700 text-white text-xs px-2 py-1 rounded-full">{{ item.borrow_count }}</span>
                         </td>
                         <td class="px-4 py-3 text-sm text-center text-gray-900 dark:text-gray-100">{{ item.percentage }}%</td>
+                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                            {% if item.top_book %}
+                                {{ item.top_book }}
+                                <span class="text-xs text-gray-500">({{ item.top_book_count }} lượt)</span>
+                            {% else %}
+                                <em class="text-gray-400">-</em>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot class="bg-gray-100 dark:bg-gray-700">
                     <tr>
-                        <td colspan="2" class="px-4 py-3 text-sm text-right"><strong>Tổng số lượt mượn:</strong></td>
+                        <td colspan="4" class="px-4 py-3 text-sm text-right"><strong>Tổng số lượt mượn:</strong></td>
                         <td class="px-4 py-3 text-sm text-center"><strong>{{ total_borrows }}</strong></td>
-                        <td></td>
+                        <td colspan="2"></td>
                     </tr>
                 </tfoot>
             </table>
