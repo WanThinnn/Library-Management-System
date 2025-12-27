@@ -2901,6 +2901,197 @@ def report_borrow_situation_excel(request):
     return response
 
 
+@permission_required('Quản lý phiếu thu', 'view')
+def report_fine_collection_view(request):
+    """
+    Báo cáo tiền phạt được thu trong khoảng thời gian
+    """
+    from datetime import timedelta
+    from collections import defaultdict
+    import json
+    
+    # Lấy ngày từ request
+    from_date_str = request.GET.get('from_date')
+    to_date_str = request.GET.get('to_date')
+    
+    # Mặc định: 30 ngày trước đến hiện tại
+    now = timezone.now()
+    if from_date_str:
+        try:
+            from_date = timezone.datetime.strptime(from_date_str, '%Y-%m-%d')
+            from_date = timezone.make_aware(from_date, timezone.get_current_timezone())
+        except ValueError:
+            from_date = now - timedelta(days=30)
+    else:
+        from_date = now - timedelta(days=30)
+    
+    if to_date_str:
+        try:
+            to_date = timezone.datetime.strptime(to_date_str, '%Y-%m-%d')
+            to_date = timezone.make_aware(to_date.replace(hour=23, minute=59, second=59), timezone.get_current_timezone())
+        except ValueError:
+            to_date = now
+    else:
+        to_date = now
+    
+    # Lấy các phiếu thu trong khoảng thời gian (không tính phiếu đã hủy)
+    receipts = Receipt.objects.filter(
+        created_date__gte=from_date,
+        created_date__lte=to_date,
+        is_cancelled=False
+    ).select_related('reader').order_by('-created_date')
+    
+    # Tạo dữ liệu báo cáo
+    report_data = []
+    total_collected = 0
+    unique_readers = set()
+    daily_stats = defaultdict(int)
+    
+    for idx, receipt in enumerate(receipts, 1):
+        report_data.append({
+            'stt': idx,
+            'receipt_id': receipt.id,
+            'reader_id': receipt.reader.id,
+            'reader_name': receipt.reader.reader_name,
+            'reader_email': receipt.reader.email,
+            'created_date': receipt.created_date,
+            'collected_amount': receipt.collected_amount,
+            'is_cancelled': receipt.is_cancelled
+        })
+        total_collected += receipt.collected_amount
+        unique_readers.add(receipt.reader.id)
+        
+        # Thống kê theo ngày cho biểu đồ
+        date_key = receipt.created_date.strftime('%d/%m')
+        daily_stats[date_key] += receipt.collected_amount
+    
+    # Dữ liệu cho biểu đồ
+    chart_labels = json.dumps(list(daily_stats.keys()))
+    chart_data = json.dumps(list(daily_stats.values()))
+    
+    # Tính trung bình
+    avg_per_receipt = total_collected / len(report_data) if report_data else 0
+    
+    context = {
+        'report_data': report_data,
+        'total_collected': total_collected,
+        'unique_readers': len(unique_readers),
+        'avg_per_receipt': avg_per_receipt,
+        'from_date': from_date,
+        'to_date': to_date,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
+        'page_title': 'Báo cáo tiền phạt được thu'
+    }
+    
+    return render(request, 'app/reports/report_fine_collection.html', context)
+
+
+@permission_required('Quản lý phiếu thu', 'view')
+def report_fine_collection_excel(request):
+    """
+    Export báo cáo tiền phạt ra file Excel
+    """
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+    from django.http import HttpResponse
+    from datetime import timedelta
+    
+    # Lấy ngày từ request
+    from_date_str = request.GET.get('from_date')
+    to_date_str = request.GET.get('to_date')
+    
+    now = timezone.now()
+    if from_date_str:
+        try:
+            from_date = timezone.datetime.strptime(from_date_str, '%Y-%m-%d')
+            from_date = timezone.make_aware(from_date, timezone.get_current_timezone())
+        except ValueError:
+            from_date = now - timedelta(days=30)
+    else:
+        from_date = now - timedelta(days=30)
+    
+    if to_date_str:
+        try:
+            to_date = timezone.datetime.strptime(to_date_str, '%Y-%m-%d')
+            to_date = timezone.make_aware(to_date.replace(hour=23, minute=59, second=59), timezone.get_current_timezone())
+        except ValueError:
+            to_date = now
+    else:
+        to_date = now
+    
+    # Lấy dữ liệu
+    receipts = Receipt.objects.filter(
+        created_date__gte=from_date,
+        created_date__lte=to_date,
+        is_cancelled=False
+    ).select_related('reader').order_by('-created_date')
+    
+    # Tạo workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Tiền phạt được thu"
+    
+    # Style
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Title
+    ws.merge_cells('A1:E1')
+    ws['A1'] = f'BÁO CÁO TIỀN PHẠT ĐƯỢC THU'
+    ws['A1'].font = Font(bold=True, size=14)
+    ws['A1'].alignment = Alignment(horizontal='center')
+    
+    ws.merge_cells('A2:E2')
+    ws['A2'] = f'Từ ngày {from_date.strftime("%d/%m/%Y")} đến ngày {to_date.strftime("%d/%m/%Y")}'
+    ws['A2'].alignment = Alignment(horizontal='center')
+    
+    # Header
+    headers = ['STT', 'Mã Phiếu', 'Độc Giả', 'Ngày Thu', 'Số Tiền (VNĐ)']
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=4, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = thin_border
+        cell.alignment = Alignment(horizontal='center')
+    
+    # Data
+    row = 5
+    total_collected = 0
+    for idx, receipt in enumerate(receipts, 1):
+        ws.cell(row=row, column=1, value=idx).border = thin_border
+        ws.cell(row=row, column=2, value=f'#{receipt.id}').border = thin_border
+        ws.cell(row=row, column=3, value=receipt.reader.reader_name).border = thin_border
+        ws.cell(row=row, column=4, value=receipt.created_date.strftime('%d/%m/%Y %H:%M')).border = thin_border
+        ws.cell(row=row, column=5, value=receipt.collected_amount).border = thin_border
+        total_collected += receipt.collected_amount
+        row += 1
+    
+    # Total
+    ws.merge_cells(f'A{row}:D{row}')
+    ws.cell(row=row, column=1, value='Tổng tiền thu được:').font = Font(bold=True)
+    ws.cell(row=row, column=5, value=total_collected).font = Font(bold=True)
+    
+    # Column widths
+    ws.column_dimensions['A'].width = 8
+    ws.column_dimensions['B'].width = 12
+    ws.column_dimensions['C'].width = 25
+    ws.column_dimensions['D'].width = 18
+    ws.column_dimensions['E'].width = 18
+    
+    # Response
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="bao_cao_tien_phat_{from_date.strftime("%Y%m%d")}_{to_date.strftime("%Y%m%d")}.xlsx"'
+    wb.save(response)
+    return response
+
+
 # ==================== SYSTEM PARAMETERS - YC8 ====================
 
 @permission_required('Thay đổi quy định', 'view')

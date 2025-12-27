@@ -85,6 +85,8 @@ urlpatterns = [
     path('report/overdue-books/excel/', views.report_overdue_books_excel, name='report_overdue_books_excel'),
     path('report/borrow-situation/', views.report_borrow_situation_view, name='report_borrow_situation'),
     path('report/borrow-situation/excel/', views.report_borrow_situation_excel, name='report_borrow_situation_excel'),
+    path('report/fine-collection/', views.report_fine_collection_view, name='report_fine_collection'),
+    path('report/fine-collection/excel/', views.report_fine_collection_excel, name='report_fine_collection_excel'),
     
     # YC8: Thay đổi quy định
     path('parameters/', views.parameter_update_view, name='parameter_update'),
