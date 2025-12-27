@@ -30,3 +30,9 @@ if settings.DEBUG:
     urlpatterns += [
         path("__reload__/", include("django_browser_reload.urls")),
     ]
+
+# Custom error handlers
+handler400 = 'LibraryManagementSystem.views.bad_request'
+handler403 = 'LibraryManagementSystem.views.permission_denied'
+handler404 = 'LibraryManagementSystem.views.page_not_found'
+handler500 = 'LibraryManagementSystem.views.server_error'
