@@ -159,8 +159,6 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',  # Mặc định - mạnh nhất
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',  # Fallback cho password cũ
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
-    'django.contrib.auth.hashers.BCryptSHA256Hasher',
-    'django.contrib.auth.hashers.ScryptPasswordHasher',
 ]
 
 
