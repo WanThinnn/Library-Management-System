@@ -1937,16 +1937,19 @@ def return_cancel_view(request, receipt_id):
             receipt.book_item.book.remaining_quantity -= 1
             receipt.book_item.book.save(update_fields=['remaining_quantity'])
             
-            # LƯU Ý: KHÔNG hoàn tiền phạt vì:
+            # HOÀN TIỀN PHẠT: Trừ fine_amount khỏi total_debt
             # - Fine đã được cộng vào total_debt khi trả sách (BorrowReturnReceipt.save())
-            # - Khi hủy return, fine_amount vẫn giữ nguyên trong total_debt
-            # - Độc giả vẫn phải trả fine vì đã thực sự trả trễ
-            # - Nếu cộng lại sẽ bị DUPLICATE (2x fine)
+            # - Khi hủy return, cần trừ fine_amount khỏi total_debt để nợ quay về trạng thái "dự tính"
+            # - Nợ dự tính sẽ được tự động tính lại qua pending_debt property
+            # - Phiếu quay lại trạng thái "đang mượn" nên fine sẽ được tính lại khi trả lần sau
+            if old_fine > 0:
+                receipt.reader.total_debt -= old_fine
+                receipt.reader.save(update_fields=['total_debt'])
             
             messages.success(
                 request,
                 f'Đã hủy hành động trả sách #{receipt.id}. Sách được đánh dấu lại là đang mượn. '
-                f'Lưu ý: Tiền phạt {old_fine:,}đ vẫn giữ nguyên trong nợ.'
+                f'Tiền phạt {old_fine:,}đ đã được chuyển về trạng thái dự tính.'
             )
             return redirect('borrow_book_list')
             
