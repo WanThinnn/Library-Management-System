@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 mb-6">
+    <div class="p-6">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            {{ page_title }}
+        </h1>
+        <p class="text-gray-500">Thống kê tiền phạt được thu trong khoảng thời gian</p>
+    </div>
+</div>
+
+<!-- Form chọn khoảng thời gian -->
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 mb-6 overflow-hidden">
+    <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
+        <h5 class="font-semibold">Chọn khoảng thời gian</h5>
+    </div>
+    <div class="p-4">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            <div class="md:col-span-3">
+                <label for="from_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Từ ngày</label>
+                <input type="date" name="from_date" id="from_date" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
+                       value="{{ from_date|date:'Y-m-d' }}" required>
+            </div>
+            <div class="md:col-span-3">
+                <label for="to_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Đến ngày</label>
+                <input type="date" name="to_date" id="to_date" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
+                       value="{{ to_date|date:'Y-m-d' }}" required>
+            </div>
+            <div class="md:col-span-6 flex flex-wrap gap-2">
+                <button type="submit" class="hover:scale-105 duration-200 transition-transform bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Xem báo cáo
+                </button>
+                <a href="{% url 'report_fine_collection_excel' %}?from_date={{ from_date|date:'Y-m-d' }}&to_date={{ to_date|date:'Y-m-d' }}" 
+                   class="hover:scale-105 duration-200 transition-transform bg-green-600 dark:bg-green-700 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Xuất Excel
+                </a>
+                <button type="button" onclick="window.print()" class="hover:scale-105 duration-200 transition-transform bg-green-600 dark:bg-green-700 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    In báo cáo
+                </button>
+            </div>
+        </form>
+        {% if not report_data %}
+        <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded mt-4">
+            <strong>Không có dữ liệu thu tiền phạt trong khoảng thời gian đã chọn</strong>
+            <p class="mt-2">Vui lòng thử lại với tiêu chí khác hoặc <a href="{% url 'report_fine_collection' %}" class="underline">xóa lọc</a>.</p>
+
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if report_data %}
+<!-- Tổng quan -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-green-600 rounded-lg shadow-md p-6 text-white">
+        <p class="text-green-100 text-sm">Tổng tiền thu được</p>
+        <p class="text-3xl font-bold">{{ total_collected|floatformat:0 }}đ</p>
+    </div>
+    <div class="bg-blue-600 rounded-lg shadow-md p-6 text-white">
+        <p class="text-blue-100 text-sm">Số phiếu thu</p>
+        <p class="text-3xl font-bold">{{ report_data|length }}</p>
+    </div>
+    <div class="bg-purple-600 rounded-lg shadow-md p-6 text-white">
+        <p class="text-purple-100 text-sm">Số độc giả</p>
+        <p class="text-3xl font-bold">{{ unique_readers }}</p>
+    </div>
+    <div class="bg-amber-500 rounded-lg shadow-md p-6 text-white">
+        <p class="text-amber-100 text-sm">Trung bình/phiếu</p>
+        <p class="text-3xl font-bold">{{ avg_per_receipt|floatformat:0 }}đ</p>
+    </div>
+</div>
+
+<!-- Biểu đồ -->
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 mb-6 overflow-hidden">
+    <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
+        <h5 class="font-semibold">Biểu đồ tiền phạt thu theo ngày</h5>
+    </div>
+    <div class="p-4">
+        <canvas id="fineChart" style="max-height: 400px;"></canvas>
+    </div>
+</div>
+
+<!-- Bảng chi tiết -->
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="bg-blue-600 dark:bg-blue-700 text-white px-4 py-3">
+        <h5 class="font-semibold">Chi tiết phiếu thu tiền phạt</h5>
+        <p class="text-sm text-blue-100 mt-1">
+            Từ <strong>{{ from_date|date:'d/m/Y' }}</strong> đến <strong>{{ to_date|date:'d/m/Y' }}</strong>
+            &nbsp;•&nbsp;
+            Tổng: <strong>{{ report_data|length }}</strong> phiếu
+            &nbsp;•&nbsp;
+            Thu: <strong>{{ total_collected|floatformat:0 }}đ</strong>
+        </p>
+    </div>
+    <div class="p-4">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-blue-600 dark:bg-blue-700 text-white">
+                    <tr>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">STT</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Mã Phiếu</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Độc Giả</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">Ngày Thu</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider">Số Tiền Thu</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">Trạng Thái</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for item in report_data %}
+                    <tr class="hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors">
+                        <td class="px-4 py-3 text-sm text-center text-gray-900 dark:text-gray-100">{{ item.stt }}</td>
+                        <td class="px-4 py-3 text-sm">
+                            <a href="{% url 'receipt_detail' item.receipt_id %}" class="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 font-medium">
+                                #{{ item.receipt_id }}
+                            </a>
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <a href="{% url 'reader_detail' item.reader_id %}" class="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400">
+                                {{ item.reader_name }}
+                            </a>
+                            <br>
+                            <small class="text-gray-500">{{ item.reader_email }}</small>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">{{ item.created_date|date:'d/m/Y H:i' }}</td>
+                        <td class="px-4 py-3 text-sm text-right">
+                            <span class="text-green-600 dark:text-green-400 font-semibold">{{ item.collected_amount|floatformat:0 }}đ</span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-center">
+                            {% if item.is_cancelled %}
+                                <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Đã hủy</span>
+                            {% else %}
+                                <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Hoàn thành</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="bg-gray-100 dark:bg-gray-700">
+                    <tr>
+                        <td colspan="4" class="px-4 py-3 text-sm text-right"><strong>Tổng tiền thu được:</strong></td>
+                        <td class="px-4 py-3 text-sm text-right"><strong class="text-green-600 dark:text-green-400 text-lg">{{ total_collected|floatformat:0 }}đ</strong></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+{% if chart_labels %}
+const ctx = document.getElementById('fineChart').getContext('2d');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+            label: 'Tiền phạt thu được (VNĐ)',
+            data: {{ chart_data|safe }},
+            backgroundColor: 'rgba(34, 197, 94, 0.7)',
+            borderColor: 'rgba(34, 197, 94, 1)',
+            borderWidth: 1,
+            borderRadius: 4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: 'Thống kê tiền phạt thu theo ngày',
+                font: {
+                    size: 16,
+                    weight: 'bold'
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Số tiền (VNĐ)'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Ngày'
+                }
+            }
+        }
+    }
+});
+{% endif %}
+</script>
+
+<style>
+@media print {
+    .bg-blue-600, .bg-green-600, nav, button, form { display: none !important; }
+}
+</style>
+{% endblock %}
