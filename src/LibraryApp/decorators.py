@@ -5,6 +5,31 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect
 from django.contrib import messages
 from functools import wraps
+from django.conf import settings
+
+
+def conditional_ratelimit(key, rate, method='POST', block=False):
+    """
+    Rate limiting decorator that respects settings.RATELIMIT_ENABLE
+    When RATELIMIT_ENABLE is False (e.g., in tests), the rate limiting is skipped.
+    """
+    from django_ratelimit.decorators import ratelimit
+    
+    def decorator(view_func):
+        # Apply the actual ratelimit decorator
+        rate_limited_func = ratelimit(key=key, rate=rate, method=method, block=block)(view_func)
+        
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            # Check if rate limiting is enabled
+            if getattr(settings, 'RATELIMIT_ENABLE', True):
+                return rate_limited_func(request, *args, **kwargs)
+            else:
+                # Skip rate limiting, call original function directly
+                return view_func(request, *args, **kwargs)
+        
+        return wrapper
+    return decorator
 
 
 def get_library_user(user):

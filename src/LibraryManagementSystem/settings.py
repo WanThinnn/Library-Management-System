@@ -28,12 +28,22 @@ environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-@kl970*(&4#b427!q380o_0a@y1igby2+5ra&knin!@kf0xbuq')
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured(
+        "SECRET_KEY environment variable is required. "
+        "Generate one with: python -c \"from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())\""
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+# ALLOWED_HOSTS - Required for production, allows localhost in DEBUG mode
+_allowed_hosts = os.getenv('ALLOWED_HOSTS', '')
+ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts.split(',') if h.strip()]
+if DEBUG:
+    ALLOWED_HOSTS += ['localhost', '127.0.0.1', '[::1]']
 
 # CSRF Trusted Origins for HTTPS
 CSRF_TRUSTED_ORIGINS = [
@@ -174,6 +184,19 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Cache configuration - Use FileBasedCache for rate limiting to work with Gunicorn workers
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/tmp/django_cache',
+        'TIMEOUT': 300,
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000
+        }
+    }
+}
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
@@ -271,3 +294,7 @@ LOGGING = {
         },
     },
 }
+
+# Rate limiting configuration - disable during tests
+import sys
+RATELIMIT_ENABLE = 'test' not in sys.argv

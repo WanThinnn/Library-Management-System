@@ -9,7 +9,9 @@ from django.utils import timezone
 from django.db import transaction
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import Count, Q
+from django.conf import settings as django_settings
 from datetime import datetime, timedelta
+from django_ratelimit.decorators import ratelimit
 from .models import BankAccount, Reader, ReaderType, Parameter, BookTitle, Author, BookImportReceipt, BookImportDetail, Book, AuthorDetail, BookItem, BorrowReturnReceipt, Receipt, Category, UserGroup, Function, Permission
 from .forms import ReaderForm, LibraryLoginForm, BookImportForm, BookImportExcelForm, BookSearchForm, BorrowBookForm, ReturnBookForm, ReceiptForm, ParameterForm, BookEditForm, ReaderTypeForm, UserGroupForm, FunctionForm
 from .decorators import manager_required, staff_required, permission_required
@@ -45,11 +47,17 @@ def home_view(request):
 
 # ==================== AUTHENTICATION ====================
 
+@ratelimit(key='ip', rate='5/m', method='POST', block=False)
 def login_view(request):
     """
     Đăng nhập hệ thống
-    Dành cho: SuperUser, Staff (Quản lý, Thủ thư)
+    Dành cho: SuperUser, Staff (Thủ thư, thực tập,...)
+    Rate limit: 5 requests/minute per IP
     """
+    # Check if rate limited
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Quá nhiều yêu cầu đăng nhập. Vui lòng thử lại sau 1 phút.')
+        return render(request, 'errors/429.html', status=429)
     # Nếu đã đăng nhập, chuyển về trang chủ
     if request.user.is_authenticated:
         return redirect('home')
@@ -221,7 +229,17 @@ class CustomPasswordResetView(PasswordResetView):
         return redirect(self.get_success_url())
 
 # Rename to match urls.py expectation or update urls.py
-password_reset_view = CustomPasswordResetView.as_view()
+# Rate limit: 3 requests/minute per IP for password reset
+_password_reset_view = CustomPasswordResetView.as_view()
+
+@ratelimit(key='ip', rate='3/m', method='POST', block=False)
+def password_reset_view(request):
+    """Password reset with rate limiting (3/min per IP)"""
+    # Check if rate limited
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Quá nhiều yêu cầu đặt lại mật khẩu. Vui lòng thử lại sau 1 phút.')
+        return render(request, 'errors/429.html', status=429)
+    return _password_reset_view(request)
 
 
 @login_required

@@ -1,8 +1,9 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.contrib.auth.models import User
 from django.urls import reverse
 from .models import LibraryUser, UserGroup
 
+@override_settings(RATELIMIT_ENABLE=False)
 class LoginTest(TestCase):
     def setUp(self):
         self.client = Client()
