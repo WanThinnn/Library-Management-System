@@ -65,8 +65,8 @@ class UserEmailPasswordResetForm(PasswordResetForm):
         email = cleaned_data.get('email')
         
         if username and email:
-            # Kiểm tra xem có user nào khớp cả username và email không
-            exists = User.objects.filter(username=username, email=email, is_active=True).exists()
+            # Kiểm tra xem có user nào khớp cả username và email không (case-insensitive cho username)
+            exists = User.objects.filter(username__iexact=username, email=email, is_active=True).exists()
             if not exists:
                 raise ValidationError(
                     "Thông tin tên đăng nhập và email không khớp, hoặc tài khoản không tồn tại."
