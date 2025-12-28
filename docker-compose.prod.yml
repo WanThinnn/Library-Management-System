@@ -5,6 +5,9 @@ services:
     container_name: library-web
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-sqlite:////app/data/db.sqlite3}
+      - PYTHONUNBUFFERED=1
     volumes:
       - sqlite_volume:/app/data
       - ./docs:/docs
@@ -14,6 +17,8 @@ services:
       - ./src/LibraryApp/migrations:/app/LibraryApp/migrations
     expose:
       - "8000"
+    networks:
+      - app-network
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8000/" ]
@@ -40,6 +45,8 @@ services:
       - SSL_CA_FILE=${SSL_CA_FILE:-CyberFortress-RootCA.crt}
     depends_on:
       - web
+    networks:
+      - app-network
     restart: unless-stopped
 
   cloudflared:
@@ -53,7 +60,7 @@ services:
     depends_on:
       - web
     networks:
-      - default
+      - app-network
     restart: unless-stopped
     profiles:
       - tunnel
@@ -63,3 +70,7 @@ volumes:
     name: sqlite_volume
   static_volume:
     name: static_volume
+
+networks:
+  app-network:
+    driver: bridge

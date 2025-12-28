@@ -22,7 +22,7 @@ services:
     env_file:
       - .env
     environment:
-      - DATABASE_URL=sqlite:////app/data/db.sqlite3
+      - DATABASE_URL=${DATABASE_URL:-sqlite:////app/data/db.sqlite3}
       - PYTHONUNBUFFERED=1
     depends_on:
       - nginx
