@@ -53,6 +53,9 @@ CSRF_TRUSTED_ORIGINS = [
     'https://127.0.0.1', 
 ]
 
+# Custom CSRF failure view
+CSRF_FAILURE_VIEW = 'LibraryManagementSystem.views.csrf_failure'
+
 
 # Application definition
 

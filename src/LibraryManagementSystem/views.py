@@ -22,3 +22,22 @@ def page_not_found(request, exception=None):
 def server_error(request):
     """Handle 500 Internal Server errors."""
     return render(request, 'errors/500.html', status=500)
+
+
+def csrf_failure(request, reason=""):
+    """Handle CSRF verification failure with custom 403 template."""
+    return render(request, 'errors/403.html', status=403)
+
+"""
+Test CSRF Failure:
+// Xóa CSRF cookie
+document.cookie = 'csrftoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+// Tạo form giả và submit
+var form = document.createElement('form');
+form.method = 'POST';
+form.action = '/auth/login/';
+form.innerHTML = '<input name="username" value="test"><input name="password" value="test">';
+document.body.appendChild(form);
+form.submit();
+"""

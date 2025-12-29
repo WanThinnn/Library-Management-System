@@ -3524,8 +3524,12 @@ def register_view(request):
     
     - Tài khoản mới mặc định: is_active=False (cần Quản lý kích hoạt)
     - Vai trò mặc định: Thủ thư (is_staff=True, is_superuser=False)
+    - Tạo LibraryUser liên kết với UserGroup "Thủ thư"
     - Sau khi đăng ký, hiển thị thông báo chờ duyệt
     """
+    from .models import LibraryUser
+    from datetime import date
+    
     # Nếu đã đăng nhập, chuyển về trang chủ
     if request.user.is_authenticated:
         return redirect('home')
@@ -3552,6 +3556,15 @@ def register_view(request):
         else:
             try:
                 with transaction.atomic():
+                    # Lấy UserGroup "Thủ thư" mặc định
+                    default_group = UserGroup.objects.filter(user_group_name='Thủ thư').first()
+                    if not default_group:
+                        # Nếu không tìm thấy, tạo mới
+                        default_group = UserGroup.objects.create(
+                            user_group_name='Thủ thư',
+                            description='Nhân viên thư viện - Thủ thư'
+                        )
+                    
                     # Tạo user mới (CHƯA KÍCH HOẠT)
                     user = User.objects.create_user(
                         username=username,
@@ -3562,6 +3575,20 @@ def register_view(request):
                         is_active=False,  # Cần Quản lý kích hoạt
                         is_staff=True,    # Mặc định là Thủ thư
                         is_superuser=False
+                    )
+                    
+                    # Tạo LibraryUser liên kết với UserGroup "Thủ thư"
+                    full_name = f"{last_name} {first_name}".strip() or username
+                    LibraryUser.objects.create(
+                        user=user,
+                        full_name=full_name,
+                        date_of_birth=date(1990, 1, 1),  # Giá trị mặc định
+                        position='Thủ thư',
+                        user_group=default_group,
+                        phone_number='',
+                        email=email,
+                        address='',
+                        is_active=False  # Phù hợp với user.is_active
                     )
                     
                     messages.success(
