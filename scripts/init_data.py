@@ -165,6 +165,12 @@ def init_authors():
         'Ngô Tất Tố',
         'Vũ Trọng Phụng',
         'Hồ Chí Minh',
+        'Nguyễn Tuân',
+        'Thạch Lam',
+        'Nguyên Hồng',
+        'Kim Lân',
+        'Tố Hữu',
+        'Hồ Xuân Hương',
         
         # Tác giả nước ngoài - IT
         'Robert C. Martin',
@@ -175,14 +181,37 @@ def init_authors():
         'Gang of Four',
         'Michael Feathers',
         'Kent Beck',
+        'Donald Knuth',
+        'Brian Kernighan',
+        'Dennis Ritchie',
+        'Linus Torvalds',
+        'Joshua Bloch',
         
         # Tác giả nước ngoài - Kỹ năng sống
         'Dale Carnegie',
         'Stephen Covey',
         'Napoleon Hill',
         'Robin Sharma',
+        'Tony Robbins',
+        'Robert Kiyosaki',
+        'Tim Ferriss',
+        
+        # Tác giả văn học nước ngoài
         'Haruki Murakami',
         'Paulo Coelho',
+        'J.K. Rowling',
+        'George Orwell',
+        'Ernest Hemingway',
+        'Victor Hugo',
+        'Leo Tolstoy',
+        'Fyodor Dostoevsky',
+        
+        # Tác giả khoa học
+        'Yuval Noah Harari',
+        'Stephen Hawking',
+        'Carl Sagan',
+        'Richard Dawkins',
+        'Neil deGrasse Tyson',
     ]
     
     print("\n[*] Khoi tao tac gia mau:")
@@ -203,13 +232,13 @@ def init_books():
     current_year = datetime.now().year
     
     books_data = [
-        # IT Books
+        # ========== IT Books ==========
         {
             'title': 'Clean Code: A Handbook of Agile Software Craftsmanship',
             'author': 'Robert C. Martin',
             'category': 'Công nghệ thông tin',
             'publisher': 'Prentice Hall',
-            'publish_year': 2008,
+            'publish_year': 2020,  # Phiên bản tái bản
             'price': 450000,
             'quantity': 3
         },
@@ -218,7 +247,7 @@ def init_books():
             'author': 'Gang of Four',
             'category': 'Công nghệ thông tin',
             'publisher': 'Addison-Wesley',
-            'publish_year': 1994,
+            'publish_year': 2020,  # Phiên bản tái bản
             'price': 550000,
             'quantity': 2
         },
@@ -240,23 +269,77 @@ def init_books():
             'price': 420000,
             'quantity': 4
         },
+        {
+            'title': 'Domain-Driven Design',
+            'author': 'Eric Evans',
+            'category': 'Công nghệ thông tin',
+            'publisher': 'Addison-Wesley',
+            'publish_year': 2019,  # Phiên bản tái bản
+            'price': 520000,
+            'quantity': 2
+        },
+        {
+            'title': 'Effective Java',
+            'author': 'Joshua Bloch',
+            'category': 'Công nghệ thông tin',
+            'publisher': 'Addison-Wesley',
+            'publish_year': 2018,
+            'price': 380000,
+            'quantity': 3
+        },
+        {
+            'title': 'The Art of Computer Programming',
+            'author': 'Donald Knuth',
+            'category': 'Công nghệ thông tin',
+            'publisher': 'Addison-Wesley',
+            'publish_year': 2021,  # Phiên bản tái bản
+            'price': 750000,
+            'quantity': 2
+        },
+        {
+            'title': 'The C Programming Language',
+            'author': 'Brian Kernighan',
+            'category': 'Công nghệ thông tin',
+            'publisher': 'Prentice Hall',
+            'publish_year': 2018,  # Phiên bản tái bản
+            'price': 320000,
+            'quantity': 4
+        },
         
-        # Vietnamese Literature
+        # ========== Vietnamese Literature ==========
         {
             'title': 'Tôi Thấy Hoa Vàng Trên Cỏ Xanh',
             'author': 'Nguyễn Nhật Ánh',
             'category': 'Văn học',
             'publisher': 'Trẻ',
-            'publish_year': 2010,
+            'publish_year': 2020,  # Phiên bản tái bản
             'price': 120000,
             'quantity': 5
+        },
+        {
+            'title': 'Mắt Biếc',
+            'author': 'Nguyễn Nhật Ánh',
+            'category': 'Văn học',
+            'publisher': 'Trẻ',
+            'publish_year': 2019,
+            'price': 110000,
+            'quantity': 4
+        },
+        {
+            'title': 'Cho Tôi Xin Một Vé Đi Tuổi Thơ',
+            'author': 'Nguyễn Nhật Ánh',
+            'category': 'Văn học',
+            'publisher': 'Trẻ',
+            'publish_year': 2018,
+            'price': 95000,
+            'quantity': 3
         },
         {
             'title': 'Dế Mèn Phiêu Lưu Ký',
             'author': 'Tô Hoài',
             'category': 'Văn học',
             'publisher': 'Kim Đồng',
-            'publish_year': 1941,
+            'publish_year': 2020,
             'price': 80000,
             'quantity': 4
         },
@@ -265,12 +348,86 @@ def init_books():
             'author': 'Nam Cao',
             'category': 'Văn học',
             'publisher': 'Văn học',
-            'publish_year': 1941,
+            'publish_year': 2019,
             'price': 65000,
             'quantity': 3
         },
+        {
+            'title': 'Truyện Kiều',
+            'author': 'Nguyễn Du',
+            'category': 'Văn học',
+            'publisher': 'Văn học',
+            'publish_year': 2020,
+            'price': 75000,
+            'quantity': 5
+        },
+        {
+            'title': 'Tắt Đèn',
+            'author': 'Ngô Tất Tố',
+            'category': 'Văn học',
+            'publisher': 'Văn học',
+            'publish_year': 2018,
+            'price': 55000,
+            'quantity': 3
+        },
+        {
+            'title': 'Số Đỏ',
+            'author': 'Vũ Trọng Phụng',
+            'category': 'Văn học',
+            'publisher': 'Văn học',
+            'publish_year': 2019,
+            'price': 85000,
+            'quantity': 4
+        },
         
-        # Self-help books
+        # ========== Foreign Literature ==========
+        {
+            'title': 'Norwegian Wood',
+            'author': 'Haruki Murakami',
+            'category': 'Văn học',
+            'publisher': 'Nhã Nam',
+            'publish_year': 2020,
+            'price': 145000,
+            'quantity': 3
+        },
+        {
+            'title': 'Kafka Bên Bờ Biển',
+            'author': 'Haruki Murakami',
+            'category': 'Văn học',
+            'publisher': 'Nhã Nam',
+            'publish_year': 2019,
+            'price': 165000,
+            'quantity': 2
+        },
+        {
+            'title': 'Nhà Giả Kim',
+            'author': 'Paulo Coelho',
+            'category': 'Văn học',
+            'publisher': 'Nhã Nam',
+            'publish_year': 2021,
+            'price': 89000,
+            'quantity': 6
+        },
+        {
+            'title': '1984',
+            'author': 'George Orwell',
+            'category': 'Văn học',
+            'publisher': 'Nhã Nam',
+            'publish_year': 2020,
+            'price': 125000,
+            'quantity': 4
+        },
+        {
+            'title': 'Những Người Khốn Khổ',
+            'author': 'Victor Hugo',
+            'category': 'Văn học',
+            'publisher': 'Văn học',
+            'publish_year': 2019,
+            'price': 195000,
+            'quantity': 2
+        },
+        
+        # ========== Self-help books ==========
         {
             'title': 'Đắc Nhân Tâm',
             'author': 'Dale Carnegie',
@@ -298,16 +455,130 @@ def init_books():
             'price': 98000,
             'quantity': 5
         },
+        {
+            'title': 'Dạy Con Làm Giàu',
+            'author': 'Robert Kiyosaki',
+            'category': 'Kỹ năng sống',
+            'publisher': 'Trẻ',
+            'publish_year': 2020,
+            'price': 115000,
+            'quantity': 4
+        },
+        {
+            'title': 'Tuần Làm Việc 4 Giờ',
+            'author': 'Tim Ferriss',
+            'category': 'Kỹ năng sống',
+            'publisher': 'Alphabooks',
+            'publish_year': 2019,
+            'price': 135000,
+            'quantity': 3
+        },
+        {
+            'title': 'Đánh Thức Con Người Phi Thường Trong Bạn',
+            'author': 'Tony Robbins',
+            'category': 'Kỹ năng sống',
+            'publisher': 'First News',
+            'publish_year': 2021,
+            'price': 145000,
+            'quantity': 3
+        },
         
-        # Science
+        # ========== Science ==========
         {
             'title': 'Sapiens: Lược Sử Loài Người',
-            'author': 'Haruki Murakami',
+            'author': 'Yuval Noah Harari',
             'category': 'Khoa học',
             'publisher': 'Thế Giới',
             'publish_year': 2018,
             'price': 180000,
+            'quantity': 4
+        },
+        {
+            'title': 'Homo Deus: Lược Sử Tương Lai',
+            'author': 'Yuval Noah Harari',
+            'category': 'Khoa học',
+            'publisher': 'Thế Giới',
+            'publish_year': 2019,
+            'price': 195000,
             'quantity': 3
+        },
+        {
+            'title': 'Lược Sử Thời Gian',
+            'author': 'Stephen Hawking',
+            'category': 'Khoa học',
+            'publisher': 'Trẻ',
+            'publish_year': 2020,
+            'price': 125000,
+            'quantity': 4
+        },
+        {
+            'title': 'Cosmos',
+            'author': 'Carl Sagan',
+            'category': 'Khoa học',
+            'publisher': 'Alphabooks',
+            'publish_year': 2018,
+            'price': 165000,
+            'quantity': 2
+        },
+        
+        # ========== Economics ==========
+        {
+            'title': 'Kinh Tế Học Vĩ Mô',
+            'author': 'Robert C. Martin',
+            'category': 'Kinh tế',
+            'publisher': 'NXB Đại học Kinh tế',
+            'publish_year': 2020,
+            'price': 185000,
+            'quantity': 3
+        },
+        {
+            'title': 'Marketing Căn Bản',
+            'author': 'Dale Carnegie',
+            'category': 'Kinh tế',
+            'publisher': 'NXB Lao động',
+            'publish_year': 2021,
+            'price': 145000,
+            'quantity': 4
+        },
+        
+        # ========== History ==========
+        {
+            'title': 'Lịch Sử Việt Nam',
+            'author': 'Nguyễn Tuân',
+            'category': 'Lịch sử',
+            'publisher': 'NXB Giáo dục',
+            'publish_year': 2019,
+            'price': 165000,
+            'quantity': 3
+        },
+        {
+            'title': 'Đại Việt Sử Ký Toàn Thư',
+            'author': 'Ngô Tất Tố',
+            'category': 'Lịch sử',
+            'publisher': 'Văn học',
+            'publish_year': 2020,
+            'price': 295000,
+            'quantity': 2
+        },
+        
+        # ========== Foreign Languages ==========
+        {
+            'title': 'English Grammar in Use',
+            'author': 'Brian Kernighan',
+            'category': 'Ngoại ngữ',
+            'publisher': 'Cambridge',
+            'publish_year': 2019,
+            'price': 285000,
+            'quantity': 5
+        },
+        {
+            'title': 'TOEIC 990',
+            'author': 'Stephen Covey',
+            'category': 'Ngoại ngữ',
+            'publisher': 'Alpha Books',
+            'publish_year': 2021,
+            'price': 195000,
+            'quantity': 4
         },
     ]
     
@@ -386,6 +657,7 @@ def init_books():
 def init_sample_readers():
     """Khởi tạo độc giả mẫu"""
     readers_data = [
+        # ========== Sinh viên ==========
         {
             'reader_name': 'Nguyễn Văn An',
             'date_of_birth': datetime(2000, 5, 15).date(),
@@ -403,6 +675,56 @@ def init_sample_readers():
             'reader_type': 'Sinh viên'
         },
         {
+            'reader_name': 'Hoàng Văn Em',
+            'date_of_birth': datetime(2001, 7, 5).date(),
+            'email': 'hvem@example.com',
+            'phone_number': '0945678901',
+            'address': '654 Điện Biên Phủ, Q.Bình Thạnh, TP.HCM',
+            'reader_type': 'Sinh viên'
+        },
+        {
+            'reader_name': 'Phan Minh Phúc',
+            'date_of_birth': datetime(2002, 3, 22).date(),
+            'email': 'pmphu@example.com',
+            'phone_number': '0956789012',
+            'address': '88 Nguyễn Thị Minh Khai, Q.3, TP.HCM',
+            'reader_type': 'Sinh viên'
+        },
+        {
+            'reader_name': 'Võ Ngọc Hân',
+            'date_of_birth': datetime(2001, 11, 8).date(),
+            'email': 'vnhan@example.com',
+            'phone_number': '0967890123',
+            'address': '205 Lý Thường Kiệt, Q.10, TP.HCM',
+            'reader_type': 'Sinh viên'
+        },
+        {
+            'reader_name': 'Đặng Quốc Bảo',
+            'date_of_birth': datetime(2000, 9, 14).date(),
+            'email': 'dqbao@example.com',
+            'phone_number': '0978901234',
+            'address': '412 Cách Mạng Tháng 8, Q.Tân Bình, TP.HCM',
+            'reader_type': 'Sinh viên'
+        },
+        {
+            'reader_name': 'Lý Thị Mỹ Linh',
+            'date_of_birth': datetime(2003, 1, 30).date(),
+            'email': 'ltmlinh@example.com',
+            'phone_number': '0989012345',
+            'address': '67 Phan Đăng Lưu, Q.Phú Nhuận, TP.HCM',
+            'reader_type': 'Sinh viên'
+        },
+        {
+            'reader_name': 'Bùi Thanh Tùng',
+            'date_of_birth': datetime(2002, 6, 18).date(),
+            'email': 'bttung@example.com',
+            'phone_number': '0990123456',
+            'address': '321 Xô Viết Nghệ Tĩnh, Q.Bình Thạnh, TP.HCM',
+            'reader_type': 'Sinh viên'
+        },
+        
+        # ========== Giảng viên ==========
+        {
             'reader_name': 'Lê Văn Cường',
             'date_of_birth': datetime(1985, 3, 10).date(),
             'email': 'lvcuong@example.com',
@@ -410,6 +732,32 @@ def init_sample_readers():
             'address': '789 Trần Hưng Đạo, Q.5, TP.HCM',
             'reader_type': 'Giảng viên'
         },
+        {
+            'reader_name': 'Nguyễn Thị Hương',
+            'date_of_birth': datetime(1982, 7, 25).date(),
+            'email': 'nthuong@example.com',
+            'phone_number': '0911223344',
+            'address': '156 Nguyễn Văn Cừ, Q.5, TP.HCM',
+            'reader_type': 'Giảng viên'
+        },
+        {
+            'reader_name': 'Trần Minh Tuấn',
+            'date_of_birth': datetime(1979, 4, 12).date(),
+            'email': 'tmtuan@example.com',
+            'phone_number': '0922334455',
+            'address': '89 Nguyễn Trãi, Q.1, TP.HCM',
+            'reader_type': 'Giảng viên'
+        },
+        {
+            'reader_name': 'Phạm Văn Đức',
+            'date_of_birth': datetime(1975, 12, 5).date(),
+            'email': 'pvduc@example.com',
+            'phone_number': '0933445566',
+            'address': '234 Điện Biên Phủ, Q.3, TP.HCM',
+            'reader_type': 'Giảng viên'
+        },
+        
+        # ========== Cán bộ ==========
         {
             'reader_name': 'Phạm Thị Dung',
             'date_of_birth': datetime(1990, 12, 25).date(),
@@ -419,12 +767,38 @@ def init_sample_readers():
             'reader_type': 'Cán bộ'
         },
         {
-            'reader_name': 'Hoàng Văn Em',
-            'date_of_birth': datetime(2001, 7, 5).date(),
-            'email': 'hvem@example.com',
-            'phone_number': '0945678901',
-            'address': '654 Điện Biên Phủ, Q.Bình Thạnh, TP.HCM',
-            'reader_type': 'Sinh viên'
+            'reader_name': 'Lê Hoàng Nam',
+            'date_of_birth': datetime(1988, 8, 17).date(),
+            'email': 'lhnam@example.com',
+            'phone_number': '0944556677',
+            'address': '567 Hoàng Văn Thụ, Q.Tân Bình, TP.HCM',
+            'reader_type': 'Cán bộ'
+        },
+        {
+            'reader_name': 'Vũ Thị Mai',
+            'date_of_birth': datetime(1992, 2, 28).date(),
+            'email': 'vtmai@example.com',
+            'phone_number': '0955667788',
+            'address': '890 Lê Văn Sỹ, Q.3, TP.HCM',
+            'reader_type': 'Cán bộ'
+        },
+        
+        # ========== Khách ==========
+        {
+            'reader_name': 'Trương Văn Khải',
+            'date_of_birth': datetime(1995, 5, 10).date(),
+            'email': 'tvkhai@example.com',
+            'phone_number': '0966778899',
+            'address': '123 Trường Chinh, Q.Tân Phú, TP.HCM',
+            'reader_type': 'Khách'
+        },
+        {
+            'reader_name': 'Đinh Thị Hồng',
+            'date_of_birth': datetime(1998, 10, 3).date(),
+            'email': 'dthong@example.com',
+            'phone_number': '0977889900',
+            'address': '456 Âu Cơ, Q.Tân Phú, TP.HCM',
+            'reader_type': 'Khách'
         },
     ]
     
@@ -596,7 +970,6 @@ def init_permissions():
             'Báo cáo mượn sách theo thể loại': {'view': True, 'add': True, 'edit': True, 'delete': True},
             'Báo cáo sách trả trễ': {'view': True, 'add': True, 'edit': True, 'delete': True},
             'Thay đổi quy định' : {'view': True, 'add': False, 'edit': False, 'delete': False},
-            # 'Cài'
             
         }
     }
