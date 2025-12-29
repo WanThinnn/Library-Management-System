@@ -330,6 +330,7 @@ def user_profile_view(request):
 
 # ==================== YC1: LẬP THẺ ĐỘC GIẢ ====================
 
+@ratelimit(key='ip', rate='10/m', method='POST', block=False)
 @permission_required('Lập thẻ độc giả', 'add')
 def reader_create_view(request):
     """
@@ -340,6 +341,11 @@ def reader_create_view(request):
     - Phải chọn loại độc giả hợp lệ
     - Thẻ có giá trị theo card_validity_period (mặc định 6 tháng)
     """
+    
+    # Check rate limit
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Quá nhiều yêu cầu. Vui lòng thử lại sau.')
+        return render(request, 'errors/429.html', status=429)
     
     # Kiểm tra hệ thống đã được cấu hình chưa
     params = Parameter.objects.first()
@@ -582,6 +588,7 @@ def book_import_select_view(request):
     return render(request, 'app/books/book_import_select.html', context)
 
 
+@ratelimit(key='ip', rate='10/m', method='POST', block=False)
 @permission_required('Lập phiếu nhập sách', 'add')
 def book_import_view(request):
     """
@@ -593,6 +600,11 @@ def book_import_view(request):
     - Tác giả phải hợp lệ
     - Tạo phiếu nhập và chi tiết phiếu nhập
     """
+    
+    # Check rate limit
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Quá nhiều yêu cầu. Vui lòng thử lại sau.')
+        return render(request, 'errors/429.html', status=429)
     
     # Kiểm tra hệ thống đã được cấu hình chưa
     params = Parameter.objects.first()
@@ -843,11 +855,17 @@ def book_import_view(request):
     return render(request, 'app/books/book_import.html', context)
 
 
+@ratelimit(key='ip', rate='5/m', method='POST', block=False)
 @permission_required('Lập phiếu nhập sách', 'add')
 def book_import_excel_view(request):
     """
     View nhập sách từ Excel
     """
+    # Check rate limit
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Quá nhiều yêu cầu. Vui lòng thử lại sau.')
+        return render(request, 'errors/429.html', status=429)
+    
     if request.method == 'POST':
         form = BookImportExcelForm(request.POST, request.FILES)
         if form.is_valid():
@@ -1435,6 +1453,7 @@ def book_search_view(request):
 
 # ==================== BORROW BOOK (YC4) ====================
 
+@ratelimit(key='ip', rate='20/m', method='POST', block=False)
 @permission_required('Lập phiếu mượn sách', 'add')
 def borrow_book_view(request):
     """
@@ -1442,6 +1461,11 @@ def borrow_book_view(request):
     Validate theo thẻ còn hạn, không quá hạn, sách chưa mượn, không quá 5 quyển
     Hỗ trợ mượn nhiều sách cùng lúc
     """
+    # Check rate limit
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Quá nhiều yêu cầu. Vui lòng thử lại sau.')
+        return render(request, 'errors/429.html', status=429)
+    
     params = Parameter.objects.first()
     
     if request.method == 'POST':
@@ -1834,12 +1858,18 @@ from .models import BorrowReturnReceipt, Parameter, Reader
 from .forms import ReturnBookForm
 
 
+@ratelimit(key='ip', rate='20/m', method='POST', block=False)
 @permission_required('Lập phiếu trả sách', 'add')
 def return_book_view(request):
     """
     Trang nhận trả sách - YC5
     Chọn độc giả → chọn sách → nhập ngày trả
     """
+    # Check rate limit
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Quá nhiều yêu cầu. Vui lòng thử lại sau.')
+        return render(request, 'errors/429.html', status=429)
+    
     params = Parameter.objects.first()
     fine_rate = params.fine_rate if params else 1000
     
@@ -2209,13 +2239,19 @@ def api_reader_borrowed_books(request, reader_id):
 
 # ==================== PAYMENT MANAGEMENT (YC6) ====================
 
+@ratelimit(key='ip', rate='10/m', method='POST', block=False)
 @permission_required('Lập phiếu thu tiền phạt', 'add')
 def receipt_form_view(request):
     """
     Lập phiếu thu tiền phạt - YC6 (BM6)
     GET: Hiển thị form chọn độc giả → hiển thị nợ → nhập số tiền → submit
-    POST: Xử lý submit, kiểm tra QĐ6, lưu phiếu, trừ nợ
+    POST: Xử lý submit, kiểm tra QĐ0636, lưu phiếu, trừ nợ
     """
+    # Check rate limit
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Quá nhiều yêu cầu. Vui lòng thử lại sau.')
+        return render(request, 'errors/429.html', status=429)
+    
     import json
     
     # Lấy danh sách độc giả có nợ
@@ -3305,6 +3341,7 @@ def user_list_view(request):
     return render(request, 'app/users/user_list.html', context)
 
 
+@ratelimit(key='ip', rate='5/m', method='POST', block=False)
 @permission_required('Quản lý người dùng', 'add')
 def user_create_view(request):
     """
@@ -3314,6 +3351,11 @@ def user_create_view(request):
     - Thủ thư (is_staff=True)
     - Quản lý (is_superuser=True)
     """
+    # Check rate limit
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Quá nhiều yêu cầu. Vui lòng thử lại sau.')
+        return render(request, 'errors/429.html', status=429)
+    
     from .models import LibraryUser
     from datetime import date
     from django.contrib.auth.password_validation import validate_password
@@ -3609,6 +3651,7 @@ def user_delete_view(request, user_id):
 
 # ==================== ĐĂNG KÝ TÀI KHOẢN ====================
 
+@ratelimit(key='ip', rate='3/m', method='POST', block=False)
 def register_view(request):
     """
     Đăng ký tài khoản mới
@@ -3624,6 +3667,11 @@ def register_view(request):
     # Nếu đã đăng nhập, chuyển về trang chủ
     if request.user.is_authenticated:
         return redirect('home')
+    
+    # Check rate limit
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Quá nhiều yêu cầu đăng ký. Vui lòng thử lại sau 1 phút.')
+        return render(request, 'errors/429.html', status=429)
     
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
