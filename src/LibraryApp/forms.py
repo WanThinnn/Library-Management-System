@@ -163,7 +163,6 @@ class ReaderForm(forms.ModelForm):
         if not self.instance.pk:
             from django.utils import timezone
             self.initial['card_creation_date'] = timezone.now().date()
-            self.initial['is_active'] = True  # Độc giả mới mặc định được kích hoạt
     
     def validate_reader_data(self):
         """Kiểm tra toàn bộ dữ liệu lập thẻ độc giả theo QĐ1"""

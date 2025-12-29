@@ -117,8 +117,7 @@
                     </div>
                 </div>
                 
-                <!-- Trạng thái hoạt động - Chỉ hiển thị khi sửa -->
-                {% if is_edit %}
+                <!-- Trạng thái hoạt động -->
                 <div class="md:col-span-3 mb-4">
                     <label for="{{ form.is_active.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ form.is_active.label }}
@@ -128,19 +127,17 @@
                         <label class="relative inline-flex items-center cursor-pointer">
                             {{ form.is_active }}
                             <span class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {% comment %} {{ form.is_active.label }} {% endcomment %}
-                                 Bật
+                                Kích hoạt thẻ
                             </span>
                         </label>
                         <span class="text-xs text-gray-500 dark:text-gray-400">
-                            (Tắt để khóa tài khoản độc giả)
+                            {% if is_edit %}(Tắt để khóa tài khoản độc giả){% else %}(Bỏ tick để tạo thẻ ở trạng thái tạm khóa){% endif %}
                         </span>
                     </div>
                     {% if form.is_active.errors %}
                     <p class="text-red-500 text-sm mt-1">{{ form.is_active.errors }}</p>
                     {% endif %}
                 </div>
-                {% endif %}
                 <!-- Địa chỉ -->
                 <div class="mb-4 md:col-span-3">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
