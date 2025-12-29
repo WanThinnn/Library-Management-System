@@ -715,9 +715,10 @@ class BookImportForm(forms.Form):
         from datetime import date
         current_year = date.today().year
         
-        if publish_year < params.establishment_year:
+        min_year = current_year - params.book_return_period
+        if publish_year < min_year:
             raise ValidationError({
-                'publish_year': f"Năm xuất bản không được nhỏ hơn năm thành lập ({params.establishment_year})"
+                'publish_year': f"Chỉ nhận sách xuất bản từ năm {min_year} trở đi (trong vòng {params.book_return_period} năm)"
             })
         if publish_year > current_year:
             raise ValidationError({

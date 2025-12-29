@@ -561,16 +561,16 @@ class Book(models.Model):
                 'remaining_quantity': 'Số lượng còn lại không thể lớn hơn tổng số lượng'
             })
         
-        # Kiểm tra năm xuất bản theo tham số hệ thống
+        # Kiểm tra năm xuất bản theo tham số hệ thống (Năm XB tối đa)
         try:
             params = Parameter.objects.first()
             if params:
                 from datetime import date
-                # current_year = date.today().year
-                # min_year = current_year - params.book_return_period
-                if self.publish_year < params.establishment_year:
+                current_year = date.today().year
+                min_year = current_year - params.book_return_period
+                if self.publish_year < min_year:
                     raise ValidationError({
-                        'publish_year': f'Năm xuất bản phải từ {params.establishment_year} trở đi'
+                        'publish_year': f'Chỉ nhận sách xuất bản từ năm {min_year} trở đi (trong vòng {params.book_return_period} năm)'
                     })
         except:
             pass
