@@ -20,16 +20,6 @@
     <div class="p-6">
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        
-        {% if messages %}
-        <div class="mb-4">
-            {% for message in messages %}
-            <div class="{% if message.tags == 'success' %}bg-green-100 text-green-700 border-l-4 border-green-500{% elif message.tags == 'error' %}bg-red-100 text-red-700 border-l-4 border-red-500{% else %}bg-yellow-100 text-yellow-700 border-l-4 border-yellow-500{% endif %} p-4 mb-2 rounded">
-                {{ message }}
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
 
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
