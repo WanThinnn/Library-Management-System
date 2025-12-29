@@ -31,7 +31,7 @@ def init_bank_account():
         defaults={
             'account_name': 'THU VIEN TRUONG',
             'account_no': '123456789',
-            'bank_id': '970415',
+            'bank_id': '970407',
             'template': 'print',
             'is_active': True
         }

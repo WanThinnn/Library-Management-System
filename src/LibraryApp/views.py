@@ -2850,14 +2850,36 @@ def report_borrow_situation_excel(request):
         borrow_date__lte=to_date
     ).select_related('book_item__book__book_title__category')
     
+    # Đếm theo thể loại (giống logic trong view)
     category_stats = {}
+    category_books = {}  # Lưu số sách từng thể loại
+    category_readers = {}  # Lưu danh sách reader_id
+    category_book_titles = {}  # Lưu tên sách được mượn
     total_borrows = 0
     
     for receipt in borrow_receipts:
         if receipt.book_item and receipt.book_item.book:
             category_name = receipt.book_item.book.book_title.category.category_name
+            book_title_name = receipt.book_item.book.book_title.book_title
+            reader_id = receipt.reader_id
+            
             category_stats[category_name] = category_stats.get(category_name, 0) + 1
             total_borrows += 1
+            
+            # Đếm số sách (đầu sách) trong category
+            if category_name not in category_books:
+                category_books[category_name] = set()
+            category_books[category_name].add(receipt.book_item.book.book_title.id)
+            
+            # Đếm số độc giả duy nhất
+            if category_name not in category_readers:
+                category_readers[category_name] = set()
+            category_readers[category_name].add(reader_id)
+            
+            # Đếm sách được mượn nhiều nhất
+            if category_name not in category_book_titles:
+                category_book_titles[category_name] = {}
+            category_book_titles[category_name][book_title_name] = category_book_titles[category_name].get(book_title_name, 0) + 1
     
     # Tạo workbook
     wb = Workbook()
@@ -2873,17 +2895,17 @@ def report_borrow_situation_excel(request):
     )
     
     # Title
-    ws.merge_cells('A1:D1')
+    ws.merge_cells('A1:G1')
     ws['A1'] = f'Báo cáo Tình hình mượn sách'
     ws['A1'].font = Font(bold=True, size=14)
     ws['A1'].alignment = Alignment(horizontal='center')
     
-    ws.merge_cells('A2:D2')
+    ws.merge_cells('A2:G2')
     ws['A2'] = f'Từ {from_date.strftime("%d/%m/%Y")} đến {to_date.strftime("%d/%m/%Y")}'
     ws['A2'].alignment = Alignment(horizontal='center')
     
-    # Headers
-    headers = ['STT', 'Tên thể loại', 'Số lượt mượn', 'Tỉ lệ (%)']
+    # Headers - 7 cột giống HTML table
+    headers = ['STT', 'Tên Thể Loại', 'Số Đầu Sách', 'Số Độc Giả', 'Số Lượt Mượn', 'Tỉ Lệ (%)', 'Sách Mượn Nhiều Nhất']
     for col, header in enumerate(headers, 1):
         cell = ws.cell(row=4, column=col, value=header)
         cell.font = header_font
@@ -2895,22 +2917,42 @@ def report_borrow_situation_excel(request):
     row = 5
     for idx, (category_name, borrow_count) in enumerate(sorted(category_stats.items(), key=lambda x: -x[1]), 1):
         percentage = round((borrow_count / total_borrows * 100), 2) if total_borrows > 0 else 0
+        book_count = len(category_books.get(category_name, set()))
+        reader_count = len(category_readers.get(category_name, set()))
+        
+        # Tìm sách được mượn nhiều nhất trong thể loại
+        top_book = ""
+        top_book_count = 0
+        if category_name in category_book_titles:
+            for book, count in category_book_titles[category_name].items():
+                if count > top_book_count:
+                    top_book = book
+                    top_book_count = count
+        top_book_display = f"{top_book} ({top_book_count} lượt)" if top_book else "-"
+        
         ws.cell(row=row, column=1, value=idx).border = thin_border
         ws.cell(row=row, column=2, value=category_name).border = thin_border
-        ws.cell(row=row, column=3, value=borrow_count).border = thin_border
-        ws.cell(row=row, column=4, value=f"{percentage}%").border = thin_border
+        ws.cell(row=row, column=3, value=book_count).border = thin_border
+        ws.cell(row=row, column=4, value=reader_count).border = thin_border
+        ws.cell(row=row, column=5, value=borrow_count).border = thin_border
+        ws.cell(row=row, column=6, value=f"{percentage}%").border = thin_border
+        ws.cell(row=row, column=7, value=top_book_display).border = thin_border
         row += 1
     
     # Total
-    ws.merge_cells(f'A{row}:B{row}')
+    ws.merge_cells(f'A{row}:D{row}')
     ws.cell(row=row, column=1, value='Tổng số lượt mượn:').font = Font(bold=True)
-    ws.cell(row=row, column=3, value=total_borrows).font = Font(bold=True)
+    ws.cell(row=row, column=1, value='Tổng số lượt mượn:').alignment = Alignment(horizontal='right')
+    ws.cell(row=row, column=5, value=total_borrows).font = Font(bold=True)
     
     # Column widths
     ws.column_dimensions['A'].width = 8
-    ws.column_dimensions['B'].width = 30
+    ws.column_dimensions['B'].width = 25
     ws.column_dimensions['C'].width = 15
-    ws.column_dimensions['D'].width = 12
+    ws.column_dimensions['D'].width = 15
+    ws.column_dimensions['E'].width = 15
+    ws.column_dimensions['F'].width = 12
+    ws.column_dimensions['G'].width = 40
     
     # Response
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
