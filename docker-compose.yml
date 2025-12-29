@@ -10,7 +10,7 @@ services:
              gunicorn LibraryManagementSystem.wsgi:application -c gunicorn.conf.py"
     volumes:
       - ./src:/app
-      - ./docs:/docs  
+      - ./docs:/docs
       - ./scripts/gunicorn.conf.py:/app/gunicorn.conf.py:ro
       - static_volume:/app/staticfiles
       - sqlite_volume:/app/data
@@ -24,6 +24,11 @@ services:
     environment:
       - DATABASE_URL=${DATABASE_URL:-sqlite:////app/data/db.sqlite3}
       - PYTHONUNBUFFERED=1
+      # Bank Account Configuration
+      - BANK_ACCOUNT_NAME=${BANK_ACCOUNT_NAME:-THU VIEN TRUONG}
+      - BANK_ACCOUNT_NO=${BANK_ACCOUNT_NO:-123456789}
+      - BANK_ID=${BANK_ID:-970407}
+      - BANK_TEMPLATE=${BANK_TEMPLATE:-print}
     depends_on:
       - nginx
     networks:

@@ -8,6 +8,11 @@ services:
     environment:
       - DATABASE_URL=${DATABASE_URL:-sqlite:////app/data/db.sqlite3}
       - PYTHONUNBUFFERED=1
+      # Bank Account Configuration
+      - BANK_ACCOUNT_NAME=${BANK_ACCOUNT_NAME:-THU VIEN TRUONG}
+      - BANK_ACCOUNT_NO=${BANK_ACCOUNT_NO:-123456789}
+      - BANK_ID=${BANK_ID:-970407}
+      - BANK_TEMPLATE=${BANK_TEMPLATE:-print}
     volumes:
       - sqlite_volume:/app/data
       - ./docs:/docs
