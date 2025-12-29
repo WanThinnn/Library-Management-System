@@ -24,15 +24,29 @@ from LibraryApp.models import (
 )
 
 def init_bank_account():
-    """Khởi tạo tài khoản ngân hàng mặc định"""
+    """Khởi tạo tài khoản ngân hàng mặc định
+    
+    Đọc từ biến môi trường (.env) nếu có, ngược lại dùng giá trị mặc định:
+    - BANK_ACCOUNT_NAME: Tên tài khoản (mặc định: 'THU VIEN TRUONG')
+    - BANK_ACCOUNT_NO: Số tài khoản (mặc định: '123456789')
+    - BANK_ID: Mã ngân hàng (mặc định: '970407' - Techcombank)
+    - BANK_TEMPLATE: Template QR (mặc định: 'print')
+    """
     print("\n[*] Khoi tao tai khoan ngan hang:")
+    
+    # Đọc từ biến môi trường, nếu không có thì dùng giá trị mặc định
+    account_name = os.environ.get('BANK_ACCOUNT_NAME', 'THU VIEN TRUONG')
+    account_no = os.environ.get('BANK_ACCOUNT_NO', '123456789')
+    bank_id = os.environ.get('BANK_ID', '970407')
+    template = os.environ.get('BANK_TEMPLATE', 'print')
+    
     bank, created = BankAccount.objects.get_or_create(
         id=1,
         defaults={
-            'account_name': 'THU VIEN TRUONG',
-            'account_no': '123456789',
-            'bank_id': '970407',
-            'template': 'print',
+            'account_name': account_name,
+            'account_no': account_no,
+            'bank_id': bank_id,
+            'template': template,
             'is_active': True
         }
     )
@@ -58,7 +72,7 @@ def init_parameters():
             
             # Quy định về mượn sách
             'max_borrowed_books': 5,
-            'max_borrow_days': 30,  # ngày
+            'max_borrow_days': 4,  # ngày
             
             # Quy định về tiền phạt
             'fine_rate': 1000,  # 1000đ/ngày trả trễ
