@@ -1092,23 +1092,28 @@ def book_import_cancel_view(request, import_id):
         )
         return redirect('book_import_detail', import_id=receipt.id)
     
-    # Kiểm tra sách có đang được mượn không
-    borrowed_books = []
+    # Kiểm tra có đủ sách KHÔNG ĐANG MƯỢN để xóa không
+    # (chỉ cần đủ số lượng cần xóa, không quan tâm sách khác đang được mượn)
+    insufficient_books = []
     for detail in receipt.import_details.all():
-        # Kiểm tra nếu có bất kỳ BookItem nào của sách này đang được mượn
-        borrowed_count = BookItem.objects.filter(
+        available_count = BookItem.objects.filter(
             book=detail.book,
-            is_borrowed=True
+            is_borrowed=False
         ).count()
         
-        if borrowed_count > 0:
-            borrowed_books.append(f"{detail.book.book_title.book_title} ({borrowed_count} cuốn)")
+        if available_count < detail.quantity:
+            shortage = detail.quantity - available_count
+            insufficient_books.append(
+                f"{detail.book.book_title.book_title} "
+                f"(cần xóa {detail.quantity}, chỉ có {available_count} cuốn rảnh, "
+                f"thiếu {shortage} cuốn đang được mượn)"
+            )
     
-    if borrowed_books:
+    if insufficient_books:
         messages.error(
             request,
             f'Không thể hủy phiếu nhập #{receipt.id}. '
-            f'Các sách sau đang được mượn: {", ".join(borrowed_books)}. '
+            f'Không đủ sách rảnh để xóa: {", ".join(insufficient_books)}. '
             f'Vui lòng đợi trả sách trước khi hủy phiếu.'
         )
         return redirect('book_import_detail', import_id=receipt.id)
