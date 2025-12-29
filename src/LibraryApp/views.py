@@ -854,26 +854,48 @@ def book_import_excel_view(request):
             excel_file = request.FILES['excel_file']
             try:
                 import pandas as pd
-                df = pd.read_excel(excel_file)
+                
+                # Đọc file Excel
+                try:
+                    df = pd.read_excel(excel_file)
+                except Exception as e:
+                    messages.error(request, f"Không thể đọc file Excel. Vui lòng kiểm tra định dạng file. Lỗi: {str(e)}")
+                    return redirect('book_import_excel')
+                
+                # Kiểm tra file có dữ liệu không
+                if df.empty:
+                    messages.error(request, "File Excel trống. Vui lòng kiểm tra lại file.")
+                    return redirect('book_import_excel')
                 
                 # Normalize columns to lower case/strip
                 df.columns = df.columns.astype(str).str.lower().str.strip()
                 
-                # Expected columns mapping
-                # Tên sách | Thể loại | Tác giả | Năm XB | NXB | Số lượng | Đơn giá | Ngày nhập | ISBN | Phiên bản | Ngôn ngữ | Mô tả
+                # Kiểm tra các cột bắt buộc
+                required_columns = ['tên sách', 'thể loại', 'tác giả', 'năm xb', 'nxb', 'số lượng', 'đơn giá']
+                missing_columns = [col for col in required_columns if col not in df.columns]
+                
+                if missing_columns:
+                    messages.error(
+                        request, 
+                        f"File Excel thiếu các cột bắt buộc: {', '.join(missing_columns)}. "
+                        f"Vui lòng tải file mẫu để xem định dạng đúng."
+                    )
+                    return redirect('book_import_excel')
+                
+                # Kiểm tra có dòng dữ liệu hợp lệ không (có tên sách)
+                valid_rows = df[df['tên sách'].notna() & (df['tên sách'].astype(str).str.strip() != '')]
+                if valid_rows.empty:
+                    messages.error(request, "File Excel không có dữ liệu sách hợp lệ. Cột 'Tên sách' không được để trống.")
+                    return redirect('book_import_excel')
                 
                 success_count = 0
                 error_count = 0
                 errors = []
                 
                 with transaction.atomic():
-                    # Create one receipt for the whole batch? Or one per row?
-                    # Let's create one receipt for the whole import file
                     from django.utils import timezone
                     
-                    # Assume import date is today if not specified or mixed. 
-                    # If file has 'Ngày nhập', use it. But receipt has one date.
-                    # Strategy: One receipt per import session (now).
+                    # Tạo phiếu nhập
                     receipt = BookImportReceipt.objects.create(
                         import_date=timezone.now(),
                         created_by=request.user.username,
@@ -888,10 +910,23 @@ def book_import_excel_view(request):
                                 continue # Skip empty rows
                                 
                             category_name = str(row.get('thể loại', '')).strip()
+                            if not category_name or category_name == 'nan':
+                                error_count += 1
+                                errors.append(f"Dòng {index+2}: Thiếu thể loại sách")
+                                continue
+                                
                             author_names_str = str(row.get('tác giả', '')).strip()
+                            if not author_names_str or author_names_str == 'nan':
+                                error_count += 1
+                                errors.append(f"Dòng {index+2}: Thiếu tác giả")
+                                continue
                             
                             publish_year = row.get('năm xb', 2025)
                             publisher = str(row.get('nxb', '')).strip()
+                            if not publisher or publisher == 'nan':
+                                error_count += 1
+                                errors.append(f"Dòng {index+2}: Thiếu nhà xuất bản")
+                                continue
                             
                             quantity = row.get('số lượng', 1)
                             unit_price = row.get('đơn giá', 0)
@@ -1017,11 +1052,20 @@ def book_import_excel_view(request):
                         except Exception as e:
                             error_count += 1
                             errors.append(f"Dòng {index+2}: {str(e)}")
+                    
+                    # Kiểm tra nếu không có sách nào được nhập thành công → rollback
+                    if success_count == 0:
+                        raise Exception("Không có sách nào được nhập thành công. Tất cả dữ liệu đã bị rollback.")
                 
-                messages.success(request, f"Đã nhập thành công {success_count} dòng. Lỗi {error_count} dòng.")
-                if errors:
-                    for err in errors[:5]: # Show first 5 errors
+                # Thông báo kết quả
+                if error_count == 0:
+                    messages.success(request, f"Đã nhập thành công {success_count} sách từ file Excel.")
+                else:
+                    messages.warning(request, f"Đã nhập {success_count} sách. Có {error_count} dòng lỗi.")
+                    for err in errors[:5]:  # Show first 5 errors
                         messages.warning(request, err)
+                    if len(errors) > 5:
+                        messages.warning(request, f"... và {len(errors) - 5} lỗi khác.")
                         
                 return redirect('book_import_list')
                 
