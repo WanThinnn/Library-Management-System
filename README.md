@@ -4,6 +4,33 @@ A comprehensive library management system built with Django, featuring book cata
 
 <img src="image/image-1.png" alt="image" style="border: 1px solid #000; padding: 0px; background: #fff;">
 
+## Table of Contents
+
+- [Library Management System](#library-management-system)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Technology Stack](#technology-stack)
+  - [Prerequisites](#prerequisites)
+  - [Preview UI/UX](#preview-uiux)
+  - [Local DNS \& SSL Configuration (Optional)](#local-dns--ssl-configuration-optional)
+    - [Using a Custom Domain](#using-a-custom-domain)
+    - [1. Update Hosts File](#1-update-hosts-file)
+    - [2. Trust the Root Certificate](#2-trust-the-root-certificate)
+  - [Quick Start](#quick-start)
+    - [1. Clone Repository](#1-clone-repository)
+    - [2. Setup Environment](#2-setup-environment)
+    - [3. Build and Run (Development)](#3-build-and-run-development)
+    - [4. Initialize Data](#4-initialize-data)
+    - [5. Access Application](#5-access-application)
+  - [Configuration](#configuration)
+    - [Environment Variables](#environment-variables)
+    - [Cloudflare Tunnel](#cloudflare-tunnel)
+  - [Production Deployment](#production-deployment)
+  - [Project Structure](#project-structure)
+  - [Troubleshooting](#troubleshooting)
+  - [License](#license)
+  - [Authors](#authors)
+  - [Acknowledgments](#acknowledgments)
 
 ## Features
 
