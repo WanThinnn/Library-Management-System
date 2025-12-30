@@ -43,7 +43,7 @@ Screenshots of the web interface are available in the image/ directory.
 <img src="image/image-2.png" alt="image" style="border: 1px solid #000; padding: 0px; background: #fff;">
 
 
-## Local DNS & SSL Configuration
+## Local DNS & SSL Configuration (Optional)
 
 To access the application via `https://library.cyberfortress.local` without browser warnings, you need to configure your hosts file and trust the generated Root CA.
 
