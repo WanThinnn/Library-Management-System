@@ -2584,10 +2584,11 @@ def report_overdue_books_view(request):
     else:
         report_date = timezone.now()
     
-    # Lấy danh sách phiếu mượn đã trả trễ
+    # Lấy danh sách phiếu mượn đã trả trễ VÀO NGÀY được chọn
+    # return_date.date() == report_date (trả vào đúng ngày báo cáo)
     # return_date > due_date (đã trả nhưng trả trễ hơn hạn)
     overdue_receipts = BorrowReturnReceipt.objects.filter(
-        return_date__isnull=False,  # Đã trả
+        return_date__date=report_date.date(),  # Trả vào đúng ngày báo cáo
         return_date__gt=models.F('due_date')  # Trả sau hạn
     ).select_related('book_item__book__book_title', 'reader')
     
@@ -2728,11 +2729,11 @@ def report_overdue_books_excel(request):
     else:
         report_date = timezone.now()
     
-    # Lấy dữ liệu
+    # Lấy dữ liệu - Đồng bộ với view: lọc phiếu trả trễ vào đúng ngày báo cáo
     overdue_receipts = BorrowReturnReceipt.objects.filter(
-        return_date__isnull=True,
-        due_date__lt=report_date
-    ).select_related('book_item__book__book_title')
+        return_date__date=report_date.date(),  # Trả vào đúng ngày báo cáo
+        return_date__gt=models.F('due_date')  # Trả sau hạn
+    ).select_related('book_item__book__book_title', 'reader')
     
     # Tạo workbook
     wb = Workbook()
@@ -2748,13 +2749,13 @@ def report_overdue_books_excel(request):
     )
     
     # Title
-    ws.merge_cells('A1:D1')
+    ws.merge_cells('A1:E1')
     ws['A1'] = f'Báo cáo sách trả trễ - Ngày {report_date.strftime("%d/%m/%Y")}'
     ws['A1'].font = Font(bold=True, size=14)
     ws['A1'].alignment = Alignment(horizontal='center')
     
-    # Headers
-    headers = ['STT', 'Tên sách', 'Ngày mượn', 'Số ngày trễ']
+    # Headers - thêm cột Người mượn để đồng bộ với view
+    headers = ['STT', 'Tên sách', 'Người mượn', 'Ngày mượn', 'Số ngày trễ']
     for col, header in enumerate(headers, 1):
         cell = ws.cell(row=3, column=col, value=header)
         cell.font = header_font
@@ -2765,20 +2766,24 @@ def report_overdue_books_excel(request):
     # Data
     row = 4
     for idx, receipt in enumerate(overdue_receipts, 1):
-        overdue_days = (report_date.date() - receipt.due_date.date()).days
+        # Tính số ngày trễ = return_date - due_date (đồng bộ với view)
+        overdue_days = (receipt.return_date.date() - receipt.due_date.date()).days
         book_title = receipt.book_item.book.book_title.book_title if receipt.book_item else "N/A"
+        reader_info = f"{receipt.reader.reader_name} ({receipt.reader.email})"
         
         ws.cell(row=row, column=1, value=idx).border = thin_border
         ws.cell(row=row, column=2, value=book_title).border = thin_border
-        ws.cell(row=row, column=3, value=receipt.borrow_date.strftime("%d/%m/%Y %H:%M")).border = thin_border
-        ws.cell(row=row, column=4, value=overdue_days).border = thin_border
+        ws.cell(row=row, column=3, value=reader_info).border = thin_border
+        ws.cell(row=row, column=4, value=receipt.borrow_date.strftime("%d/%m/%Y %H:%M")).border = thin_border
+        ws.cell(row=row, column=5, value=overdue_days).border = thin_border
         row += 1
     
     # Column widths
     ws.column_dimensions['A'].width = 8
     ws.column_dimensions['B'].width = 50
-    ws.column_dimensions['C'].width = 20
-    ws.column_dimensions['D'].width = 15
+    ws.column_dimensions['C'].width = 35  # Người mượn
+    ws.column_dimensions['D'].width = 20  # Ngày mượn
+    ws.column_dimensions['E'].width = 15  # Số ngày trễ
     
     # Response
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
