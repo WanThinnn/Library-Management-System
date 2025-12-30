@@ -1674,11 +1674,13 @@ def borrow_book_list_view(request):
     status = request.GET.get('filter') or request.GET.get('status', 'all')
     
     if status == 'unreturned':
-        receipts = receipts.filter(return_date__isnull=True)
+        receipts = receipts.filter(return_date__isnull=True, is_cancelled=False)
     elif status == 'overdue':
-        receipts = receipts.filter(return_date__isnull=True, due_date__lt=timezone.now())
+        receipts = receipts.filter(return_date__isnull=True, due_date__lt=timezone.now(), is_cancelled=False)
     elif status == 'returned':
-        receipts = receipts.filter(return_date__isnull=False)
+        receipts = receipts.filter(return_date__isnull=False, is_cancelled=False)
+    elif status == 'cancelled':
+        receipts = receipts.filter(is_cancelled=True)
     # 'all' = no filter, show all
     
     # Search
