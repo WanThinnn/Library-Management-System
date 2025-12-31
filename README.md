@@ -319,7 +319,7 @@ This project is licensed under the MIT License.
 
 ## Authors
 
-- **Lại Quan Thiên** - [WanThinnn](https://github.com/WanThinnn)
+- **Lại Quan Thiên** - [WanThinnn](https://github.com/WanThinnn) 
 
 
 ## Acknowledgments
@@ -358,4 +358,5 @@ This project is licensed under the MIT License.
 
 ---
 Contributor
+
 Hồ Diệp Huy - [hohuyy](https://github.com/hohuyy)
