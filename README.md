@@ -322,12 +322,13 @@ This project is licensed under the MIT License.
 - **Lại Quan Thiên** - [WanThinnn](https://github.com/WanThinnn) 
 
 
+## Contributor
+
+- **Hồ Diệp Huy** - [hohuyy](https://github.com/hohuyy)
+
 ## Acknowledgments
 
 - University of Information Technology (UIT)
 - SE104 - Software Engineering Course
 
 
-## Contributor
-
-Hồ Diệp Huy - [hohuyy](https://github.com/hohuyy)
