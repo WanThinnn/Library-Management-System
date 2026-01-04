@@ -328,35 +328,6 @@ This project is licensed under the MIT License.
 - SE104 - Software Engineering Course
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-Contributor
+## Contributor
 
 Hồ Diệp Huy - [hohuyy](https://github.com/hohuyy)
